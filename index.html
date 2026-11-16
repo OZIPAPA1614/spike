@@ -105,6 +105,14 @@ button.ghost{border-color:rgba(236,232,225,.15);color:var(--dim)}
 .fract button{margin:0;padding:8px 12px;font-size:11px;width:auto}
 .frreq{display:flex;align-items:center;gap:8px;background:rgba(245,196,81,.07);border-left:3px solid var(--gold);padding:8px 12px;margin:6px 0;font-size:14px}
 .frreq span{flex:1} .frreq button{margin:0;padding:7px 10px;font-size:11px;width:auto}
+button.pub{border-color:rgba(30,227,207,.6);color:var(--teal)}
+button.pub:hover:not(:disabled){background:rgba(30,227,207,.12);border-color:var(--teal)}
+.pubspin{display:flex;gap:8px;justify-content:center;margin:10px 0 14px}
+.pubspin span{width:12px;height:12px;border-radius:50%;background:var(--teal);animation:pubb 1s infinite ease-in-out}
+.pubspin span:nth-child(2){animation-delay:.15s}.pubspin span:nth-child(3){animation-delay:.3s}
+@keyframes pubb{0%,80%,100%{transform:scale(.5);opacity:.4}40%{transform:scale(1);opacity:1}}
+.pubst{text-align:center;font-size:15px;letter-spacing:.06em;margin-bottom:10px;min-height:20px}
+.pubbar{margin:8px 0;padding:8px 12px;border:1px solid rgba(30,227,207,.45);background:rgba(30,227,207,.08);color:var(--teal);font-size:13px;letter-spacing:.06em;text-align:center}
 #gemBar{display:flex;align-items:center;gap:6px;font-size:14px;letter-spacing:.14em;color:#7cf3ff;font-weight:700}
 #gemBar b{font-size:22px;color:#fff;letter-spacing:.04em}
 .gi{filter:drop-shadow(0 0 6px rgba(94,242,255,.8))}
@@ -309,6 +317,7 @@ label{font-size:11px;letter-spacing:.2em;color:var(--dim);display:block;margin:1
     <label for="inName">OYUNCU ADI</label>
     <input id="inName" maxlength="16" placeholder="Adını yaz" autocomplete="off">
     <button id="btnSP" class="primary">TEK OYUNCULU · BOTLARA KARŞI</button>
+    <button id="btnPub" class="pub">🌐 HERKESE AÇIK SUNUCUYA KATIL</button>
     <button id="btnHost">ODA KUR (HOST)</button>
     <button id="btnJoin">ODAYA KATIL (JOIN)</button>
     <button id="btnStore" class="store">💎 MAĞAZA · GEMS</button>
@@ -364,8 +373,10 @@ label{font-size:11px;letter-spacing:.2em;color:var(--dim);display:block;margin:1
       <div style="grid-column:1/3"><label>HARİTA</label><select id="lbMap"></select></div>
       <div style="grid-column:1/3"><button id="lbFF" type="button" class="fftog">TAKIM ATEŞİ: AÇIK</button></div>
       <div style="grid-column:1/3"><label><input type="checkbox" id="lbFill" checked style="width:auto;margin-right:8px;vertical-align:middle">BOŞ SLOTLARI BOTLARLA DOLDUR</label></div>
+      <div style="grid-column:1/3"><label><input type="checkbox" id="lbPubChk" style="width:auto;margin-right:8px;vertical-align:middle">🌐 HERKESE AÇIK SUNUCU (rastgele oyuncular katılabilir)</label></div>
     </div>
     <div id="lbChat"><div id="lbChatLog"></div><div class="lbcrow"><input id="lbChatIn" maxlength="120" autocomplete="off" enterkeyhint="send" placeholder="Lobiye mesaj yaz, Enter ile gönder"><button id="lbChatSend">GÖNDER</button><button id="lbMic" class="ghost">🎤 BAS-KONUŞ (0)</button></div></div>
+    <div id="lbPub" class="pubbar hidden"></div>
     <div class="note" id="lbCfgText"></div>
     <div id="lbNet" class="netstat"></div>
     <div id="lbHostCtl" class="row-btn"><button id="btnLobbyLeave" class="ghost">ODAYI KAPAT</button><button id="btnLobbyStart" class="primary">MAÇI BAŞLAT</button></div>
@@ -506,6 +517,18 @@ label{font-size:11px;letter-spacing:.2em;color:var(--dim);display:block;margin:1
     <button id="btnPauseSet">AYARLAR</button>
     <button id="btnFF" class="fftog">TAKIM ATEŞİ: AÇIK</button>
     <button id="btnMute">SESİ KAPAT</button>
+  </div>
+</div>
+
+<div id="scr-pub" class="screen hidden">
+  <div class="panel" style="width:min(520px,92vw)">
+    <h2>HERKESE AÇIK SUNUCU</h2>
+    <div class="sub">Rastgele oyuncularla eşleşiyorsun</div>
+    <div class="pubspin"><span></span><span></span><span></span></div>
+    <div id="pubStatus" class="pubst">Açık sunucular aranıyor…</div>
+    <div id="pubInfo" class="note"></div>
+    <div class="note">Boş yer olan bir odaya otomatik girersin. Hiç oda yoksa yeni bir açık oda kurulur ve başkaları sana katılır. Lobide 2 kişi olunca maç 25 saniye içinde kendiliğinden başlar, boş yerleri botlar doldurur.</div>
+    <div class="row-btn"><button id="btnPubCancel" class="ghost">İPTAL</button></div>
   </div>
 </div>
 
@@ -3348,11 +3371,127 @@ Object.assign(EN_FRAG, {
   'YÜKSELT': 'UPGRADE', 'SATIN AL': 'BUY', 'TAHTA KILIÇ': 'WOODEN SWORD', 'TAŞ KILIÇ': 'STONE SWORD', 'ALTIN KILIÇ': 'GOLD SWORD', 'DEMİR KILIÇ': 'IRON SWORD',
   'Renk değiştiren': 'Color-shifting', 'Işıklı': 'Glowing', 'Hız ×': 'Speed ×', ' hasar': ' dmg', ' alındı!': ' unlocked!',
   'Maç bittikçe gems kazanırsın': 'You earn gems after every match', 'galibiyet': 'win', 'beraberlik': 'draw', 'yenilgi': 'loss', ' öldürme başına': ' per kill',
+  'Odaya bağlanılıyor: ': 'Connecting to room: ', 'Açık oda: ': 'Public rooms: ', ' · Oyuncu: ': ' · Players: ', 'Başlamasına ': 'Starts in ',
+  'Oyuncu bekleniyor (en az 2 kişi)': 'Waiting for players (at least 2)', 'Maç başlıyor…': 'Match starting…', 'HERKESE AÇIK SUNUCU': 'PUBLIC SERVER',
   'GEMS KAZANDIN': 'GEMS EARNED', 'MAĞAZA · GEMS': 'STORE · GEMS', '/sn': '/s',
+  'HERKESE AÇIK SUNUCU': 'PUBLIC SERVER', 'Rastgele oyuncularla eşleşiyorsun': 'Matching you with random players', 'İPTAL': 'CANCEL',
+  'Açık sunucular aranıyor…': 'Searching public servers…', 'Şu an açık oda yok': 'No public rooms right now', 'Açık sunucuya katıldın!': 'Joined a public server!',
+  'Yeni açık sunucu kuruldu — oyuncular bekleniyor': 'New public server created — waiting for players', 'Uygun açık oda yok — yeni bir açık sunucu kuruluyor…': 'No open room — creating a new public server…',
+  'Sunucu listesine ulaşılamadı — yeni bir açık oda kuruluyor…': 'Could not reach the server list — creating a new public room…', 'Açık sunucuya bağlanılamadı — ayrıntı menüde.': 'Could not join a public server — details in the menu.',
+  'Boş yer olan bir odaya otomatik girersin. Hiç oda yoksa yeni bir açık oda kurulur ve başkaları sana katılır. Lobide 2 kişi olunca maç 25 saniye içinde kendiliğinden başlar, boş yerleri botlar doldurur.': 'You are placed in a room with free slots automatically. If there is none, a new public room is created and others join you. Once 2 players are in the lobby, the match starts by itself within 25 seconds; bots fill the empty slots.',
+  '🌐 HERKESE AÇIK SUNUCUYA KATIL': '🌐 JOIN PUBLIC SERVER', '🌐 HERKESE AÇIK SUNUCU (rastgele oyuncular katılabilir)': '🌐 PUBLIC SERVER (random players can join)',
   'KAMERA': 'CAMERA', 'BİRİNCİ ŞAHIS': 'FIRST PERSON', 'ARKADAN': 'BEHIND', 'ÖNDEN': 'FRONT', 'Renkli mermi izi': 'Colored bullet trail', ' · Silah skinleri mermiye de renk ve iz verir': ' · Weapon skins also color your bullets and their trails'
 });
 EN_EXACT['Her maçta ' + MAPS.length + ' haritadan biri rastgele seçilir.'] = 'One of the ' + MAPS.length + ' maps is picked at random every match.';
 try { _EN_RE = null; _EN_CACHE.clear(); } catch (e) { } // yeni çeviriler sözlüğe girsin
+
+/* =====================================================================
+   02i · HERKESE AÇIK SUNUCULAR
+   "HERKESE AÇIK SUNUCUYA KATIL" denince oyun, Firebase'deki açık oda
+   listesinden (pub/<kod>) uygun bir odayı seçip seni oraya bağlar; boş
+   oda yoksa yeni bir açık oda kurar ve başkalarının gelmesini bekler.
+   · Açık odayı kuran oyuncu (host) her 8 sn listede "hâlâ buradayım" der;
+     30 sn haber vermeyen oda listede görünmez, 2 dk sonra silinir.
+   · Lobide en az 2 kişi olunca maç 25 sn içinde kendiliğinden başlar
+     (10 kişi dolarsa 3 sn). Boş yerleri botlar doldurur.
+   · Maç başlayan odalar listeden çıkar; oyun sürümü farklı odalara girilmez.
+   ===================================================================== */
+const GAME_VER = 13;
+const PUB = {
+  on: false, code: null, timer: null, autoTimer: null, skew: 0, skewOk: false, searching: false, cancelled: false,
+  async req(method, path, body, keep) {
+    let r;
+    try { r = await fetch(FB.db + '/' + path + '.json', { method, body: body === undefined ? undefined : JSON.stringify(body), keepalive: !!keep }); }
+    catch (e) { throw new Error('NETWORK'); }
+    if (!r.ok) throw new Error('DB ' + r.status);
+    return r.json();
+  },
+  /* sunucu saati (oda kayıtlarının tazeliğini doğru ölçmek için) */
+  async clock() {
+    if (this.skewOk) return;
+    const t0 = Date.now(), v = await this.req('PUT', 'clk', { '.sv': 'timestamp' }), t1 = Date.now();
+    if (typeof v === 'number') { this.skew = v - (t0 + t1) / 2; this.skewOk = true; }
+  },
+  now() { return Date.now() + this.skew; },
+  humans() { return NET.lobby ? NET.lobby.players.filter(p => !p.bot).length : 0; },
+  /* ---- host: odayı herkese aç / kapat ---- */
+  start() {
+    if (NET.mode !== 'host' || !NET.lobby) return;
+    this.on = true; NET.lobby.pub = true; this.code = NET.code;
+    this.beat();
+    clearInterval(this.timer); this.timer = setInterval(() => this.beat(), 8000);
+    clearInterval(this.autoTimer); this.autoTimer = setInterval(() => this.autoTick(), 1000);
+  },
+  stop(keepFlag) {
+    const c = this.code;
+    this.on = false; this.code = null;
+    clearInterval(this.timer); clearInterval(this.autoTimer); this.timer = this.autoTimer = null;
+    if (NET.lobby && !keepFlag) { NET.lobby.pub = false; NET.lobby.autoAt = 0; }
+    if (c) this.req('DELETE', 'pub/' + c).catch(() => { });
+  },
+  beat() {
+    if (!this.on || NET.mode !== 'host' || !NET.code || !NET.lobby) return;
+    if (this.code !== NET.code) { if (this.code) this.req('DELETE', 'pub/' + this.code).catch(() => { }); this.code = NET.code; }
+    const L = NET.lobby, hostP = L.players.find(p => p.id === 'h');
+    this.req('PUT', 'pub/' + NET.code, { n: String(hostP ? hostP.name : 'Oda').slice(0, 16), p: this.humans(), mx: 10, g: L.inGame || NET.sel ? 1 : 0, m: L.cfg.map, ts: { '.sv': 'timestamp' }, v: GAME_VER }).catch(() => { });
+  },
+  /* lobide yeterli kişi olunca maçı kendiliğinden başlat */
+  autoTick() {
+    const L = NET.lobby;
+    if (!this.on || NET.mode !== 'host' || !L || L.inGame || NET.sel) return;
+    const n = this.humans();
+    if (n < 2) { if (L.autoAt) { L.autoAt = 0; broadcastLobby(); } return; }
+    const want = n >= 10 ? 3000 : 25000, now = Date.now();
+    if (!L.autoAt || L.autoAt - now > want) { L.autoAt = now + want; broadcastLobby(); }
+    if (now >= L.autoAt) { L.autoAt = 0; this.beat(); selStart(L.players.filter(p => !p.bot), L.cfg); }
+  },
+  /* ---- açık odaları listele ---- */
+  async list() {
+    try { await this.clock(); } catch (e) { }
+    const all = await this.req('GET', 'pub') || {}, now = this.now(), out = [];
+    for (const code in all) {
+      const r = all[code]; if (!r || typeof r !== 'object') continue;
+      const age = now - (r.ts || 0);
+      if (age > 120000) { this.req('DELETE', 'pub/' + code).catch(() => { }); continue; }  // terk edilmiş kaydı temizle
+      if (age > 30000 || r.v !== GAME_VER) continue;
+      out.push({ code, n: String(r.n || 'Oda'), p: r.p | 0, mx: r.mx | 0 || 10, g: !!r.g, m: r.m });
+    }
+    return out;
+  },
+  /* ---- HIZLI KATIL: uygun bir açık odaya gir, yoksa yeni açık oda kur ---- */
+  async quickJoin(name, ui) {
+    if (this.searching) return;
+    this.searching = true; this.cancelled = false;
+    try {
+      ui.status('Açık sunucular aranıyor…');
+      let rooms = [];
+      try { rooms = await this.list(); } catch (e) { ui.status('Sunucu listesine ulaşılamadı — yeni bir açık oda kuruluyor…'); }
+      if (this.cancelled) return;
+      const all = rooms.length, players = rooms.reduce((a, r) => a + r.p, 0);
+      ui.info(all ? 'Açık oda: ' + all + ' · Oyuncu: ' + players : 'Şu an açık oda yok');
+      // dolmaya en yakın (ama dolu olmayan) lobiler önce; eşit olanlar arasında rastgele
+      const cand = rooms.filter(r => !r.g && r.p < r.mx).map(r => ({ r, k: r.p + Math.random() * 0.9 })).sort((a, b) => b.k - a.k).map(x => x.r).slice(0, 4);
+      for (const r of cand) {
+        if (this.cancelled) return;
+        ui.status('Odaya bağlanılıyor: ' + r.n + ' (' + r.p + '/' + r.mx + ')…');
+        const ok = await new Promise(res => clientJoin(r.code, name, () => res(true), () => res(false), m => { if (!this.cancelled) ui.status(m); }));
+        if (this.cancelled) { if (ok) netShutdown(); return; }
+        if (ok) { ui.joined(); return; }
+        netShutdown();
+      }
+      if (this.cancelled) return;
+      ui.status('Uygun açık oda yok — yeni bir açık sunucu kuruluyor…');
+      await new Promise(res => hostCreate(name, () => {
+        if (this.cancelled) { netShutdown(); res(); return; }
+        NET.lobby.cfg.map = -1; // açık odalarda harita her maç rastgele
+        this.start(); ui.hosted(); res();
+      }, err => { ui.fail(err); netShutdown(); res(); }));
+    } finally { this.searching = false; }
+  },
+  cancel() { this.cancelled = true; this.searching = false; if (NET.mode !== 'off') netShutdown(); }
+};
+/* sekme kapanırken açık oda kaydını hemen sil */
+window.addEventListener('pagehide', () => { if (PUB.code) { try { PUB.req('DELETE', 'pub/' + PUB.code, undefined, true).catch(() => { }); } catch (e) { } } });
 
 /* =====================================================================
    03 · OYUN DURUMU, RAUNT/EKONOMİ, SPIKE, HAREKET, SİLAH, HASAR
@@ -5240,6 +5379,7 @@ function genCode() { const ch = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = ''; 
 function netSend(conn, msg) { try { if (conn && conn.open) conn.send(msg); } catch (e) { /* yoksay */ } }
 function broadcast(msg) { for (const id in NET.conns) netSend(NET.conns[id], msg); }
 function netShutdown() {
+  try { PUB.stop(); } catch (e) { }
   try { for (const id in NET.conns) NET.conns[id].close(); } catch (e) { }
   try { if (NET.conn) NET.conn.close(); } catch (e) { }
   try { if (NET.peer) NET.peer.destroy(); } catch (e) { }
@@ -5295,7 +5435,7 @@ function hostCreate(name, onReady, onErr) {
   if (NET.sigTimer) clearInterval(NET.sigTimer);
   NET.sigTimer = setInterval(hostReconnect, 3000);
 }
-function lobbyView() { return { players: NET.lobby.players, cfg: NET.lobby.cfg, code: NET.code, vs: NET.vs || {} }; }
+function lobbyView() { const L = NET.lobby; return { players: L.players, cfg: L.cfg, code: NET.code, vs: NET.vs || {}, pub: !!L.pub, autoIn: L.autoAt ? Math.max(0, (L.autoAt - Date.now()) / 1000) : 0 }; }
 function broadcastLobby() { broadcast({ t: 'lobby', lobby: lobbyView() }); if (typeof uiRenderLobby === 'function') uiRenderLobby(); }
 function hostRecv(conn, d) {
   if (!d || typeof d !== 'object') return;
@@ -5374,6 +5514,7 @@ function selStart(players, cfg) {
   cfg = Object.assign({}, cfg);
   if (cfg.map === undefined || cfg.map === null || cfg.map < 0) cfg.map = randi(0, MAPS.length - 1);
   NET.sel = { players: players.map(p => ({ id: p.id, name: p.name, team: p.team, cos: p.cos })), picks: {}, locks: {}, remain: 35, cfg };
+  try { PUB.beat(); } catch (e) { } // açık sunucu listesinde "maç başladı" olarak işaretle
   if (NET.selTimer) clearInterval(NET.selTimer);
   let last = Date.now();
   NET.selTimer = setInterval(() => {
@@ -5438,7 +5579,7 @@ function launchGame(roster, cfg) {
   G.cfg = cfg;
   createGame(roster, cfg);
   for (const id in (NET.vs || {})) if (S.pmap[id]) { S.pmap[id].vm = NET.vs[id].vm; S.pmap[id].vt = NET.vs[id].vt; }
-  if (NET.mode === 'host') { for (const id in NET.conns) { NET.conns[id]._snPrev = null; NET.conns[id]._evq = []; } NET.lobby.inGame = true; broadcast({ t: 'start', roster, cfg }); vcBroadcastDir(); }
+  if (NET.mode === 'host') { for (const id in NET.conns) { NET.conns[id]._snPrev = null; NET.conns[id]._evq = []; } NET.lobby.inGame = true; NET.lobby.autoAt = 0; try { PUB.beat(); } catch (e) { } broadcast({ t: 'start', roster, cfg }); vcBroadcastDir(); }
   uiStartGame();
 }
 
@@ -5631,7 +5772,7 @@ function clientRecv(d) {
   if (!d || typeof d !== 'object') return;
   if (d instanceof ArrayBuffer) { const pk = vxParse(d); if (pk) VC.play(pk.id, pk.data); return; } // sesli sohbet paketi
   switch (d.t) {
-    case 'lobby': NET.lobby = d.lobby; if (typeof uiRenderLobby === 'function') uiRenderLobby(); break;
+    case 'lobby': NET.lobby = d.lobby; NET.lobby._at = performance.now(); if (typeof uiRenderLobby === 'function') uiRenderLobby(); break;
     case 'sel': NET.sel = d.sel; uiRenderSelect(d.sel); break;
     case 'start':
       NET.sel = null; G.mode = 'client'; G.cfg = d.cfg;
@@ -8471,6 +8612,22 @@ function uiInit() {
       uiShow('scr-lobby'); uiRenderLobby();
     }, err => { $('btnHost').disabled = false; $('netStatus').textContent = err; uiToast(err.length > 90 ? 'Oda kurulamadı — ayrıntı menüde.' : err, true); netShutdown(); });
   };
+  // HERKESE AÇIK SUNUCU: uygun odaya gir ya da yeni açık oda kur
+  $('btnPub').onclick = () => {
+    AU.init(); AU.resume();
+    if (!netAvailable() || !rtcAvailable()) { const m = netBlockedMsg('Çok oyunculu mod bu sayfada çalışmıyor.'); $('netStatus').textContent = m; uiToast(m.length > 90 ? 'Çok oyunculu başlatılamadı — ayrıntı menüde.' : m, true); return; }
+    uiShow('scr-pub'); $('pubStatus').textContent = 'Açık sunucular aranıyor…'; $('pubInfo').textContent = '';
+    PUB.quickJoin(playerName(), {
+      status: m => { if (UI.screen === 'scr-pub') $('pubStatus').textContent = m; },
+      info: m => { $('pubInfo').textContent = m; },
+      joined: () => { uiShow('scr-lobby'); uiRenderLobby(); uiToast('Açık sunucuya katıldın!'); },
+      hosted: () => { uiShow('scr-lobby'); uiRenderLobby(); uiToast('Yeni açık sunucu kuruldu — oyuncular bekleniyor'); },
+      fail: m => { uiShow('scr-menu'); $('netStatus').textContent = m; uiToast(m.length > 90 ? 'Açık sunucuya bağlanılamadı — ayrıntı menüde.' : m, true); }
+    });
+  };
+  $('btnPubCancel').onclick = () => { PUB.cancel(); uiShow('scr-menu'); };
+  $('lbPubChk').onchange = () => { if (NET.mode !== 'host') return; if ($('lbPubChk').checked) PUB.start(); else PUB.stop(); broadcastLobby(); };
+  setInterval(() => { if (UI.screen === 'scr-lobby') uiLobbyPub(); }, 500);
   $('btnJoin').onclick = () => { AU.init(); AU.resume(); uiShow('scr-join'); $('joinStatus').textContent = ''; setTimeout(() => $('inCode').focus(), 50); };
   $('btnHelp').onclick = () => uiShow('scr-help');
   $('btnExit').onclick = () => exitGame();
@@ -8638,6 +8795,20 @@ function uiRenderLobby() {
     for (let i = 0; i < fillN; i++) { const d = document.createElement('div'); d.className = 'slot bot'; d.textContent = 'BOT'; box.appendChild(d); }
   }
   uiRenderLobbyChat();
+  uiLobbyPub();
+}
+/* açık sunucu durumu: oyuncu sayısı + otomatik başlama geri sayımı */
+function uiLobbyPub() {
+  const L = NET.lobby, el = $('lbPub'); if (!L || !el) return;
+  const host = NET.mode === 'host';
+  $('lbPubChk').checked = !!L.pub; $('lbPubChk').disabled = !host;
+  if (!L.pub) { el.classList.add('hidden'); return; }
+  el.classList.remove('hidden');
+  const n = L.players.filter(p => !p.bot).length;
+  let left = 0;
+  if (host) left = L.autoAt ? Math.max(0, (L.autoAt - Date.now()) / 1000) : 0;
+  else if (L.autoIn) left = Math.max(0, L.autoIn - (performance.now() - (L._at || performance.now())) / 1000);
+  el.textContent = '🌐 HERKESE AÇIK SUNUCU · Oyuncu: ' + n + '/10 · ' + (left > 0 ? 'Başlamasına ' + Math.ceil(left) + ' sn' : n < 2 ? 'Oyuncu bekleniyor (en az 2 kişi)' : 'Maç başlıyor…');
 }
 function uiRenderLobbyChat() {
   const log = $('lbChatLog'); if (!log) return;
