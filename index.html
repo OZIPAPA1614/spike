@@ -2896,10 +2896,10 @@ const FR = {
       case 'join?':
         if (!f) break;
         if (G.running || !(this.st.s === 'lobby' && this.st.code)) { this.raw(c, { t: 'join-no', why: G.running ? 'Arkadaşın şu an maçta.' : 'Arkadaşın bir odada değil.' }); break; }
-        uiFriendPopup('join', c._uid, nick);
+        if (!this.pops.some(p => p.kind === 'join' && p.uid === c._uid)) uiFriendPopup('join', c._uid, nick);
         break;
-      case 'join!': if (f && d.code) uiFriendJoin(String(d.code).toUpperCase().slice(0, 8), nick); break;
-      case 'join-no': uiToast(nick + ': ' + String(d.why || 'İstek reddedildi.').slice(0, 80)); break;
+      case 'join!': if (f && d.code) this.joinAccepted(c._uid, d.code, nick); break;
+      case 'join-no': if (this.waitJoin && this.waitJoin.uid === c._uid) this.waitJoin = null; uiToast(nick + ': ' + String(d.why || 'İstek reddedildi.').slice(0, 80)); break;
     }
   },
   addFriend(uid, nick) {
@@ -2920,8 +2920,50 @@ const FR = {
   accept(uid) { const r = this.reqIn.find(x => x.uid === uid); if (!r) return; this.st = this.myState(); this.addFriend(uid, r.nick); this.sendTo(uid, { t: 'facc', nick: this.nick, st: this.st.s, code: this.st.code }); if (this.acc) { ACC.send(uid, 'acc').catch(() => { }); ACC.inboxDel(uid).catch(() => { }); } },
   decline(uid) { this.reqIn = this.reqIn.filter(x => x.uid !== uid); this.save(); this.sendTo(uid, { t: 'fdec' }); if (this.acc) ACC.inboxDel(uid).catch(() => { }); uiFriendsChanged(); },
   remove(uid) { this.list = this.list.filter(x => x.uid !== uid); this.save(); this.sendTo(uid, { t: 'unf' }); if (this.acc) { ACC.friendDel(uid).catch(() => { }); ACC.send(uid, 'unf').catch(() => { }); } uiFriendsChanged(); },
-  askJoin(uid) { const f = this.friend(uid); if (!f) return; this.sendTo(uid, { t: 'join?' }); uiToast(f.nick + ' oyuncusuna katılma isteği gönderildi…'); },
-  answerJoin(uid, ok) { if (ok && this.st.s === 'lobby' && this.st.code) this.sendTo(uid, { t: 'join!', code: this.st.code }); else this.sendTo(uid, { t: 'join-no', why: 'İstek reddedildi.' }); },
+  /* OYUNA KATIL isteği: doğrudan bağlantı varsa oradan, AYRICA sunucudaki gelen kutusundan da gider
+     (iki oyuncu arasında doğrudan bağlantı kurulamasa bile istek mutlaka ulaşır) */
+  inboxPut(uid, m) { if (!this.acc) return Promise.resolve(); return ACC.db('PUT', 'users/' + uid + '/inbox/' + this.uid, Object.assign({ nick: this.nick, ts: { '.sv': 'timestamp' } }, m)).catch(() => { }); },
+  askJoin(uid) {
+    const f = this.friend(uid); if (!f) return;
+    this.sendTo(uid, { t: 'join?' });
+    this.inboxPut(uid, { t: 'join' });
+    this.waitJoin = { uid, nick: f.nick, until: Date.now() + 45000 };
+    uiToast(f.nick + ' oyuncusuna katılma isteği gönderildi…');
+  },
+  answerJoin(uid, ok) {
+    const code = this.st.code;
+    if (ok && this.st.s === 'lobby' && code) { this.sendTo(uid, { t: 'join!', code }); this.inboxPut(uid, { t: 'joinok', code }); }
+    else { this.sendTo(uid, { t: 'join-no', why: 'İstek reddedildi.' }); this.inboxPut(uid, { t: 'joinno', why: 'İstek reddedildi.' }); }
+  },
+  joinAccepted(uid, code, nick) {
+    if (this.waitJoin && this.waitJoin.uid === uid) this.waitJoin = null;
+    if (this._joinT && Date.now() - this._joinT < 6000) return; // aynı yanıt iki yoldan gelirse bir kez katıl
+    this._joinT = Date.now();
+    uiFriendJoin(String(code).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8), nick);
+  },
+  /* odadayken ya da yanıt beklerken gelen kutusuna sık bak (3 sn) */
+  async fastInbox() {
+    if (!this.acc || !this.uid || this._fiBusy || document.hidden) return;
+    const st = this.myState(), waiting = this.waitJoin && Date.now() < this.waitJoin.until;
+    if (this.waitJoin && !waiting) { uiToast(this.waitJoin.nick + ' isteğine yanıt vermedi.'); this.waitJoin = null; }
+    if (!(st.s === 'lobby' || waiting)) return;
+    this._fiBusy = true;
+    try {
+      const inbox = await ACC.db('GET', 'users/' + this.uid + '/inbox') || {}, now = ACC.now();
+      for (const from in inbox) {
+        const m = inbox[from] || {}, nick = String(m.nick || 'Oyuncu').slice(0, 16);
+        if (m.t !== 'join' && m.t !== 'joinok' && m.t !== 'joinno') continue;
+        ACC.inboxDel(from).catch(() => { });
+        if (now - (m.ts || 0) > 90000 || !this.isFriend(from)) continue; // eski ya da arkadaş olmayan
+        if (m.t === 'join') {
+          if (G.running || !(st.s === 'lobby' && st.code)) { this.inboxPut(from, { t: 'joinno', why: G.running ? 'Arkadaşın şu an maçta.' : 'Arkadaşın bir odada değil.' }); continue; }
+          if (!this.pops.some(p => p.kind === 'join' && p.uid === from)) uiFriendPopup('join', from, nick);
+        } else if (m.t === 'joinok') { if (m.code) this.joinAccepted(from, m.code, nick); }
+        else { if (this.waitJoin && this.waitJoin.uid === from) this.waitJoin = null; uiToast(nick + ': ' + String(m.why || 'İstek reddedildi.').slice(0, 80)); }
+      }
+    } catch (e) { }
+    this._fiBusy = false;
+  },
   /* ---- kendi durumum ---- */
   myState() {
     if (G.running && S) return { s: 'game', code: NET.mode !== 'off' ? (NET.code || (NET.lobby && NET.lobby.code) || null) : null };
@@ -2940,6 +2982,7 @@ const FR = {
     }
     this._pollT = (this._pollT || 0) + 3;
     if (this._pollT >= 20) { this._pollT = 0; this.pollAll(); }
+    this.fastInbox();
   },
   onlineCount() { return this.list.filter(f => f.online).length; }
 };
@@ -8856,6 +8899,8 @@ function uiRenderFriends() {
 /* istek açılır kartı (kuyruklu) */
 function uiFriendPopup(kind, uid, nick) {
   if (G.running) { if (kind === 'freq') uiToast(nick + ' sana arkadaşlık isteği gönderdi — ana menüdeki ARKADAŞLAR\'dan kabul edebilirsin.'); return; }
+  if (FR.pops.some(p => p.kind === kind && p.uid === uid)) return; // aynı istek iki yoldan gelirse tek pencere
+  if (kind === 'freq' && FR.isFriend(uid)) return;
   FR.pops.push({ kind, uid, nick }); if (FR.pops.length === 1) uiFriendPopShow();
 }
 function uiFriendPopShow() {
