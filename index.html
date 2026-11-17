@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="SPIKE"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>SPIKE — Taktik FPS</title>
 <style>
 :root{--navy:#0f1923;--navy2:#16232f;--navy3:#1f2e3c;--red:#ff4655;--teal:#1ee3cf;--white:#ece8e1;--gold:#f5c451;--dim:#8b978f;
@@ -2632,6 +2632,7 @@ const EN_FRAG = {
   'PeerJS yüklenemedi — çok oyunculu mod için internet bağlantısı gerekli.': 'PeerJS failed to load — multiplayer needs an internet connection.',
   'PeerJS yüklenemedi: çok oyunculu mod için internet gerekir. Tek oyunculu mod çalışır.': 'PeerJS failed to load: multiplayer needs internet. Single player works.',
   'Dokunmatik kontroller hazır — telefonu yatay tut, TAM EKRAN önerilir.': 'Touch controls ready — hold your phone sideways, FULLSCREEN recommended.',
+  "Tam ekran için: Safari'de Paylaş → Ana Ekrana Ekle, sonra oyunu ana ekrandaki simgeden aç": 'For fullscreen: in Safari tap Share → Add to Home Screen, then open the game from the home screen icon',
   'TURN ayarları kaydedildi.': 'TURN settings saved.', 'Özel TURN kaldırıldı, varsayılanlar kullanılacak.': 'Custom TURN removed, defaults will be used.',
   'Oda açık': 'Room open', '— arkadaşların kodla katılabilir.': '— friends can join with the code.', 'Eşleştirme sunucusu bağlantısı koptu': 'Lost connection to the matchmaking server',
   '— yeniden bağlanılıyor… (bağlı oyuncular etkilenmez)': '— reconnecting… (connected players are unaffected)', ' Bağlı oyuncu: ': ' Connected players: ', ' Özel TURN: açık.': ' Custom TURN: on.',
@@ -8421,6 +8422,23 @@ function footstepSounds(dt, v) {
    ===================================================================== */
 const $ = id => document.getElementById(id);
 const IS_TOUCH = /[?&]touch=1/.test(location.search) || (('ontouchstart' in window || navigator.maxTouchPoints > 0) && !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches));
+/* ---- Tam ekran ----
+   iPhone/iPad'de (Safari ve iOS'taki tüm tarayıcılar WebKit'tir) tam ekrandayken hızlı dokunuşlar ya da klavye girişi
+   "Tam ekrandayken yazı yazıyor gibi görünüyorsunuz" uyarısını açıp oyunu kesiyor; bu bir tarayıcı güvenlik özelliği ve
+   kapatılamıyor. Bu yüzden iOS/iPadOS'ta Fullscreen API hiç kullanılmaz. Çubuksuz oynamak için Ana Ekrana Ekle yeterli. */
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IS_STANDALONE = navigator.standalone === true || !!(window.matchMedia && window.matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches);
+function enterFullscreen() {
+  if (IS_IOS || document.fullscreenElement) return;
+  try { const r = document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); if (r && r.catch) r.catch(() => { }); } catch (e) { }
+}
+function toggleFullscreen() {
+  if (IS_IOS) {
+    if (!IS_STANDALONE) uiToast('Tam ekran için: Safari\'de Paylaş → Ana Ekrana Ekle, sonra oyunu ana ekrandaki simgeden aç');
+    return;
+  }
+  try { if (document.fullscreenElement) document.exitFullscreen(); else enterFullscreen(); } catch (e) { }
+}
 const SETTINGS = { sens: 1, gfx: 'high' };
 try { const g = localStorage.getItem('spk_gfx'); SETTINGS.gfx = g === 'low' || g === 'mid' || g === 'high' ? g : (typeof IS_TOUCH !== 'undefined' && IS_TOUCH ? 'mid' : 'high'); } catch (e) { }
 const TOUCH = { jx: 0, jy: 0, fire: false, use: false, alt: false, walk: false, crouch: false, ptr: {} };
@@ -8985,11 +9003,12 @@ function uiStartGame() {
   AU.init(); AU.resume();
   document.body.classList.add('ingame');
   $('touch').classList.toggle('hidden', !IS_TOUCH);
+  $('tbFull').classList.toggle('hidden', IS_IOS && IS_STANDALONE);
   for (const k in TOUCH.ptr) delete TOUCH.ptr[k];
   TOUCH.jx = TOUCH.jy = 0; TOUCH.fire = TOUCH.use = TOUCH.alt = TOUCH.crouch = false;
   for (const id of ['tbCrouch', 'tbScope']) { const el = $(id); if (el) el.classList.remove('lit'); }
   syncCursor();
-  if (IS_TOUCH) { try { const r = document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); if (r && r.catch) r.catch(() => { }); } catch (e) { } try { screen.orientation.lock('landscape').catch(() => { }); } catch (e) { } }
+  if (IS_TOUCH) { enterFullscreen(); try { screen.orientation.lock('landscape').catch(() => { }); } catch (e) { } }
   else { G.freeMouse = false; G._needLock = undefined; lockPointer(false); }
   glcv.focus();
 }
@@ -9193,7 +9212,7 @@ function setupTouch() {
       case 'board': UI.board = true; break;
       case 'drop': if (me && me.hasSpike) { if (G.mode === 'client') netSend(NET.conn, { t: 'act', a: 'drop' }); else dropSpike(me); } break;
       case 'pause': togglePause(true); break;
-      case 'full': try { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); } catch (e) { } break;
+      case 'full': toggleFullscreen(); break;
     }
   };
   const btnUp = act => {
