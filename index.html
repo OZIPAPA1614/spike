@@ -1027,10 +1027,16 @@ function visibleFPS(v, t) {
   if (d < 1) return true;
   if (t.st.invis > 0 && d > 70) return false;
   if (d > fpsRange(v)) return false;
-  const e = eyeOf(v), top = topOf(t) - 3, mid = top * 0.55;
-  const px = -dy / d * (PR - 3), py = dx / d * (PR - 3);
-  return losClear(v.x, v.y, t.x, t.y, false, e, top) || losClear(v.x, v.y, t.x, t.y, false, e, mid) ||
-    losClear(v.x, v.y, t.x + px, t.y + py, false, e, mid) || losClear(v.x, v.y, t.x - px, t.y - py, false, e, mid);
+  // oyuncunun görünebilen her yerine (baş, gövde, kollar, bacaklar) ışın: bir köşeden azıcık görünen oyuncu
+  // "aniden kaybolmasın" — çizilen modelin kenarı görünüyorsa oyuncu da görünür
+  const e = eyeOf(v), top = topOf(t) - 3, mid = top * 0.55, low = Math.max(8, top * 0.22);
+  const px = -dy / d * (PR - 2), py = dx / d * (PR - 2);
+  if (losClear(v.x, v.y, t.x, t.y, false, e, top) || losClear(v.x, v.y, t.x, t.y, false, e, mid)) return true;
+  for (const s of [1, -1]) {
+    const x = t.x + px * s, y = t.y + py * s;
+    if (losClear(v.x, v.y, x, y, false, e, mid) || losClear(v.x, v.y, x, y, false, e, top) || losClear(v.x, v.y, x, y, false, e, low)) return true;
+  }
+  return losClear(v.x, v.y, t.x, t.y, false, e, low);
 }
 function canSee(v, t) {
   if (!t.alive) return false;
@@ -5510,7 +5516,10 @@ function hostRecv(conn, d) {
       const p = S.pmap[conn._pid]; if (!p || p.ctrl !== 'remote') return;
       if (p.alive && d.pv >= p.posVer && isFinite(d.x) && isFinite(d.y)) {
         const nx = clamp(+d.x, PR, WW - PR), ny = clamp(+d.y, PR, WH - PR);
-        if (!circleHits(nx, ny, PR - 3) || dist(nx, ny, p.x, p.y) < 4) { p.x = nx; p.y = ny; }
+        if (!circleHits(nx, ny, PR - 3) || dist(nx, ny, p.x, p.y) < 4) { p.x = nx; p.y = ny; p._rej = 0; }
+        else if (++p._rej > 15) { // ~0.5 sn boyunca kabul edilmeyen konum: oyuncu host'ta eski yerde "donmuş" kalmasın
+          const f = findFree(nx, ny, PR); p._rej = 0; setPos(p, f.x, f.y);
+        }
       }
       const inp = p.input;
       inp.ang = +d.ang || 0; inp.mvx = +d.mvx || 0; inp.mvy = +d.mvy || 0; inp.walk = !!d.walk; inp.fire = !!d.fire;
@@ -5677,6 +5686,8 @@ function netHostUpdate(dt) {
     if (q.length > 400) q.splice(0, q.length - 400);
     const dc = c.dataChannel;
     if (dc && dc.bufferedAmount > 96 * 1024) { c._skip = (c._skip || 0) + 1; continue; }
+    // her 2 sn'de bir TAM görüntü: istemcide herhangi bir şey kaymışsa (oyuncu görünmez kalmış vb.) kendiliğinden düzelir
+    if ((c._kf = (c._kf || 0) + 1) >= 40) { c._kf = 0; c._snPrev = null; }
     const prev = c._snPrev || (c._snPrev = { top: {}, pl: {} }), out = {};
     for (const k in J.top) if (k === 'tm' || prev.top[k] !== J.top[k]) { out[k] = snap[k]; prev.top[k] = J.top[k]; }
     out.ev = q.splice(0, q.length);
@@ -5856,12 +5867,12 @@ function clientApplySnap(d) {
     if (sp.id === G.myId) {
       const keep = { x: p.x, y: p.y, ang: p.ang, pitch: p.pitch, crouch: p.crouch, vx: p.vx, vy: p.vy, imp: p.imp, posVer: p.posVer, spd: p.spd, input: p.input, ctrl: 'local', jz: p.jz, jvz: p.jvz, lastJc: p.lastJc };
       const wasAlive = p.alive;
-      Object.assign(p, sp); Object.assign(p, keep);
+      Object.assign(p, sp); Object.assign(p, keep); p.st = Object.assign({}, sp.st);
       if (sp.posVer > keep.posVer || (!wasAlive && sp.alive)) { p.x = sp.x; p.y = sp.y; p.posVer = sp.posVer; p.vx = 0; p.vy = 0; p.imp = null; p.jz = 0; p.jvz = 0; }
       if (!sp.alive) p.imp = null;
     } else {
       const hist = p.hist || [];
-      Object.assign(p, sp);
+      Object.assign(p, sp); p.st = Object.assign({}, sp.st);
       p.hist = hist;
       hist.push({ t: s.tm, x: sp.x, y: sp.y, a: sp.ang, pt: sp.pitch || 0, z: sp.jz || 0 });
       if (hist.length > 24) hist.shift();
@@ -6065,9 +6076,29 @@ function glInit(canvas) {
 function glResize(w, h) {
   if (!GLX.ok) return;
   const q = (typeof SETTINGS !== 'undefined' && SETTINGS.gfx) || 'high', base = Math.min(window.devicePixelRatio || 1, IS_TOUCH ? 1.25 : 1.5);
-  GLX.dpr = q === 'low' ? Math.min(base, 1) * 0.6 : q === 'mid' ? Math.min(base, 1) * 0.85 : base; // grafik kalitesi: çizim çözünürlüğü
+  GLX.dpr = (q === 'low' ? Math.min(base, 1) * 0.6 : q === 'mid' ? Math.min(base, 1) * 0.85 : base) * DYN.s; // grafik kalitesi × otomatik ölçek
   GLX.cv.width = Math.round(w * GLX.dpr); GLX.cv.height = Math.round(h * GLX.dpr);
   GLX.cv.style.width = w + 'px'; GLX.cv.style.height = h + 'px';
+}
+
+/* ---------- OTOMATİK ÇÖZÜNÜRLÜK ----------
+   Kare hızı düşerse çizim çözünürlüğü kademeli olarak azaltılır (en fazla %50), oyun akıcılaşınca
+   yavaşça geri yükseltilir. Takılmaya yol açan ölçeğe 20 sn boyunca geri dönülmez (gidip gelme olmasın). */
+const DYN = { s: 1, acc: 0, n: 0, good: 0, cap: 1, capT: 0, min: 0.5, mx: 0 };
+function dynRes(rawDt) {
+  if (!GLX.ok || document.hidden || rawDt > 0.5) { DYN.acc = 0; DYN.n = 0; return; }
+  DYN.acc += rawDt; DYN.n++; if (rawDt > DYN.mx) DYN.mx = rawDt;
+  if (DYN.acc < 1) return;
+  const fps = DYN.n / DYN.acc, now = performance.now(), steady = DYN.mx < 1.3 * DYN.acc / DYN.n; DYN.acc = 0; DYN.n = 0; DYN.mx = 0;
+  // tarayıcı kare hızını kendisi 30'a sabitlemişse (ör. iPhone güç tasarrufu modu) çözünürlüğü düşürmenin faydası yok
+  if (steady && fps > 28 && fps < 32) return;
+  if (now > DYN.capT) DYN.cap = 1;
+  let ns = DYN.s;
+  if (fps < 50) { DYN.good = 0; DYN.cap = Math.min(DYN.cap, DYN.s * 0.97); DYN.capT = now + 20000; ns = DYN.s * (fps < 35 ? 0.8 : 0.9); }
+  else if (fps >= 57) { if (++DYN.good >= 4) { DYN.good = 0; ns = Math.min(DYN.cap, DYN.s * 1.08, 1); } }
+  else DYN.good = 0;
+  ns = clamp(ns, DYN.min, 1);
+  if (Math.abs(ns - DYN.s) > 0.01) { DYN.s = ns; glResize(window.innerWidth, window.innerHeight); }
 }
 
 /* ---------- geometri ---------- */
@@ -6078,14 +6109,60 @@ function gquad(g, p0, p1, p2, p3, n, c0, c1, uv) {
   gv(g, ...p0, ...n, C0, T[0], T[1]); gv(g, ...p1, ...n, C0, T[2], T[3]); gv(g, ...p2, ...n, C1, T[4], T[5]);
   gv(g, ...p0, ...n, C0, T[0], T[1]); gv(g, ...p2, ...n, C1, T[4], T[5]); gv(g, ...p3, ...n, C1, T[6], T[7]);
 }
+/* PERFORMANS: büyük dünya meshleri (duvar, zemin, dekor, eşyalar…) parçalara bölünür; her karede
+   yalnızca kameranın görüş alanına giren parçalar çizilir. Sisin tamamen yuttuğu uzak küçük eşyalar
+   (fogCull) hiç çizilmez. Görüntü aynı kalır, ekran kartının işi 2-4 kat azalır. */
+/* değer: parçanın bu mesafeden uzaktaysa hiç çizilmediği mesafe (0 = yalnızca görüş alanı kontrolü).
+   Süs eşyaları (fıçı, sandık, lamba…) oyunu etkilemez; 2600 birimden (~32 karo) uzakta birkaç piksel kalırlar. */
+const CHUNKED = { floor: 0, walls: 0, trim: 0, crates: 0, lows: 0, water: 0, props: 2600, decor: 0, decorEm: 0 };
 function mkMesh(name, g) {
-  const gl = GLX.gl;
-  if (GLX.meshes[name]) { try { gl.deleteBuffer(GLX.meshes[name].b); } catch (e) { } }
+  const gl = GLX.gl, old = GLX.meshes[name];
+  if (old) { try { if (old.b) gl.deleteBuffer(old.b); if (old.ch) for (const c of old.ch) gl.deleteBuffer(c.b); } catch (e) { } }
   if (!g.v.length) { delete GLX.meshes[name]; return; }
-  const b = gl.createBuffer();
   if (g.v.length < 200000) GLX.prim[name] = g.v; else delete GLX.prim[name]; // büyük dünya meshlerini bellekte tutma
+  const nv = g.v.length / 11;
+  if (name in CHUNKED && nv > 6000 && typeof WW === 'number' && WW > 0) {
+    const cell = Math.max(WW, WH) / (CHUNKED[name] ? 10 : 5), V = g.v, groups = new Map();
+    for (let i = 0; i < V.length; i += 33) { // üçgen başına: ağırlık merkezine göre parça
+      const cx = (V[i] + V[i + 11] + V[i + 22]) / 3, cz = (V[i + 2] + V[i + 13] + V[i + 24]) / 3;
+      const k = Math.floor(cx / cell) * 4096 + Math.floor(cz / cell);
+      let a = groups.get(k); if (!a) { a = []; groups.set(k, a); }
+      for (let j = 0; j < 33; j++) a.push(V[i + j]);
+    }
+    const ch = [];
+    for (const a of groups.values()) {
+      let x0 = 1e9, y0 = 1e9, z0 = 1e9, x1 = -1e9, y1 = -1e9, z1 = -1e9;
+      for (let i = 0; i < a.length; i += 11) { const x = a[i], y = a[i + 1], z = a[i + 2]; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; if (z < z0) z0 = z; if (z > z1) z1 = z; }
+      const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(a), gl.STATIC_DRAW);
+      ch.push({ b, n: a.length / 11, bb: [x0, y0, z0, x1, y1, z1] });
+    }
+    GLX.meshes[name] = { ch, n: nv, far: CHUNKED[name] };
+    return;
+  }
+  const b = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(g.v), gl.STATIC_DRAW);
-  GLX.meshes[name] = { b, n: g.v.length / 11 };
+  GLX.meshes[name] = { b, n: nv };
+}
+/* görüş piramidi (frustum) düzlemleri: VP matrisinden */
+const FRU = new Float32Array(24);
+function glFrustum() {
+  const m = GLX.vp;
+  for (let p = 0; p < 6; p++) {
+    const r = p >> 1, s = p & 1 ? -1 : 1;
+    let a = m[3] + s * m[r], b = m[7] + s * m[4 + r], c = m[11] + s * m[8 + r], d = m[15] + s * m[12 + r];
+    const l = Math.hypot(a, b, c) || 1; FRU[p * 4] = a / l; FRU[p * 4 + 1] = b / l; FRU[p * 4 + 2] = c / l; FRU[p * 4 + 3] = d / l;
+  }
+}
+function bbVisible(bb, far) {
+  for (let p = 0; p < 6; p++) {
+    const a = FRU[p * 4], b = FRU[p * 4 + 1], c = FRU[p * 4 + 2], d = FRU[p * 4 + 3];
+    if (a * (a > 0 ? bb[3] : bb[0]) + b * (b > 0 ? bb[4] : bb[1]) + c * (c > 0 ? bb[5] : bb[2]) + d < 0) return false;
+  }
+  if (far) { // uzak (ya da sisin tamamen yuttuğu) parça
+    const cx = clamp(GLX.cam[0], bb[0], bb[3]), cz = clamp(GLX.cam[2], bb[2], bb[5]);
+    if (Math.hypot(cx - GLX.cam[0], cz - GLX.cam[2]) > Math.min(far, GLX.fog[1] + 40)) return false;
+  }
+  return true;
 }
 function buildPrimitives() {
   // birim küp (merkezli, -0.5..0.5)
@@ -6116,6 +6193,15 @@ function buildPrimitives() {
     gv(g, ...a, ...N(a), [1, 1, 1], 0, 0); gv(g, ...c, ...N(c), [1, 1, 1], 1, 1); gv(g, ...d, ...N(d), [1, 1, 1], 1, 0);
   }
   mkMesh('sphLo', g);
+  // orta çözünürlüklü küre (bulutlar)
+  g = GB();
+  for (let i = 0; i < 6; i++) for (let j = 0; j < 10; j++) {
+    const P = (a, b) => { const th = a / 6 * Math.PI, ph = b / 10 * TAU; return [Math.sin(th) * Math.cos(ph) * 0.5, Math.cos(th) * 0.5, Math.sin(th) * Math.sin(ph) * 0.5]; };
+    const a = P(i, j), b = P(i + 1, j), c = P(i + 1, j + 1), d = P(i, j + 1), N = q => [q[0] * 2, q[1] * 2, q[2] * 2];
+    gv(g, ...a, ...N(a), [1, 1, 1], 0, 0); gv(g, ...b, ...N(b), [1, 1, 1], 0, 1); gv(g, ...c, ...N(c), [1, 1, 1], 1, 1);
+    gv(g, ...a, ...N(a), [1, 1, 1], 0, 0); gv(g, ...c, ...N(c), [1, 1, 1], 1, 1); gv(g, ...d, ...N(d), [1, 1, 1], 1, 0);
+  }
+  mkMesh('sphMd', g);
   // silindir (yarıçap 0.5, yükseklik 1, merkezli)
   const CS = 18;
   g = GB();
@@ -6126,6 +6212,14 @@ function buildPrimitives() {
     gv(g, 0, -h, 0, 0, -1, 0, [1, 1, 1], 0.5, 0.5); gv(g, c1, -h, s1, 0, -1, 0, [1, 1, 1], 1, 0); gv(g, c0, -h, s0, 0, -1, 0, [1, 1, 1], 0, 0);
   }
   mkMesh('cyl', g);
+  // düşük poligonlu silindir (dekor: ağaç gövdesi, direk, baca)
+  g = GB();
+  for (let i = 0; i < 8; i++) {
+    const a0 = i / 8 * TAU, a1 = (i + 1) / 8 * TAU, c0 = Math.cos(a0) * 0.5, s0 = Math.sin(a0) * 0.5, c1 = Math.cos(a1) * 0.5, s1 = Math.sin(a1) * 0.5;
+    gquad(g, [c0, -h, s0], [c1, -h, s1], [c1, h, s1], [c0, h, s0], [Math.cos((a0 + a1) / 2), 0, Math.sin((a0 + a1) / 2)]);
+    gv(g, 0, h, 0, 0, 1, 0, [1, 1, 1], 0.5, 0.5); gv(g, c0, h, s0, 0, 1, 0, [1, 1, 1], 0, 0); gv(g, c1, h, s1, 0, 1, 0, [1, 1, 1], 1, 0);
+  }
+  mkMesh('cylLo', g);
   // dekor silindiri: sarmal UV (fıçı, varil), 12 dilim
   g = GB();
   for (let i = 0; i < 12; i++) {
@@ -6199,7 +6293,7 @@ function mkTex(src, repeat) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   const wrap = repeat && pot ? gl.REPEAT : gl.CLAMP_TO_EDGE;
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
-  if (pot && GLX.aniso) gl.texParameterf(gl.TEXTURE_2D, GLX.aniso.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(8, gl.getParameter(GLX.aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
+  if (pot && GLX.aniso) gl.texParameterf(gl.TEXTURE_2D, GLX.aniso.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(IS_TOUCH ? 2 : 4, gl.getParameter(GLX.aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
   _boundTex = null;
   return t;
 }
@@ -6392,26 +6486,34 @@ function Qline(x1, y1, z1, x2, y2, z2, w, col, o) {
 }
 let _boundTex = null;
 let _detOn = true;
+function glBindMesh(gl, b) {
+  gl.bindBuffer(gl.ARRAY_BUFFER, b);
+  gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 44, 0); gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 44, 12);
+  gl.vertexAttribPointer(2, 3, gl.FLOAT, false, 44, 24); gl.vertexAttribPointer(3, 2, gl.FLOAT, false, 44, 36);
+}
 function glDrawItem(it) {
   const gl = GLX.gl, L = GLX.L, m = GLX.meshes[it.mesh];
   if (!m) return;
-  gl.bindBuffer(gl.ARRAY_BUFFER, m.b);
-  gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 44, 0); gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 44, 12);
-  gl.vertexAttribPointer(2, 3, gl.FLOAT, false, 44, 24); gl.vertexAttribPointer(3, 2, gl.FLOAT, false, 44, 36);
+  if (m.ch) { // parçalı dünya meshi (birim dönüşümle çizilir): görünmeyen parçaları atla
+    let any = false;
+    for (const c of m.ch) if (c.vis = bbVisible(c.bb, m.far)) any = true;
+    if (!any) return;
+  } else glBindMesh(gl, m.b);
   gl.uniformMatrix4fv(L.uM, false, it.M); gl.uniformMatrix3fv(L.uR, false, it.R);
   gl.uniform4fv(L.uCol, it.col); gl.uniform3fv(L.uEm, it.em); gl.uniform1f(L.uLit, it.lit);
   const tx = it.tex || GLX.tex.white;
   if (it.det) { gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, it.det); gl.activeTexture(gl.TEXTURE0); gl.uniform1f(L.uDetS, it.detS); gl.uniform2fv(L.uDetO, it.detO || ZERO2); _detOn = true; }
   else if (_detOn) { gl.uniform1f(L.uDetS, 0); _detOn = false; }
   if (tx !== _boundTex) { gl.bindTexture(gl.TEXTURE_2D, tx); _boundTex = tx; }
-  gl.drawArrays(gl.TRIANGLES, 0, m.n);
+  if (m.ch) { for (const c of m.ch) if (c.vis) { glBindMesh(gl, c.b); gl.drawArrays(gl.TRIANGLES, 0, c.n); GLX.stV += c.n; } }
+  else { gl.drawArrays(gl.TRIANGLES, 0, m.n); GLX.stV += m.n; }
 }
 function glBeginFrame(clear) {
   const gl = GLX.gl;
   gl.viewport(0, 0, GLX.cv.width, GLX.cv.height);
   gl.clearColor(clear[0], clear[1], clear[2], 1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  GLX.oq.length = 0; GLX.tq.length = 0; GLX.pn = 0; _boundTex = null;
+  GLX.oq.length = 0; GLX.tq.length = 0; GLX.pn = 0; _boundTex = null; GLX.stV = 0;
 }
 function glSetCamera(ex, ey, ez, yaw, pitch, fovY, aspect) {
   const fx = Math.cos(yaw) * Math.cos(pitch), fy = Math.sin(pitch), fz = Math.sin(yaw) * Math.cos(pitch);
@@ -6419,18 +6521,21 @@ function glSetCamera(ex, ey, ez, yaw, pitch, fovY, aspect) {
   m4Persp(GLX.proj, fovY, aspect, 3, 7500 * MS);
   m4Mul(GLX.vp, GLX.proj, GLX.view);
   GLX.cam[0] = ex; GLX.cam[1] = ey; GLX.cam[2] = ez; GLX.fovY = fovY;
+  glFrustum();
 }
 function glFlush() {
   const gl = GLX.gl, L = GLX.L;
   gl.uniformMatrix4fv(L.uVP, false, GLX.vp); gl.uniform3fv(L.uCam, GLX.cam);
   gl.uniform3fv(L.uFogC, GLX.fogCol); gl.uniform3fv(L.uL, GLX.light); gl.uniform3fv(L.uAD, GLX.ad); gl.uniform3fv(L.uLC, GLX.lc);
-  // gökyüzü: derinlik ve sis olmadan önce çizilir
-  gl.uniform2fv(L.uFog, [1e6, 2e6]); gl.disable(gl.DEPTH_TEST); gl.depthMask(false); gl.enable(gl.BLEND);
-  for (const it of GLX.oq) if (it.sky) { gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); glDrawItem(it); }
-  for (const it of GLX.tq) if (it.sky) { if (it.add) gl.blendFunc(gl.SRC_ALPHA, gl.ONE); else gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); glDrawItem(it); }
+  // önce opak dünya (önden arkaya yakın sıra: duvar/zemin), SONRA gökyüzü yalnızca boş kalan piksellere
+  // (derinlik testiyle) — ekranın büyük kısmında gökyüzü boşuna boyanmaz
   gl.uniform2fv(L.uFog, GLX.fog);
   gl.disable(gl.BLEND); gl.depthMask(true); gl.enable(gl.DEPTH_TEST);
   for (const it of GLX.oq) if (!it.vm && !it.sky) glDrawItem(it);
+  gl.uniform2fv(L.uFog, [1e6, 2e6]); gl.depthMask(false); gl.enable(gl.BLEND);
+  for (const it of GLX.oq) if (it.sky) { gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); glDrawItem(it); }
+  for (const it of GLX.tq) if (it.sky) { if (it.add) gl.blendFunc(gl.SRC_ALPHA, gl.ONE); else gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); glDrawItem(it); }
+  gl.uniform2fv(L.uFog, GLX.fog); gl.disable(gl.BLEND); gl.depthMask(true);
   GLX.tq.sort((a, b) => b.dist - a.dist);
   gl.enable(gl.BLEND); gl.depthMask(false);
   for (const it of GLX.tq) {
@@ -6790,7 +6895,7 @@ function buildSkyMesh() {
   if (th.sun) { const d = th.sun.dir, l = Math.hypot(d[0], d[1], d[2]); gAppend(g, 'sphere', d[0] / l * 0.46, d[1] / l * 0.46, d[2] / l * 0.46, 0, th.sun.size / 900, th.sun.size / 900, th.sun.size / 900, [1.6, 1.5, 1.2]); }
   for (let i = 0; i < (th.clouds || 0); i++) {
     const az = R() * TAU, el = 0.12 + R() * 0.35, p = dirPt(az, el, 0.44);
-    for (let k = 0; k < 4; k++) gAppend(g, 'sphere', p[0] + (R() - 0.5) * 0.06, p[1] + (R() - 0.5) * 0.01, p[2] + (R() - 0.5) * 0.06, az, 0.05 + R() * 0.05, 0.015 + R() * 0.01, 0.05 + R() * 0.04, [1.05, 1.05, 1.08]);
+    for (let k = 0; k < 4; k++) gAppend(g, 'sphMd', p[0] + (R() - 0.5) * 0.06, p[1] + (R() - 0.5) * 0.01, p[2] + (R() - 0.5) * 0.06, az, 0.05 + R() * 0.05, 0.015 + R() * 0.01, 0.05 + R() * 0.04, [1.05, 1.05, 1.08]);
   }
   mkMesh('sky', g);
 }
@@ -6821,11 +6926,11 @@ function buildDecor() {
     };
     const ringK = clamp((MW + MH) / 136, 1, 3);
     const ring = (n, off, fn) => { n = Math.round(n * ringK); for (let k = 0; k < n; k++) { const side = k % 4, t = R(); let x, z; if (side === 0) { x = t * WW; z = -off - rr(0, 300); } else if (side === 1) { x = t * WW; z = WH + off + rr(0, 300); } else if (side === 2) { x = -off - rr(0, 300); z = t * WH; } else { x = WW + off + rr(0, 300); z = t * WH; } fn(x, z, k); } };
-    const tree = (x, z, s, trunk, leaf) => { gAppend(g, 'cyl', x, Hw * 0.5 + 40 * s, z, 0, 14 * s, Hw + 80 * s, 14 * s, trunk); for (let k = 0; k < 4; k++) gAppend(g, 'sphLo', x + rr(-30, 30) * s, Hw + 70 * s + rr(0, 50) * s, z + rr(-30, 30) * s, 0, rr(70, 110) * s, rr(55, 80) * s, rr(70, 110) * s, leaf.map(c => c * rr(0.85, 1.1))); };
-    const palm = (x, z, s) => { const hgt = Hw + rr(90, 160); gAppend(g, 'cyl', x, hgt / 2, z, 0, 10 * s, hgt, 10 * s, [0.55, 0.42, 0.28]); for (let k = 0; k < 7; k++) { const a = k / 7 * TAU + rr(0, 0.4); gAppend(g, 'box', x + Math.cos(a) * 34 * s, hgt - 4, z + Math.sin(a) * 34 * s, a, 74 * s, 4, 16 * s, [0.3, 0.6, 0.22], -0.35); } gAppend(g, 'sphLo', x, hgt, z, 0, 18 * s, 14 * s, 18 * s, [0.42, 0.33, 0.2]); };
-    const pine = (x, z, s, snow) => { gAppend(g, 'cyl', x, Hw * 0.5 + 30, z, 0, 10 * s, Hw + 60, 10 * s, [0.35, 0.25, 0.18]); for (let k = 0; k < 4; k++) { const y = Hw + 20 + k * 42 * s, w = (110 - k * 22) * s; gAppend(g, 'cone', x, y, z, 0, w, 70 * s, w, [0.16, 0.34, 0.24]); if (snow) gAppend(g, 'cone', x, y + 16 * s, z, 0, w * 0.62, 40 * s, w * 0.62, [0.95, 0.97, 1]); } };
+    const tree = (x, z, s, trunk, leaf) => { gAppend(g, 'cylLo', x, Hw * 0.5 + 40 * s, z, 0, 14 * s, Hw + 80 * s, 14 * s, trunk); for (let k = 0; k < 4; k++) gAppend(g, 'sphLo', x + rr(-30, 30) * s, Hw + 70 * s + rr(0, 50) * s, z + rr(-30, 30) * s, 0, rr(70, 110) * s, rr(55, 80) * s, rr(70, 110) * s, leaf.map(c => c * rr(0.85, 1.1))); };
+    const palm = (x, z, s) => { const hgt = Hw + rr(90, 160); gAppend(g, 'cylLo', x, hgt / 2, z, 0, 10 * s, hgt, 10 * s, [0.55, 0.42, 0.28]); for (let k = 0; k < 7; k++) { const a = k / 7 * TAU + rr(0, 0.4); gAppend(g, 'box', x + Math.cos(a) * 34 * s, hgt - 4, z + Math.sin(a) * 34 * s, a, 74 * s, 4, 16 * s, [0.3, 0.6, 0.22], -0.35); } gAppend(g, 'sphLo', x, hgt, z, 0, 18 * s, 14 * s, 18 * s, [0.42, 0.33, 0.2]); };
+    const pine = (x, z, s, snow) => { gAppend(g, 'cylLo', x, Hw * 0.5 + 30, z, 0, 10 * s, Hw + 60, 10 * s, [0.35, 0.25, 0.18]); for (let k = 0; k < 4; k++) { const y = Hw + 20 + k * 42 * s, w = (110 - k * 22) * s; gAppend(g, 'cone', x, y, z, 0, w, 70 * s, w, [0.16, 0.34, 0.24]); if (snow) gAppend(g, 'cone', x, y + 16 * s, z, 0, w * 0.62, 40 * s, w * 0.62, [0.95, 0.97, 1]); } };
     if (kind === 'liman') {
-      for (const [x, z] of spots(1, 2, 26)) { gAppend(g, 'cyl', x, Hw + 70, z, 0, 5, 140, 5, [0.3, 0.32, 0.35]); gAppend(ge, 'sphLo', x, Hw + 142, z, 0, 14, 10, 14, [1, 0.92, 0.6]); }
+      for (const [x, z] of spots(1, 2, 26)) { gAppend(g, 'cylLo', x, Hw + 70, z, 0, 5, 140, 5, [0.3, 0.32, 0.35]); gAppend(ge, 'sphLo', x, Hw + 142, z, 0, 14, 10, 14, [1, 0.92, 0.6]); }
       const cranes = [[-120, WH * 0.3], [-120, WH * 0.7], [WW + 120, WH * 0.3], [WW + 120, WH * 0.7]];
       for (const [x, z] of cranes) {
         const dir = x < 0 ? 0 : Math.PI, H2 = 520;
@@ -6842,7 +6947,7 @@ function buildDecor() {
       gAppend(g, 'box', WW / 2 + 500, 340, WH + 900, 0, 420, 200, 300, [0.92, 0.92, 0.95]);
     } else if (kind === 'col') {
       for (const [x, z] of spots(1, 3, 34)) palm(x, z, rr(0.8, 1.2));
-      for (const [x, z] of spots(1, 1, 18)) gAppend(g, 'cyl', x, (Hw + 40) / 2, z, 0, 26, Hw + 40, 26, [0.8, 0.65, 0.42]);
+      for (const [x, z] of spots(1, 1, 18)) gAppend(g, 'cylLo', x, (Hw + 40) / 2, z, 0, 26, Hw + 40, 26, [0.8, 0.65, 0.42]);
       gAppend(g, 'pyr', WW * 0.25, 450, -1600, 0.2, 1500, 900, 1500, [0.86, 0.72, 0.46]);
       gAppend(g, 'pyr', WW * 0.72, 330, -1300, 0.6, 1100, 660, 1100, [0.84, 0.7, 0.45]);
       gAppend(g, 'pyr', WW * 0.5, 600, WH + 2200, 0, 2000, 1200, 2000, [0.83, 0.69, 0.44]);
@@ -6851,7 +6956,7 @@ function buildDecor() {
       for (const [x, z] of spots(1, 3, 46)) pine(x, z, rr(0.8, 1.25), true);
       ring(24, 900, (x, z) => { const s = rr(900, 1700); gAppend(g, 'cone', x, s * 0.4, z, 0, s * 1.4, s * 0.9, s * 1.4, [0.78, 0.83, 0.9]); gAppend(g, 'cone', x, s * 0.72, z, 0, s * 0.55, s * 0.36, s * 0.55, [0.98, 0.99, 1]); });
       const dc = tc(...MAPDATA.defCenter);
-      gAppend(g, 'cyl', dc.x, Hw + 120, dc.y - 140, 0, 10, 240, 10, [0.6, 0.62, 0.66]);
+      gAppend(g, 'cylLo', dc.x, Hw + 120, dc.y - 140, 0, 10, 240, 10, [0.6, 0.62, 0.66]);
       gAppend(g, 'disc', dc.x, Hw + 240, dc.y - 140, 0, 140, 1, 140, [0.9, 0.92, 0.95], 0.6);
       gAppend(ge, 'sphLo', dc.x, Hw + 252, dc.y - 140, 0, 10, 10, 10, [1, 0.25, 0.25]);
     } else if (kind === 'tapinak') {
@@ -6878,40 +6983,40 @@ function buildDecor() {
       gAppend(g, 'disc', WW / 2, -3, WH / 2, 0, WW * 4.5, 1, WH * 4.5, [0.08, 0.5, 0.72]);
       gAppend(g, 'disc', WW / 2, -2, WH / 2, 0, WW * 1.7, 1, WH * 1.7, [0.2, 0.72, 0.82]);
       // direkli kulübeler, şemsiyeler
-      ring(26, 200, (x, z) => { const a = rr(0, 3); for (const [ox, oz] of [[-60, -60], [60, -60], [-60, 60], [60, 60]]) gAppend(g, 'cyl', x + ox, 60, z + oz, 0, 8, 120, 8, [0.5, 0.36, 0.22]); gAppend(g, 'box', x, 130, z, a, 160, 20, 160, [0.62, 0.46, 0.28]); gAppend(g, 'pyr', x, 200, z, a, 200, 110, 200, [0.82, 0.7, 0.42]); });
-      for (const [x, z] of spots(1, 1, 16)) { gAppend(g, 'cyl', x, Hw + 40, z, 0, 3, 80, 3, [0.9, 0.9, 0.9]); gAppend(g, 'cone', x, Hw + 84, z, 0, 70, 22, 70, R() < 0.5 ? [0.95, 0.3, 0.3] : [0.2, 0.6, 0.95]); }
-      gAppend(g, 'cyl', WW + 600, 260, WH * 0.5, 0, 60, 520, 60, [0.95, 0.95, 0.95]); gAppend(g, 'cyl', WW + 600, 300, WH * 0.5, 0, 62, 50, 62, [0.9, 0.2, 0.2]); gAppend(ge, 'sphLo', WW + 600, 560, WH * 0.5, 0, 40, 40, 40, [1, 0.95, 0.6]); // deniz feneri
+      ring(26, 200, (x, z) => { const a = rr(0, 3); for (const [ox, oz] of [[-60, -60], [60, -60], [-60, 60], [60, 60]]) gAppend(g, 'cylLo', x + ox, 60, z + oz, 0, 8, 120, 8, [0.5, 0.36, 0.22]); gAppend(g, 'box', x, 130, z, a, 160, 20, 160, [0.62, 0.46, 0.28]); gAppend(g, 'pyr', x, 200, z, a, 200, 110, 200, [0.82, 0.7, 0.42]); });
+      for (const [x, z] of spots(1, 1, 16)) { gAppend(g, 'cylLo', x, Hw + 40, z, 0, 3, 80, 3, [0.9, 0.9, 0.9]); gAppend(g, 'cone', x, Hw + 84, z, 0, 70, 22, 70, R() < 0.5 ? [0.95, 0.3, 0.3] : [0.2, 0.6, 0.95]); }
+      gAppend(g, 'cylLo', WW + 600, 260, WH * 0.5, 0, 60, 520, 60, [0.95, 0.95, 0.95]); gAppend(g, 'cylLo', WW + 600, 300, WH * 0.5, 0, 62, 50, 62, [0.9, 0.2, 0.2]); gAppend(ge, 'sphLo', WW + 600, 560, WH * 0.5, 0, 40, 40, 40, [1, 0.95, 0.6]); // deniz feneri
     } else if (kind === 'uzay') {
       // anten kuleleri ve yanıp sönen ışıklar
-      for (const [x, z] of spots(1, 2, 26)) { const h = rr(120, 260); gAppend(g, 'cyl', x, Hw + h / 2, z, 0, 5, h, 5, [0.62, 0.66, 0.72]); gAppend(ge, 'sphLo', x, Hw + h + 4, z, 0, 9, 9, 9, R() < 0.5 ? [1, 0.25, 0.25] : [0.3, 0.9, 1]); }
-      for (const [x, z] of spots(1, 3, 14)) { gAppend(g, 'cyl', x, Hw + 50, z, 0, 8, 100, 8, [0.6, 0.62, 0.66]); gAppend(g, 'disc', x, Hw + 110, z, 0, 90, 1, 90, [0.85, 0.87, 0.9], 0.7); }
+      for (const [x, z] of spots(1, 2, 26)) { const h = rr(120, 260); gAppend(g, 'cylLo', x, Hw + h / 2, z, 0, 5, h, 5, [0.62, 0.66, 0.72]); gAppend(ge, 'sphLo', x, Hw + h + 4, z, 0, 9, 9, 9, R() < 0.5 ? [1, 0.25, 0.25] : [0.3, 0.9, 1]); }
+      for (const [x, z] of spots(1, 3, 14)) { gAppend(g, 'cylLo', x, Hw + 50, z, 0, 8, 100, 8, [0.6, 0.62, 0.66]); gAppend(g, 'disc', x, Hw + 110, z, 0, 90, 1, 90, [0.85, 0.87, 0.9], 0.7); }
       // güneş panelleri ve kubbeler
-      ring(36, 150, (x, z) => { if (R() < 0.5) { gAppend(g, 'box', x, 120, z, R() < 0.5 ? 0 : Math.PI / 2, 420, 6, 140, [0.1, 0.18, 0.42], 0.3); gAppend(g, 'cyl', x, 60, z, 0, 10, 120, 10, [0.6, 0.62, 0.66]); }
+      ring(36, 150, (x, z) => { if (R() < 0.5) { gAppend(g, 'box', x, 120, z, R() < 0.5 ? 0 : Math.PI / 2, 420, 6, 140, [0.1, 0.18, 0.42], 0.3); gAppend(g, 'cylLo', x, 60, z, 0, 10, 120, 10, [0.6, 0.62, 0.66]); }
         else { const s = rr(160, 320); gAppend(g, 'sphLo', x, 0, z, 0, s, s * 0.8, s, [0.78, 0.8, 0.85]); gAppend(ge, 'box', x, s * 0.35, z, 0, s * 1.6, 6, 8, [0.3, 0.9, 1]); } });
-      gAppend(g, 'cyl', WW / 2, 700, WH + 1600, 0, 140, 1400, 140, [0.7, 0.72, 0.78]); gAppend(g, 'box', WW / 2, 1300, WH + 1600, 0, 1800, 40, 120, [0.12, 0.2, 0.44]);
+      gAppend(g, 'cylLo', WW / 2, 700, WH + 1600, 0, 140, 1400, 140, [0.7, 0.72, 0.78]); gAppend(g, 'box', WW / 2, 1300, WH + 1600, 0, 1800, 40, 120, [0.12, 0.2, 0.44]);
     } else if (kind === 'sakura') {
       const pink = [[1, 0.72, 0.82], [0.98, 0.62, 0.76], [1, 0.82, 0.88]];
       for (const [x, z] of spots(1, 3, 40)) tree(x, z, rr(0.85, 1.3), [0.3, 0.2, 0.16], pink[Math.floor(R() * 3)]);
       // pagodalar
-      const pagoda = (x, z, s) => { for (let k = 0; k < 5; k++) { const w = (260 - k * 40) * s, y = (60 + k * 110) * s; gAppend(g, 'box', x, y, z, 0, w * 0.7, 90 * s, w * 0.7, [0.9, 0.88, 0.82]); gAppend(g, 'pyr', x, y + 60 * s, z, Math.PI / 4, w * 1.25, 34 * s, w * 1.25, [0.5, 0.12, 0.12]); } gAppend(g, 'cyl', x, 640 * s, z, 0, 6 * s, 120 * s, 6 * s, [0.85, 0.7, 0.3]); };
+      const pagoda = (x, z, s) => { for (let k = 0; k < 5; k++) { const w = (260 - k * 40) * s, y = (60 + k * 110) * s; gAppend(g, 'box', x, y, z, 0, w * 0.7, 90 * s, w * 0.7, [0.9, 0.88, 0.82]); gAppend(g, 'pyr', x, y + 60 * s, z, Math.PI / 4, w * 1.25, 34 * s, w * 1.25, [0.5, 0.12, 0.12]); } gAppend(g, 'cylLo', x, 640 * s, z, 0, 6 * s, 120 * s, 6 * s, [0.85, 0.7, 0.3]); };
       pagoda(WW / 2, -900, 1.6); pagoda(-700, WH * 0.4, 1.1); pagoda(WW + 700, WH * 0.6, 1.1);
       // torii kapıları ve fenerler
-      for (const [x, z] of [[WW * 0.25, WH + 500], [WW * 0.75, WH + 500]]) { gAppend(g, 'cyl', x - 120, 160, z, 0, 14, 320, 14, [0.82, 0.16, 0.12]); gAppend(g, 'cyl', x + 120, 160, z, 0, 14, 320, 14, [0.82, 0.16, 0.12]); gAppend(g, 'box', x, 330, z, 0, 360, 24, 30, [0.82, 0.16, 0.12]); gAppend(g, 'box', x, 280, z, 0, 300, 14, 20, [0.82, 0.16, 0.12]); }
+      for (const [x, z] of [[WW * 0.25, WH + 500], [WW * 0.75, WH + 500]]) { gAppend(g, 'cylLo', x - 120, 160, z, 0, 14, 320, 14, [0.82, 0.16, 0.12]); gAppend(g, 'cylLo', x + 120, 160, z, 0, 14, 320, 14, [0.82, 0.16, 0.12]); gAppend(g, 'box', x, 330, z, 0, 360, 24, 30, [0.82, 0.16, 0.12]); gAppend(g, 'box', x, 280, z, 0, 300, 14, 20, [0.82, 0.16, 0.12]); }
       for (const [x, z] of spots(1, 1, 22)) { gAppend(g, 'box', x, Hw + 10, z, 0, 14, 20, 14, [0.55, 0.55, 0.52]); gAppend(ge, 'box', x, Hw + 28, z, 0, 12, 14, 12, [1, 0.8, 0.45]); gAppend(g, 'pyr', x, Hw + 42, z, Math.PI / 4, 24, 10, 24, [0.4, 0.4, 0.38]); }
       ring(50, 300, (x, z) => tree(x, z, rr(1.4, 2.3), [0.28, 0.2, 0.16], pink[Math.floor(R() * 3)]));
     } else if (kind === 'hurda') {
       // bacalar ve duman
       for (const [x, z] of [[-500, WH * 0.25], [-560, WH * 0.7], [WW + 520, WH * 0.35], [WW + 560, WH * 0.8], [WW * 0.5, -700]]) {
-        gAppend(g, 'cyl', x, 450, z, 0, 90, 900, 90, [0.55, 0.42, 0.36]);
-        for (let k = 0; k < 3; k++) gAppend(g, 'cyl', x, 620 + k * 90, z, 0, 93, 24, 93, k % 2 ? [0.9, 0.9, 0.9] : [0.8, 0.15, 0.12]);
+        gAppend(g, 'cylLo', x, 450, z, 0, 90, 900, 90, [0.55, 0.42, 0.36]);
+        for (let k = 0; k < 3; k++) gAppend(g, 'cylLo', x, 620 + k * 90, z, 0, 93, 24, 93, k % 2 ? [0.9, 0.9, 0.9] : [0.8, 0.15, 0.12]);
         for (let k = 0; k < 6; k++) gAppend(g, 'sphLo', x + k * 60 + rr(-30, 30), 960 + k * 120, z + rr(-40, 40), 0, 160 + k * 50, 110, 160 + k * 50, [0.35, 0.33, 0.3]);
       }
       // hurda araba yığınları
       const carC = [[0.55, 0.2, 0.15], [0.2, 0.3, 0.45], [0.5, 0.45, 0.2], [0.35, 0.36, 0.38], [0.45, 0.25, 0.12]];
       ring(70, 80, (x, z) => { const n = 1 + Math.floor(R() * 4); for (let k = 0; k < n; k++) { const a = rr(0, 3), c = carC[Math.floor(R() * carC.length)]; gAppend(g, 'box', x + rr(-20, 20), 30 + k * 58, z + rr(-20, 20), a, 220, 56, 100, c.map(v => v * rr(0.75, 1.05)), rr(-0.15, 0.15)); } });
-      for (const [x, z] of spots(1, 2, 26)) { gAppend(g, 'cyl', x, Hw + 18, z, 0, 18, 36, 18, [0.32, 0.4, 0.22]); if (R() < 0.4) gAppend(ge, 'sphLo', x, Hw + 37, z, 0, 14, 3, 14, [0.5, 0.95, 0.15]); }
+      for (const [x, z] of spots(1, 2, 26)) { gAppend(g, 'cylLo', x, Hw + 18, z, 0, 18, 36, 18, [0.32, 0.4, 0.22]); if (R() < 0.4) gAppend(ge, 'sphLo', x, Hw + 37, z, 0, 14, 3, 14, [0.5, 0.95, 0.15]); }
       // mıknatıslı vinç
-      gAppend(g, 'box', WW + 300, 380, WH * 0.15, 0, 24, 760, 24, [0.95, 0.72, 0.12]); gAppend(g, 'box', WW, 760, WH * 0.15, 0, 640, 26, 26, [0.95, 0.72, 0.12]); gAppend(g, 'cyl', WW - 260, 560, WH * 0.15, 0, 70, 30, 70, [0.25, 0.25, 0.27]);
+      gAppend(g, 'box', WW + 300, 380, WH * 0.15, 0, 24, 760, 24, [0.95, 0.72, 0.12]); gAppend(g, 'box', WW, 760, WH * 0.15, 0, 640, 26, 26, [0.95, 0.72, 0.12]); gAppend(g, 'cylLo', WW - 260, 560, WH * 0.15, 0, 70, 30, 70, [0.25, 0.25, 0.27]);
     } else if (kind === 'neon') {
       const neon = [[1, 0.2, 0.7], [0.2, 0.9, 1], [1, 0.8, 0.2], [0.6, 0.3, 1]];
       ring(90, 120, (x, z) => {
@@ -6921,7 +7026,7 @@ function buildDecor() {
         for (let y = 140; y < h - 40; y += rr(70, 160)) gAppend(ge, 'box', x, y, z, 0, w + 2, 5, d + 2, c.map(v => v * rr(0.5, 0.9)));
       });
       for (const [x, z] of spots(1, 1, 30)) { const c = neon[Math.floor(R() * neon.length)]; gAppend(ge, 'box', x, Hw + 30, z, R() < 0.5 ? 0 : Math.PI / 2, 90, 34, 8, c); gAppend(g, 'box', x, Hw + 8, z, 0, 6, 16, 6, [0.2, 0.2, 0.22]); }
-      for (const [x, z] of spots(1, 1, 24)) { gAppend(g, 'cyl', x, Hw + 60, z, 0, 5, 120, 5, [0.25, 0.25, 0.28]); gAppend(ge, 'sphLo', x, Hw + 122, z, 0, 14, 8, 14, [0.7, 0.85, 1]); }
+      for (const [x, z] of spots(1, 1, 24)) { gAppend(g, 'cylLo', x, Hw + 60, z, 0, 5, 120, 5, [0.25, 0.25, 0.28]); gAppend(ge, 'sphLo', x, Hw + 122, z, 0, 14, 8, 14, [0.7, 0.85, 1]); }
     }
   }
   buildProps(ge);
@@ -7564,7 +7669,7 @@ function render3D(dt, me, v) {
   glBeginFrame(fc);
   glSetCamera(ex, ey, ez, yaw, pitch, fovY, asp);
   const I3 = [1, 0, 0, 0, 1, 0, 0, 0, 1];
-  if (!(S && v && v.alive && (v.st.near > 0 || v.st.shroud > 0))) QR('sky', ex, ey, ez, I3, 6000, 6000, 6000, COL.white, { lit: 0, sky: true });
+  if (!(S && v && v.alive && (v.st.near > 0 || v.st.shroud > 0))) { const sr = 7500 * MS * 0.9; QR('sky', ex, ey, ez, I3, sr, sr, sr, COL.white, { lit: 0, sky: true }); } // görüş uzaklığının hemen içinde: her şeyin arkasında kalır
   QR('floor', 0, 0, 0, I3, 1, 1, 1, COL.floor, { tex: GLX.tex.floor, det: SETTINGS.gfx === 'low' ? null : GLX.tex.det, detS: THEME.pack && THEME.pack.detS || 1 / 160 });
   QR('walls', 0, 0, 0, I3, 1, 1, 1, COL.wall, { tex: GLX.tex.wall });
   if (THEME.trim) { const tr = THEME.trim; QR('trim', 0, 0, 0, I3, 1, 1, 1, [tr[0], tr[1], tr[2], 1], { lit: 0, em: [tr[0] * 0.25, tr[1] * 0.25, tr[2] * 0.25] }); }
@@ -9324,8 +9429,9 @@ function simAdvance() {
   if (me && me.ctrl === 'local') me.input = buildLocalInput(me);
   if (!G.paused) {
     simAcc += dt; let n = 0;
-    while (simAcc >= SIM_DT && n < 15) { hostTick(SIM_DT); simAcc -= SIM_DT; n++; }
-    if (n >= 15) simAcc = 0;
+    // yavaş cihazda "yetişmeye çalışırken daha da yavaşlama" döngüsüne girmemek için kare başına en fazla 8 adım
+    while (simAcc >= SIM_DT && n < 8) { hostTick(SIM_DT); simAcc -= SIM_DT; n++; }
+    if (n >= 8) simAcc = 0;
   }
   netHostUpdate(dt);
 }
@@ -9336,6 +9442,7 @@ function frame(now) {
   try { VC.update(); } catch (e) { console.error(e); }
   if (!lastT) lastT = now;
   let dt = (now - lastT) / 1000; lastT = now;
+  try { dynRes(dt); } catch (e) { }
   if (dt > 0.1) dt = 0.1;
   if (dt <= 0) return;
   try {
