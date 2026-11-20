@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="SPIKE"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SPIKE — Taktik FPS</title>
+<style>
+:root{--navy:#0f1923;--navy2:#16232f;--navy3:#1f2e3c;--red:#ff4655;--teal:#1ee3cf;--white:#ece8e1;--gold:#f5c451;--dim:#8b978f;
+--font:"Bahnschrift","DIN Alternate","Arial Narrow","Roboto Condensed","Segoe UI",Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#04070b;color:var(--white);font-family:var(--font);user-select:none}
+canvas#gl{position:fixed;inset:0;display:block;outline:none;touch-action:none}
+canvas#hud{position:fixed;inset:0;display:block;pointer-events:none;z-index:2}
+body.ingame:not(.ovl),body.ingame:not(.ovl) *{cursor:none!important}
+body.ingame.ovl,body.ingame.ovl canvas#gl{cursor:default}
+body.ingame.needlock,body.ingame.needlock *{cursor:default!important}
+#lockHint{position:fixed;left:50%;top:58%;transform:translate(-50%,-50%);z-index:30;pointer-events:none;text-align:center;
+ background:rgba(11,18,26,.82);border:1px solid rgba(46,230,214,.45);padding:12px 22px;letter-spacing:.12em;font-size:14px;color:#e9eef3}
+#lockHint b{color:#2ee6d6;font-size:18px;margin-right:6px}
+#lockHint small{display:block;margin-top:6px;font-size:11px;color:var(--dim);letter-spacing:.1em}
+.kh{display:inline-block;margin-left:10px;padding:1px 7px;border:1px solid currentColor;border-radius:3px;font-size:10px;letter-spacing:.12em;opacity:.75;vertical-align:2px}
+.quitsub{font-size:11px;color:var(--dim);letter-spacing:.06em;margin:6px 0 4px;text-align:center}
+.netlink{margin-top:14px;font-size:12px;color:var(--dim);letter-spacing:.04em}
+.netlink a{color:var(--teal,#2ee6d6)}
+.netstat{font-size:12px;margin-top:8px;line-height:1.5;color:var(--dim);letter-spacing:.03em}
+.netstat b.ok{color:#5be3a0}.netstat b.bad{color:#ff8a94}
+.netp{font-size:13px;line-height:1.55;color:#c9d3dd;margin:0 0 14px}
+.netdiag{font-size:13px;line-height:1.7;margin-top:12px;min-height:0}
+.netdiag .ok{color:#5be3a0}.netdiag .bad{color:#ff8a94}.netdiag .dim{color:var(--dim)}
+#bye{position:fixed;inset:0;z-index:80;background:#0b121a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;letter-spacing:.14em}
+#bye .logo{font-size:44px}
+button.exit{border-color:rgba(255,70,85,.45);color:#ff8a94}
+button.exit:hover{background:rgba(255,70,85,.15)}
+#touch{position:fixed;inset:0;z-index:5;touch-action:none;-webkit-touch-callout:none}
+#tjoy{position:absolute;left:30px;bottom:20px;top:auto;width:120px;height:120px;border-radius:50%;border:2px solid rgba(236,232,225,.25);background:rgba(15,25,35,.25);pointer-events:none;opacity:.45}
+#tjoy.act{opacity:1;bottom:auto}
+#tknob{position:absolute;left:35px;top:35px;width:50px;height:50px;border-radius:50%;background:rgba(30,227,207,.45);border:2px solid #1ee3cf;box-shadow:0 0 12px rgba(30,227,207,.5)}
+.tb{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;background:rgba(15,25,35,.62);border:2px solid rgba(236,232,225,.35);color:var(--white);font-weight:800;font-size:14px;letter-spacing:.05em;user-select:none;-webkit-user-select:none;line-height:1.05;text-align:center}
+.tb.on{background:rgba(255,70,85,.55);transform:scale(.94)}
+.tb.lit{border-color:var(--gold);color:var(--gold)}
+.tb small{font-size:10px;color:var(--gold);font-weight:700}
+.tb i{font-style:normal;font-size:8px;color:var(--dim);max-width:52px;overflow:hidden;white-space:nowrap}
+.tb.ab{width:58px;height:58px;border-color:rgba(139,151,143,.5)}
+.tb.ab.ready{border-color:var(--teal);box-shadow:0 0 10px rgba(30,227,207,.35)}
+#tbX.ready{border-color:var(--gold);box-shadow:0 0 14px rgba(245,196,81,.5)}
+#tbFire{width:96px;height:96px;right:max(26px,env(safe-area-inset-right));bottom:30px;border-color:var(--red);color:var(--red);font-size:16px;box-shadow:0 0 18px rgba(255,70,85,.35)}
+#tbFire.on{background:rgba(255,70,85,.75);color:#fff}
+#tbQ{right:150px;bottom:24px} #tbE{right:150px;bottom:92px} #tbX{right:92px;bottom:140px}
+#tbReload{right:24px;bottom:142px;width:50px;height:50px}
+#tbSwap{right:214px;bottom:24px;width:46px;height:46px;font-size:16px}
+#tbUse{right:214px;bottom:80px;width:46px;height:46px}
+#tbUse.ready{border-color:var(--gold);color:var(--gold);box-shadow:0 0 12px rgba(245,196,81,.5)}
+#tbScope{right:24px;bottom:202px;width:50px;height:50px;font-size:18px}
+#tbWalk{left:max(176px,calc(env(safe-area-inset-left) + 176px));bottom:22px;width:50px;height:50px;font-size:10px}
+#tbCrouch{left:max(176px,calc(env(safe-area-inset-left) + 176px));bottom:82px;width:50px;height:50px;font-size:10px}
+.tb.xs{width:auto;height:30px;border-radius:4px;padding:0 10px;font-size:11px;top:8px;letter-spacing:.1em}
+#tbPause{right:12px} #tbBoard{right:62px} #tbBuy{right:126px;border-color:var(--gold);color:var(--gold)} #tbDrop{right:212px} #tbReq{right:212px;border-color:var(--gold);color:var(--gold)} #tbFull{left:12px}
+#tbJump{right:270px;bottom:24px;width:50px;height:50px;font-size:10px}
+#tbMic{left:max(150px,calc(env(safe-area-inset-left) + 150px))} #tbChat{left:max(256px,calc(env(safe-area-inset-left) + 256px))}
+#tbEmote{left:max(362px,calc(env(safe-area-inset-left) + 362px))} #tbCam{left:max(462px,calc(env(safe-area-inset-left) + 462px))}
+#emoteBox{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);z-index:45;background:rgba(15,25,35,.94);border:1px solid rgba(236,232,225,.2);padding:8px 10px}
+#emoteBox .eh{font-size:11px;letter-spacing:.18em;color:var(--gold);margin-bottom:6px;text-align:center}
+#emoteBox .eg{display:flex;gap:6px}
+#emoteBox button{margin:0;width:78px;padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;letter-spacing:.06em}
+#emoteBox button i{font-style:normal;font-size:26px} #emoteBox button b{font-size:10px;color:var(--gold)}
+body.touch #emoteBox{bottom:auto;top:56px}
+#tbMic.on{background:rgba(30,227,207,.35);border-color:var(--teal)}
+#chatBox{position:fixed;left:14px;bottom:96px;z-index:40;width:min(460px,60vw);display:flex;gap:8px;align-items:center;background:rgba(11,18,26,.92);border:1px solid rgba(236,232,225,.25);padding:6px 8px}
+#chatBox b{font-size:12px;letter-spacing:.12em;color:var(--gold);white-space:nowrap}
+#chatBox input{flex:1;margin:0;padding:8px 10px;font-size:15px}
+body.touch #chatBox{bottom:auto;top:60px;left:50%;transform:translateX(-50%)}
+#rotate{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:#0f1923;text-align:center;padding:30px;font-size:18px;letter-spacing:.1em}
+#rotate b{font-size:54px;color:var(--teal)}
+@media (orientation:portrait){body.touch.ingame #rotate{display:flex}}
+.sens{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13px;color:var(--dim);letter-spacing:.1em}
+.sens input{flex:1;padding:0}
+.hidden{display:none!important}
+.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;overflow-y:auto}
+.screen>.panel{max-height:calc(100vh - 16px);overflow-y:auto}
+@media (max-height:700px){.screen>.panel{padding:16px 20px} #lbChatLog{height:70px}}
+button,.btn{font-family:var(--font);font-weight:700;letter-spacing:.12em;font-size:15px;color:var(--white);background:transparent;border:1px solid rgba(236,232,225,.35);padding:14px 22px;cursor:pointer;text-transform:uppercase;position:relative;transition:all .15s;clip-path:polygon(0 0,100% 0,100% 70%,94% 100%,0 100%)}
+button:hover:not(:disabled){background:rgba(236,232,225,.08);border-color:var(--white)}
+button.primary{background:var(--red);border-color:var(--red);color:#fff}
+button.primary:hover:not(:disabled){background:#ff5c69}
+button.ghost{border-color:rgba(236,232,225,.15);color:var(--dim)}
+#settings{z-index:46}
+#accOv{z-index:70}
+#accOv input{width:100%;margin:4px 0 10px}
+#accOv label{display:block;margin-top:6px}
+.acclink{text-align:center;margin-top:10px;font-size:13px}
+.acclink a{color:var(--teal)}
+.acclink.small{font-size:11px;margin-top:6px} .acclink.small a{color:var(--dim)}
+#frPop{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:80;background:rgba(15,25,35,.97);border:1px solid var(--gold);padding:12px 16px;min-width:min(380px,92vw);box-shadow:0 8px 30px rgba(0,0,0,.5)}
+#frPopT{font-size:14px;letter-spacing:.06em;margin-bottom:10px;color:var(--white)}
+#frPop .fpb{display:flex;gap:8px} #frPop .fpb button{flex:1;margin:0;padding:9px 0;font-size:12px}
+.frrow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);padding:10px 12px;margin:6px 0;cursor:pointer;border-left:3px solid rgba(255,255,255,.15)}
+.frrow.on{border-left-color:#3cf07a}
+.frrow .dot{width:10px;height:10px;border-radius:50%;background:#5b6672;flex:0 0 10px}
+.frrow.on .dot{background:#3cf07a;box-shadow:0 0 8px #3cf07a}
+.frrow .nm{font-weight:700;font-size:15px;flex:0 0 auto}
+.frrow .st{font-size:12px;color:var(--dim);flex:1}
+.frrow.on .st{color:#9fe8b6}
+.fract{display:flex;gap:8px;margin:-2px 0 8px 22px}
+.fract button{margin:0;padding:8px 12px;font-size:11px;width:auto}
+.frreq{display:flex;align-items:center;gap:8px;background:rgba(245,196,81,.07);border-left:3px solid var(--gold);padding:8px 12px;margin:6px 0;font-size:14px}
+.frreq span{flex:1} .frreq button{margin:0;padding:7px 10px;font-size:11px;width:auto}
+button.pub{border-color:rgba(30,227,207,.6);color:var(--teal)}
+button.pub:hover:not(:disabled){background:rgba(30,227,207,.12);border-color:var(--teal)}
+.pubspin{display:flex;gap:8px;justify-content:center;margin:10px 0 14px}
+.pubspin span{width:12px;height:12px;border-radius:50%;background:var(--teal);animation:pubb 1s infinite ease-in-out}
+.pubspin span:nth-child(2){animation-delay:.15s}.pubspin span:nth-child(3){animation-delay:.3s}
+@keyframes pubb{0%,80%,100%{transform:scale(.5);opacity:.4}40%{transform:scale(1);opacity:1}}
+.pubst{text-align:center;font-size:15px;letter-spacing:.06em;margin-bottom:10px;min-height:20px}
+.pubbar{margin:8px 0;padding:8px 12px;border:1px solid rgba(30,227,207,.45);background:rgba(30,227,207,.08);color:var(--teal);font-size:13px;letter-spacing:.06em;text-align:center}
+#gemBar{display:flex;align-items:center;gap:6px;font-size:14px;letter-spacing:.14em;color:#7cf3ff;font-weight:700}
+#gemBar b{font-size:22px;color:#fff;letter-spacing:.04em}
+.gi{filter:drop-shadow(0 0 6px rgba(94,242,255,.8))}
+button.store{border-color:rgba(94,242,255,.55);color:#9ff6ff}
+button.store:hover:not(:disabled){background:rgba(94,242,255,.12);border-color:#7cf3ff}
+#endGems{text-align:center;font-size:20px;font-weight:700;color:#7cf3ff;letter-spacing:.08em;margin:2px 0 12px}
+#endGems span{font-size:13px;color:var(--dim);letter-spacing:.12em}
+.st-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.st-head .gems{font-size:15px;letter-spacing:.14em;color:#7cf3ff;font-weight:700}
+.st-head .gems b{color:#fff;font-size:24px;letter-spacing:.04em}
+.st-tabs{display:flex;gap:6px;margin:4px 0 12px}
+.st-tabs button{flex:1;padding:10px 6px;font-size:13px}
+.st-tabs button.on{background:var(--red);border-color:var(--red);color:#fff}
+.st-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;max-height:min(58vh,560px);overflow-y:auto;padding:2px 4px 2px 2px}
+.sc{background:rgba(255,255,255,.035);border:1px solid rgba(236,232,225,.1);padding:8px;display:flex;flex-direction:column;gap:5px;text-align:center}
+.sc canvas{width:100%;height:auto;aspect-ratio:180/96;background:radial-gradient(ellipse at 50% 60%,rgba(124,243,255,.1),rgba(0,0,0,0) 70%),#0b131b}
+.sc.eq{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal) inset}
+.sc.lock{opacity:.5}
+.sc .nm{font-weight:700;font-size:13px;letter-spacing:.06em}
+.sc .ds{font-size:11px;color:var(--dim);min-height:14px;letter-spacing:.03em}
+.sc button{padding:7px 4px;font-size:11px;letter-spacing:.08em}
+@media (max-height:700px){.st-grid{max-height:52vh}.sc canvas{aspect-ratio:180/80}}
+#btnFriends b{background:var(--red);color:#fff;border-radius:9px;padding:1px 7px;font-size:11px;margin-left:6px}
+.slot .fadd{cursor:pointer;font-size:10px;letter-spacing:.1em;color:var(--teal);border:1px solid rgba(30,227,207,.5);padding:2px 6px;white-space:nowrap}
+.slot .fadd.done{color:var(--dim);border-color:rgba(236,232,225,.2);cursor:default}
+.slot .mic{color:var(--teal);font-size:13px} .slot .mic.idle{opacity:.35}
+#lbChat{margin:8px 0;background:rgba(0,0,0,.18);border:1px solid rgba(236,232,225,.1);padding:8px}
+#lbChatLog{height:110px;overflow-y:auto;font-size:13px;line-height:1.45;margin-bottom:6px}
+#lbChatLog .ln b{margin-right:4px} #lbChatLog .t0{color:var(--teal)} #lbChatLog .t1{color:#ff6b78}
+.lbcrow{display:flex;gap:6px} .lbcrow input{flex:1;margin:0;padding:8px 10px;font-size:14px}
+.lbcrow button{margin:0;width:auto;padding:8px 10px;font-size:11px}
+#lbMic.on{background:rgba(30,227,207,.25);border-color:var(--teal);color:var(--teal)}
+.setpanel{width:min(620px,94vw);max-height:92vh;overflow:auto}
+.setpanel h4{margin:16px 0 6px;font-size:12px;letter-spacing:.2em;color:var(--teal)}
+.setrow{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:13px;letter-spacing:.08em}
+.setrow>span{flex:0 0 190px;color:var(--white)}
+.setrow input[type=range]{flex:1;padding:0;margin:0}
+.setrow>b{width:58px;text-align:right;color:var(--gold);font-size:12px}
+.setrow button.tog{width:76px;margin:0;padding:8px 0;font-size:12px;border-color:var(--teal);color:var(--teal)}
+.setrow button.tog.off{border-color:rgba(255,70,85,.6);color:#ff6b78}
+.seg{display:flex;gap:6px;flex:1}
+.seg button{flex:1;margin:0;padding:9px 0;font-size:12px}
+.seg button.sel{border-color:var(--gold);color:var(--gold);background:rgba(245,196,81,.08)}
+.setpanel .note{font-size:12px;line-height:1.5;color:var(--dim);margin:4px 0}
+button.fftog{width:100%;border-color:rgba(255,70,85,.55);color:#ff6b78}
+button.fftog.off{border-color:rgba(30,227,207,.55);color:var(--teal)}
+button.fftog:disabled{opacity:.75;cursor:default}
+button:disabled{opacity:.4;cursor:not-allowed}
+input,select{font-family:var(--font);font-size:16px;background:rgba(15,25,35,.9);border:1px solid rgba(236,232,225,.25);color:var(--white);padding:11px 12px;outline:none;letter-spacing:.06em}
+input:focus,select:focus{border-color:var(--teal)}
+label{font-size:11px;letter-spacing:.2em;color:var(--dim);display:block;margin:10px 0 6px}
+.panel{background:rgba(15,25,35,.94);border:1px solid rgba(236,232,225,.1);padding:28px 32px;min-width:380px;max-width:92vw;position:relative}
+.panel:before{content:"";position:absolute;left:0;top:0;width:4px;height:100%;background:var(--red)}
+.panel h2{font-size:26px;letter-spacing:.14em;margin-bottom:6px}
+.panel .sub{color:var(--dim);font-size:13px;letter-spacing:.1em;margin-bottom:16px}
+#scr-menu{justify-content:flex-start;padding-left:8vw}
+.brand{position:absolute;right:7vw;bottom:9vh;text-align:right}
+.logo{font-size:clamp(40px,7vw,96px);font-weight:900;letter-spacing:.04em;line-height:.9;color:var(--white)}
+.logo span{color:var(--red)}
+.brand .sub2{color:var(--teal);letter-spacing:.5em;font-size:14px;margin-top:10px}
+.menu-col{display:flex;flex-direction:column;gap:12px;width:min(420px,84vw)}
+.menu-col input{width:100%}
+.menu-col .tagline{font-size:12px;color:var(--dim);letter-spacing:.3em;margin-bottom:4px}
+.note{font-size:12px;color:var(--gold);min-height:16px;letter-spacing:.05em}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.row-btn{display:flex;gap:10px;margin-top:20px}
+.row-btn button{flex:1}
+#lbCodeBox{display:flex;align-items:center;gap:14px;margin:6px 0 16px}
+#lbCode{font-size:44px;font-weight:900;letter-spacing:.25em;color:var(--teal)}
+.teams{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:10px 0}
+.teams h3{font-size:13px;letter-spacing:.2em;margin-bottom:8px}
+.teams .t0 h3{color:var(--red)} .teams .t1 h3{color:var(--teal)}
+.slot{display:flex;justify-content:space-between;align-items:center;gap:8px;background:rgba(255,255,255,.04);padding:9px 12px;margin-bottom:6px;font-size:15px;border-left:3px solid rgba(255,255,255,.2)}
+.slot.me{border-left-color:var(--gold)}
+.slot.bot{color:var(--dim);font-size:12px;letter-spacing:.2em;border-left-color:transparent}
+.slot .sw,.slot .kick{cursor:pointer;color:var(--dim);padding:0 4px}
+.slot .sw:hover{color:var(--teal)} .slot .kick:hover{color:var(--red)}
+.tag{font-size:10px;color:var(--gold);letter-spacing:.15em}
+#scr-select{flex-direction:column;align-items:stretch;justify-content:flex-start;padding:3vh 4vw;background:linear-gradient(180deg,rgba(15,25,35,.75),rgba(4,7,11,.92))}
+.selhead{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+.selhead h2{font-size:34px;letter-spacing:.12em}
+.selhead small{color:var(--dim);letter-spacing:.15em}
+#selTimer{font-size:52px;font-weight:900;color:var(--gold)}
+.selbody{display:grid;grid-template-columns:220px 1fr 380px;gap:22px;flex:1;min-height:0}
+#selTeam .tm{display:flex;gap:10px;align-items:center;padding:10px;background:rgba(255,255,255,.04);margin-bottom:8px;border-left:3px solid rgba(255,255,255,.15)}
+#selTeam .tm.lk{border-left-color:var(--teal)}
+#selTeam small{color:var(--dim)}
+#selGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-content:start}
+.agent{background:rgba(15,25,35,.9);border:1px solid rgba(236,232,225,.12);padding:14px 8px;text-align:center;cursor:pointer;transition:all .12s}
+.agent:hover{border-color:var(--white);transform:translateY(-2px)}
+.agent.sel{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold) inset}
+.agent.taken{opacity:.3;pointer-events:none}
+.agent.locked{pointer-events:none}
+.agent .nm{font-weight:800;letter-spacing:.12em;margin-top:8px}
+.agent .rl{font-size:11px;color:var(--dim);letter-spacing:.1em}
+.ic{width:52px;height:52px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:24px;color:#0b1016;border:2px solid rgba(255,255,255,.4)}
+.ic.big{width:72px;height:72px;font-size:34px;margin:0}
+.ic.sm{width:34px;height:34px;font-size:15px;margin:0}
+#selDetail{background:rgba(15,25,35,.94);padding:20px;border-left:4px solid var(--red);overflow:auto}
+.dh{display:flex;gap:16px;align-items:center;margin-bottom:14px}
+.dn{font-size:30px;font-weight:900;letter-spacing:.1em}
+.dr{color:var(--teal);letter-spacing:.15em;font-size:13px}
+.ab{display:flex;gap:12px;margin-bottom:14px}
+.ab .k{min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:1px solid var(--gold);color:var(--gold);font-weight:800}
+.ab b{letter-spacing:.06em} .ab i{color:var(--dim);font-size:12px;font-style:normal}
+.ab p{font-size:13px;color:#c9c5bd;margin-top:4px;line-height:1.35}
+#btnLock{width:100%;margin-top:10px;background:var(--red);border-color:var(--red);font-size:18px;padding:16px}
+.overlay{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(4,7,11,.55)}
+#buy .panel{width:min(1000px,94vw);max-height:90vh;overflow:auto}
+.buyhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+#buyCredits{font-size:28px;color:var(--gold);font-weight:900}
+.cat{margin-bottom:14px}
+.cat h4{font-size:12px;letter-spacing:.25em;color:var(--dim);margin-bottom:8px}
+.cat .row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.item{background:rgba(255,255,255,.04);border:1px solid rgba(236,232,225,.12);padding:12px;cursor:pointer;transition:all .1s}
+.item:hover{border-color:var(--teal);background:rgba(30,227,207,.06)}
+.item .in{font-weight:800;letter-spacing:.08em;font-size:16px}
+.item .is{font-size:11px;color:var(--dim);margin:4px 0 8px;min-height:26px}
+.item .ip{color:var(--gold);font-weight:800}
+.item.no{opacity:.4}
+.item.owned{border-color:var(--teal);opacity:1}
+.item.owned .ip{color:var(--teal)}
+.eco{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:#c9c5bd}
+.eco b{color:var(--gold)}
+#pause .panel,#end .panel{text-align:center;min-width:420px}
+#pause button,#end button{display:block;width:100%;margin-top:10px}
+#endTitle{font-size:72px;font-weight:900;letter-spacing:.2em}
+#endTitle.win{color:var(--teal)} #endTitle.lose{color:var(--red)}
+#endScore{font-size:30px;margin-bottom:16px;letter-spacing:.2em}
+#endTable{width:100%;border-collapse:collapse;margin:10px 0 6px;font-size:14px}
+#endTable th{font-size:11px;letter-spacing:.2em;color:var(--dim);padding:6px;text-align:left}
+#endTable td{padding:7px 6px;text-align:left;border-top:1px solid rgba(255,255,255,.06)}
+#endTable tr.al td:first-child{color:var(--teal)} #endTable tr.en td:first-child{color:var(--red)}
+.mvp{color:var(--gold);font-size:11px;letter-spacing:.15em}
+#toasts{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:rgba(15,25,35,.95);border-left:4px solid var(--teal);padding:10px 18px;font-size:14px;letter-spacing:.04em;transition:opacity .4s;max-width:80vw}
+.toast.bad{border-left-color:var(--red)}
+.toast.out{opacity:0}
+.help{max-width:900px;max-height:86vh;overflow:auto}
+.help table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0 16px}
+.help td{padding:6px 8px;border-top:1px solid rgba(255,255,255,.06)}
+.help td:first-child{color:var(--gold);font-weight:800;width:170px;letter-spacing:.08em}
+.help h3{letter-spacing:.2em;font-size:14px;color:var(--teal);margin-top:6px}
+.help p{color:#c9c5bd;font-size:14px;line-height:1.5;margin:6px 0}
+@media (max-width:1100px){.selbody{grid-template-columns:1fr;overflow:auto}#selGrid{grid-template-columns:repeat(5,1fr)}.cat .row{grid-template-columns:repeat(2,1fr)}}
+@media (max-height:560px){
+ .screen{align-items:flex-start;overflow-y:auto;padding-top:12px;padding-bottom:12px}
+ #scr-menu{padding-left:5vw}.menu-col{gap:7px}.menu-col button{padding:10px 16px}
+}
+@media (max-height:440px){
+ .menu-col{gap:5px}.menu-col button{padding:7px 14px;font-size:13px}.menu-col input{padding:7px 12px}.menu-col .tagline{margin-bottom:0}
+ .brand{bottom:4vh}.logo{font-size:clamp(30px,6vw,64px)}
+ .panel{padding:16px 20px;min-width:0}
+ #scr-select{padding:2vh 3vw}.selhead h2{font-size:22px}#selTimer{font-size:34px}
+ .selbody{grid-template-columns:150px 1fr 250px;gap:10px}
+ #selGrid{gap:6px}.agent{padding:6px 4px}.ic{width:34px;height:34px;font-size:16px}.agent .nm{font-size:12px;margin-top:3px}.agent .rl{font-size:9px}
+ #selDetail{padding:10px;max-height:62vh}.dn{font-size:20px}.ic.big{width:44px;height:44px;font-size:22px}.ab p{font-size:11px}
+ #btnLock{padding:10px;font-size:15px}
+ #buy .panel{max-height:96vh}.item{padding:8px}.item .in{font-size:14px}
+ #lbCode{font-size:30px}
+ .tb i{display:none}
+ #buy .panel{padding:12px 16px}.buyhead h2{font-size:20px}.buyhead .sub{font-size:11px;margin-bottom:4px}#buyCredits{font-size:22px}
+ .cat{margin-bottom:8px}.cat h4{margin-bottom:4px}.cat .row{grid-template-columns:repeat(4,1fr);gap:6px}
+ .item .is{min-height:0;font-size:10px;margin:2px 0 4px}.item .ip{font-size:13px}
+}
+</style>
+</head>
+<body>
+<canvas id="gl" tabindex="0"></canvas>
+<canvas id="hud"></canvas>
+
+<div id="touch" class="hidden">
+  <div id="tjoy"><div id="tknob"></div></div>
+  <div class="tb" id="tbFire" data-act="fire">ATEŞ</div>
+  <div class="tb ab" id="tbQ" data-act="q">Q<i></i><small></small></div>
+  <div class="tb ab" id="tbE" data-act="e">E<i></i><small></small></div>
+  <div class="tb ab" id="tbX" data-act="x">X<i></i><small></small></div>
+  <div class="tb" id="tbReload" data-act="reload">R</div>
+  <div class="tb" id="tbSwap" data-act="swap">⇄</div>
+  <div class="tb" id="tbUse" data-act="use">F</div>
+  <div class="tb hidden" id="tbScope" data-act="scope">◎</div>
+  <div class="tb" id="tbWalk" data-act="walk">YÜRÜ</div>
+  <div class="tb" id="tbCrouch" data-act="crouch">EĞİL</div>
+  <div class="tb xs" id="tbPause" data-act="pause">❚❚</div>
+  <div class="tb xs" id="tbBoard" data-act="board">SKOR</div>
+  <div class="tb xs" id="tbBuy" data-act="buy">MAĞAZA</div>
+  <div class="tb xs hidden" id="tbDrop" data-act="drop">SPIKE BIRAK</div>
+  <div class="tb xs hidden" id="tbReq" data-act="req">SPIKE İSTE</div>
+  <div class="tb" id="tbJump" data-act="jump">ZIPLA</div>
+  <div class="tb xs" id="tbMic" data-act="mic">🎤 KONUŞ</div>
+  <div class="tb xs" id="tbChat" data-act="chat">💬 SOHBET</div>
+  <div class="tb xs" id="tbEmote" data-act="emote">😀 EMOTE</div>
+  <div class="tb xs" id="tbCam" data-act="cam">📷 KAMERA</div>
+  <div class="tb xs" id="tbFull" data-act="full">⛶ TAM EKRAN</div>
+</div>
+<div id="rotate"><b>⟳</b>Telefonunu yatay çevir<small style="color:var(--dim);font-size:13px">SPIKE yatay ekranda oynanır</small></div>
+
+<div id="scr-menu" class="screen">
+  <div class="menu-col">
+    <div class="tagline">TAKTİKSEL 5v5 · SPIKE · AJANLAR</div>
+    <div id="gemBar" title="Maç bittikçe gems kazanırsın"><span class="gi">💎</span> <b id="gemN">0</b> <span>GEMS</span></div>
+    <label for="inName">OYUNCU ADI</label>
+    <input id="inName" maxlength="16" placeholder="Adını yaz" autocomplete="off">
+    <button id="btnSP" class="primary">TEK OYUNCULU · BOTLARA KARŞI</button>
+    <button id="btnPub" class="pub">🌐 HERKESE AÇIK SUNUCUYA KATIL</button>
+    <button id="btnHost">ODA KUR (HOST)</button>
+    <button id="btnJoin">ODAYA KATIL (JOIN)</button>
+    <button id="btnStore" class="store">💎 MAĞAZA · GEMS</button>
+    <button id="btnFriends">ARKADAŞLAR</button>
+    <button id="btnSettings">AYARLAR</button>
+    <button id="btnHelp" class="ghost">KONTROLLER &amp; KURALLAR</button>
+    <button id="btnNetCfg" class="ghost">BAĞLANTI AYARLARI</button>
+    <button id="btnExit" class="ghost exit">OYUNDAN ÇIK</button>
+    <div id="netStatus" class="note" style="line-height:1.5"></div>
+  </div>
+  <div class="brand"><div class="logo">SPIKE</div><div class="sub2">3D TAKTİK FPS</div></div>
+</div>
+
+<div id="scr-sp" class="screen hidden">
+  <div class="panel">
+    <h2>TEK OYUNCULU</h2>
+    <div class="sub">Botlara karşı tam maç · 20 raunt · 10. rauntten sonra taraf değişir</div>
+    <div class="grid2">
+      <div><label>TAKIM BOYUTU</label><select id="spSize"><option value="1">1v1</option><option value="2">2v2</option><option value="3">3v3</option><option value="4">4v4</option><option value="5" selected>5v5</option></select></div>
+      <div><label>BOT ZORLUĞU</label><select id="spDiff"><option value="kolay">Kolay</option><option value="normal" selected>Normal</option><option value="zor">Zor</option></select></div>
+      <div><label>İLK YARI TARAFI</label><select id="spSide"><option value="atk">Saldıran (Spike sende)</option><option value="def">Savunan</option></select></div>
+      <div><label>HARİTA</label><select id="spMap"></select></div>
+      <div style="grid-column:1/3" class="note" id="spMapNote"></div>
+    </div>
+    <div class="row-btn"><button data-back class="ghost">GERİ</button><button id="btnSpGo" class="primary">AJAN SEÇİMİ</button></div>
+  </div>
+</div>
+
+<div id="scr-join" class="screen hidden">
+  <div class="panel">
+    <h2>ODAYA KATIL</h2>
+    <div class="sub">Host'un verdiği 5 haneli oda kodunu gir</div>
+    <label for="inCode">ODA KODU</label>
+    <input id="inCode" maxlength="8" placeholder="ÖRN: K7M2Q" style="width:100%;text-transform:uppercase;font-size:24px;letter-spacing:.3em" autocomplete="off">
+    <div id="joinStatus" class="note" style="margin-top:10px;line-height:1.5"></div>
+    <div class="row-btn"><button data-back class="ghost">GERİ</button><button id="btnConnect" class="primary">BAĞLAN</button></div>
+    <div class="netlink">Farklı ağlardan bağlanamıyor musunuz? <a href="#" data-netcfg>Bağlantı ayarları (TURN)</a></div>
+  </div>
+</div>
+
+<div id="scr-lobby" class="screen hidden">
+  <div class="panel" style="width:min(760px,94vw)">
+    <h2>LOBİ</h2>
+    <div class="sub">Arkadaşların bu kodla "Odaya Katıl" diyerek bağlanabilir</div>
+    <div id="lbCodeBox"><div id="lbCode">-----</div><button id="btnCopy" class="ghost">KOPYALA</button></div>
+    <div class="teams">
+      <div class="t0"><h3>TAKIM 1 · İLK YARI SALDIRAN</h3><div id="lbTeam0"></div></div>
+      <div class="t1"><h3>TAKIM 2 · İLK YARI SAVUNAN</h3><div id="lbTeam1"></div></div>
+    </div>
+    <div class="grid2">
+      <div><label>TAKIM BOYUTU</label><select id="lbSize"><option value="1">1v1</option><option value="2">2v2</option><option value="3">3v3</option><option value="4">4v4</option><option value="5" selected>5v5</option></select></div>
+      <div><label>BOT ZORLUĞU</label><select id="lbDiff"><option value="kolay">Kolay</option><option value="normal" selected>Normal</option><option value="zor">Zor</option></select></div>
+      <div style="grid-column:1/3"><label>HARİTA</label><select id="lbMap"></select></div>
+      <div style="grid-column:1/3"><button id="lbFF" type="button" class="fftog">TAKIM ATEŞİ: AÇIK</button></div>
+      <div style="grid-column:1/3"><label><input type="checkbox" id="lbFill" checked style="width:auto;margin-right:8px;vertical-align:middle">BOŞ SLOTLARI BOTLARLA DOLDUR</label></div>
+      <div style="grid-column:1/3"><label><input type="checkbox" id="lbPubChk" style="width:auto;margin-right:8px;vertical-align:middle">🌐 HERKESE AÇIK SUNUCU (rastgele oyuncular katılabilir)</label></div>
+    </div>
+    <div id="lbChat"><div id="lbChatLog"></div><div class="lbcrow"><input id="lbChatIn" maxlength="120" autocomplete="off" enterkeyhint="send" placeholder="Lobiye mesaj yaz, Enter ile gönder"><button id="lbChatSend">GÖNDER</button><button id="lbMic" class="ghost">🎤 BAS-KONUŞ (0)</button></div></div>
+    <div id="lbPub" class="pubbar hidden"></div>
+    <div class="note" id="lbCfgText"></div>
+    <div id="lbNet" class="netstat"></div>
+    <div id="lbHostCtl" class="row-btn"><button id="btnLobbyLeave" class="ghost">ODAYI KAPAT</button><button id="btnLobbyStart" class="primary">MAÇI BAŞLAT</button></div>
+    <div id="lbWait" class="row-btn"><button data-back class="ghost">AYRIL</button><div class="note" style="flex:2;align-self:center">Host'un maçı başlatması bekleniyor...</div></div>
+  </div>
+</div>
+
+<div id="scr-net" class="screen hidden">
+  <div class="panel" style="width:min(640px,94vw)">
+    <h2>BAĞLANTI AYARLARI</h2>
+    <div class="sub">Farklı ağlardaki oyuncular için aktarma (TURN) sunucusu</div>
+    <p class="netp">Aynı Wi-Fi'da genelde sorun olmaz. Farklı evler, mobil veri veya okul/iş ağlarında cihazlar çoğu zaman birbirine <b>doğrudan bağlanamaz</b>; o zaman trafik bir <b>TURN</b> sunucusundan geçmelidir. Oyun varsayılan olarak PeerJS'in ücretsiz TURN sunucusunu dener; o çalışmazsa ücretsiz bir hesapla (ör. <b>ExpressTURN</b> veya <b>Metered Open Relay</b>) aldığın bilgileri buraya yaz. <b>Host'un girmesi genelde yeterli</b>; ikiniz de girerseniz daha garanti olur. Bilgiler sadece bu tarayıcıda saklanır.</p>
+    <label for="inTurnUrl">TURN ADRES(LER)İ</label>
+    <input id="inTurnUrl" style="width:100%" placeholder="turn:relay1.expressturn.com:3478, turns:relay1.expressturn.com:443?transport=tcp" autocomplete="off" spellcheck="false">
+    <div class="grid2" style="margin-top:10px">
+      <div><label for="inTurnUser">KULLANICI ADI</label><input id="inTurnUser" autocomplete="off" spellcheck="false"></div>
+      <div><label for="inTurnPass">ŞİFRE</label><input id="inTurnPass" type="password" autocomplete="new-password"></div>
+    </div>
+    <div id="netDiagOut" class="netdiag"></div>
+    <div class="row-btn"><button id="btnNetBack" class="ghost">GERİ</button><button id="btnNetTest" class="ghost">BAĞLANTIYI TEST ET</button><button id="btnNetSave" class="primary">KAYDET</button></div>
+    <div class="note" id="netCfgNote" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<div id="scr-select" class="screen hidden">
+  <div class="selhead"><div><h2>AJANINI SEÇ</h2><small id="selSide"></small></div><div id="selTimer">30</div></div>
+  <div class="selbody">
+    <div><label>TAKIMIN</label><div id="selTeam"></div></div>
+    <div id="selGrid"></div>
+    <div><div id="selDetail"></div><button id="btnLock">KİLİTLE</button></div>
+  </div>
+</div>
+
+<div id="scr-help" class="screen hidden">
+  <div class="panel help">
+    <div id="helpTR" data-noi18n>
+    <h2>KONTROLLER &amp; KURALLAR</h2>
+    <table>
+      <tr><td>W A S D</td><td>Hareket</td></tr>
+      <tr><td>SHIFT (basılı)</td><td>Eğil — daha küçük hedef, daha isabetli, sessiz ama yavaş; alçak siperlerin arkasına saklan</td></tr>
+      <tr><td>C (basılı)</td><td>Yürü — sessiz ve daha isabetli</td></tr>
+      <tr><td>BOŞLUK</td><td>Zıpla (havadayken isabet çok düşer) · Ölüyken izlenen takım arkadaşını değiştir</td></tr>
+      <tr><td>FARE</td><td>Bakış (ekrana tıklayınca fare kilitlenir) · Sol tık: ateş · Sağ tık: Atmaca dürbünü</td></tr>
+      <tr><td>Q · E · X</td><td>Yetenekler ve ulti — nişangahın gösterdiği yere/yöne kullanılır</td></tr>
+      <tr><td>MOBİL</td><td>Sol yarı: sürükleyerek hareket (az itersen yürür) · Sağ yarı: kaydırarak bakış · ATEŞ'e basılı tutup kaydırınca hem ateş edip hem nişan alırsın · EĞİL düğmesi eğilmeyi açar/kapatır</td></tr>
+      <tr><td>F (basılı)</td><td>Spike kur (saldıran, A/B bölgesinde) · Spike imha et (savunan) · Reboot istasyonunda takım arkadaşını dirilt</td></tr>
+      <tr><td>G · T</td><td>Spike'ı yere bırak · Takım arkadaşından Spike iste (yakındaki bot hemen verir, uzaktaki bırakıp sana ayırır)</td></tr>
+      <tr><td>R · 1 · 2 · 3 · Tekerlek</td><td>Şarjör değiştir · Ana silah · Tabanca · <b>Kılıç</b> (elde tutarken %22 daha hızlı koşarsın; sol tık hızlı kesik 50, sağ tık ağır darbe 75, sırttan iki katı) · Silah değiştir</td></tr>
+      <tr><td>B</td><td>Mağaza (yalnızca 20 sn'lik satın alma evresinde)</td></tr>
+      <tr><td>0</td><td>Sesli sohbet: basılı tut = konuş · kısa dokun = mikrofon açık kalsın (tekrar dokununca kapanır)</td></tr>
+      <tr><td>Z · 1–6</td><td>Emote menüsü: el salla, dans, sevin, tamam, gül, GG</td></tr>
+      <tr><td>. (nokta)</td><td>Yazılı sohbet: yaz, ENTER ile gönder — mesaj herkesin ekranında solda adınla görünür</td></tr>
+      <tr><td>ESC</td><td>Menüyü açar: <b>OYUNDAN ÇIK</b> (ya da ENTER) ile ana menüye dönersin, tekrar ESC ile maça dönersin. Mağaza açıksa önce mağazayı kapatır.</td></tr>
+      <tr><td>P · TAB · M</td><td>Duraklat / ayarlar · Skor tablosu · Ses aç/kapa</td></tr>
+    </table>
+    <h3>MAÇ</h3>
+    <p>İki takım: Saldıranlar ve Savunanlar. Maç <b>20 raunt</b> sürer; <b>10. rauntten sonra</b> taraflar değişir ve ekonomi sıfırlanır. 20 raunt sonunda daha çok raunt kazanan takım maçı alır (10–10 berabere). Saldıranlar Spike'ı A veya B bölgesine kurar; kurulan Spike (C4) haritaya göre 45–50 saniyede patlar; raunt 100 saniyedir (gerçek VALORANT süreleri). Savunanlar 7 saniyede imha eder (yarıda bırakılırsa 3.5 sn'den devam eder).</p>
+    <h3>TAKIM ATEŞİ</h3>
+    <p>Mermiler ve kılıç takım arkadaşlarına da işler. Takım arkadaşını vurursan ekranın altında uyarı çıkar; takım arkadaşını öldürmek ödül vermez. Online odada <b>TAKIM ATEŞİ</b> düğmesine tek tıklayarak kapatabilirsin (lobide ya da maç sırasında ESC menüsünde; yalnızca odayı kuran değiştirir).</p>
+    <h3>İMHA KİTİ</h3>
+    <p>Savunanlar mağazadan <b>İmha Kiti</b> alabilir (¤600). Kiti olan oyuncu Spike'ı <b>1 saniyede</b> imha eder. Kit ölünce gider; raundu sağ bitirirsen sende kalır.</p>
+    <h3>HOPARLÖR MÜZİĞİ VE EMOTE</h3>
+    <p>Doğuş alanlarındaki hoparlörlerden yankılı bir müzik çalar: satın almada başlar, raunt boyunca sürer, raunt bitince susar. Hoparlörden uzaklaştıkça kısılır, uzakta hiç duyulmaz. <b>F3</b> (Mac'te <b>fn+F3</b>) ile kamerayı değiştir: birinci şahıs → arkadan → önden. <b>Z</b> ile emote menüsünü aç, <b>1–6</b> ile seç (el salla, dans, sevin, tamam, gül, GG): karakterin hareketi yapar ve başının üstünde emoji çıkar. Seviyelerini <b>AYARLAR</b>'dan ayarlayabilir ya da kapatabilirsin.</p>
+    <h3>SESLİ SOHBET VE YAZILI SOHBET</h3>
+    <p>Çok oyunculu odada <b>0</b>'a basılı tutunca mikrofonun açılır. Sesin mesafeyle azalır, yaklaşık 37 metreden sonra hiç duyulmaz; duvar arkasından boğuk gelir. <b>Doğuş alanındayken</b> seni yalnızca takımın duyar. Ölü oyuncular yalnızca kendi takımıyla konuşur. Konuşanların adı solda mikrofon simgesiyle görünür; TAB tablosunda da mikrofonu olanların yanında simge vardır. Diğer oyuncuları duymak istemezsen <b>AYARLAR → SESLİ SOHBET</b>'ten kapat. Yazılı sohbet için <b>nokta (.)</b> tuşuna bas.</p>
+    <h3>CAN KÜRESİ</h3>
+    <p>Haritada yeşil artı şeklinde <b>can küreleri</b> var (mini haritada yeşil +). Üstünden geçince <b>+50 can</b> verir (en fazla 100). Alınan küre 25 saniye sonra yeniden çıkar. Canın doluyken almazsın.</p>
+    <h3>REBOOT (YENİDEN DOĞMA)</h3>
+    <p>Ölen oyuncunun <b>reboot kartı</b> yere düşer. Bir takım arkadaşı kartın üstünden geçerek alır ve A ya da B bölgesindeki <b>reboot istasyonuna</b> götürüp <b>F</b>'yi 4 saniye basılı tutar; kartın sahibi istasyonun yanında 100 canla, sadece tabanca ve kılıçla yeniden doğar. Her istasyon kullanıldıktan sonra 15 saniye bekler. Kart taşıyan ölürse kartlar yere düşer.</p>
+    <h3>EKONOMİ</h3>
+    <p>Başlangıç ¤800 · Öldürme ¤200 · Raunt galibiyeti ¤3000 · Mağlubiyet ¤1900/2400/2900 (seri) · Spike kurulursa saldıranlara ¤300. Hayatta kalırsan silah ve kalkanını korursun.</p>
+    <h3>SAVAŞ</h3>
+    <h3>FARKLI AĞLARDAN OYNAMAK</h3>
+    <p>Oda kodu PeerJS eşleştirme sunucusu üzerinden bulunur, sonra oyun verisi doğrudan cihazlar arasında akar. Farklı ağlarda (mobil veri, başka ev, okul/iş ağı) doğrudan yol kurulamazsa <b>BAĞLANTI AYARLARI</b>'ndan ücretsiz bir TURN sunucusu ekle (ExpressTURN veya Metered'da ücretsiz hesap açıp verilen adres, kullanıcı adı ve şifreyi gir) ve <b>BAĞLANTIYI TEST ET</b> ile "Aktarma (TURN) ✓" gördüğünden emin ol. Host telefondaysa kodu paylaşırken oyunu arka planda uzun süre bırakmasın.</p>
+    <h3>HARİTALAR</h3>
+    <p><b>Merkez</b> (klasik kapalı tesis), <b>Liman</b> (konteyner limanı, vinçler, su kanalı ve köprüler), <b>Çöl Harabesi</b> (kumtaşı kalıntılar, palmiyeler, piramitler), <b>Buzul Üssü</b> (karlı araştırma istasyonu, donmuş göl, dağlar), <b>Orman Tapınağı</b> (yeşil avlular, nehir, basamaklı tapınak) ve <b>Neon Şehir</b> (gece, gökdelenler, neon tabelalar). Haritaların boyutu gerçek VALORANT haritalarından esinlenmiştir (doğuştan bölgeye ~20–25 sn, A↔B dönüşü ~20 sn); geniş koridorlarla birbirine bağlı odalardan oluşur, A/B tarafları aynalıdır. Odalarda kuru kafalar, sandıklar, fıçılar, çuvallar, meşaleler gibi dekorlar vardır. Mini harita çevreni gösterir; TAB basılıyken tüm haritayı görürsün, bölge yönleri kenarda A/B okları olarak çıkar. Duvar ve zemin dokuları Poly Haven'ın ücretsiz (CC0) fotoğraf dokularıdır; bel hizasındaki alçak siperlerin arkasında eğilerek saklanabilirsin, ayakta durana ise üstünden ateş edilebilir.</p>
+    <p>Görüş konisi ve duvarlar düşmanları gizler; dumanlar görüşü keser. Kafaya isabet kritik hasardır; bacaklara isabet hasarı azaltır. Seri atışta namlu yukarı kalkar, aşağı çekerek kontrol et. Koşarken isabet düşer; seri atışta geri tepme yayılımı artırır. Ulti puanı: öldürme, ölme, Spike kurma/imha ve haritadaki turkuaz küreler.</p>
+    </div>
+    <div id="helpEN" class="hidden" data-noi18n>
+    <h2>CONTROLS &amp; RULES</h2>
+    <table>
+      <tr><td>W A S D</td><td>Move</td></tr>
+      <tr><td>SHIFT (hold)</td><td>Crouch — smaller target, more accurate and quiet but slow; hide behind low cover</td></tr>
+      <tr><td>C (hold)</td><td>Walk — quiet and more accurate</td></tr>
+      <tr><td>SPACE</td><td>Jump (accuracy drops a lot in the air) · While dead: switch spectated teammate</td></tr>
+      <tr><td>MOUSE</td><td>Look (click the screen to lock the mouse) · Left click: fire · Right click: sniper scope</td></tr>
+      <tr><td>Q · E · X</td><td>Abilities and ultimate — used where/toward your crosshair points</td></tr>
+      <tr><td>MOBILE</td><td>Left half: drag to move · Right half: swipe to look · Hold FIRE and swipe to shoot and aim · CROUCH toggles crouching</td></tr>
+      <tr><td>F (hold)</td><td>Plant the Spike (attackers, at site A/B) · Defuse (defenders) · Revive a teammate at a reboot station</td></tr>
+      <tr><td>G · T</td><td>Drop the Spike · Request the Spike from a teammate</td></tr>
+      <tr><td>R · 1 · 2 · 3 · Wheel</td><td>Reload · Primary · Pistol · <b>Sword</b> (22% faster running; left click 50, right click heavy 75, double from behind) · Switch weapon</td></tr>
+      <tr><td>B</td><td>Shop (only during the 20 s buy phase)</td></tr>
+      <tr><td>0</td><td>Voice chat: hold = talk · short tap = keep the mic open (tap again to close)</td></tr>
+      <tr><td>Z · 1–6</td><td>Emote menu: wave, dance, cheer, thumbs up, laugh, GG</td></tr>
+      <tr><td>. (period)</td><td>Text chat: type, press ENTER — the message appears on the left for everyone with your name</td></tr>
+      <tr><td>ESC</td><td>Opens the menu: <b>QUIT GAME</b> (or ENTER) returns to the main menu, ESC again resumes.</td></tr>
+      <tr><td>P · TAB · M</td><td>Pause · Scoreboard · Sound on/off</td></tr>
+    </table>
+    <h3>MATCH</h3>
+    <p>Two teams: Attackers and Defenders. A match lasts <b>20 rounds</b>; sides swap <b>after round 10</b> and the economy resets. After 20 rounds the team with more round wins takes the match (10–10 is a draw). Attackers plant the Spike at site A or B; it detonates after 45–50 s depending on the map; a round lasts about 100 s. Defenders defuse in 7 s (resumes from 3.5 s if interrupted halfway).</p>
+    <h3>FRIENDLY FIRE</h3>
+    <p>Bullets and the sword also hurt teammates; a warning appears at the bottom of the screen. In an online room the host can turn it off with one click on the <b>FRIENDLY FIRE</b> button (in the lobby, or in the ESC menu during the match).</p>
+    <h3>DEFUSE KIT</h3>
+    <p>Defenders can buy a <b>Defuse Kit</b> (¤600). With a kit you defuse the Spike in <b>1 second</b>. You lose it when you die; you keep it if you survive the round.</p>
+    <h3>SPEAKER MUSIC, EMOTES, CHAT</h3>
+    <p>Music plays from the loudspeakers in the spawns: it starts in the buy phase, keeps playing through the round and stops when the round ends. It fades as you move away and is silent far from the speaker. Press <b>F3</b> (<b>fn+F3</b> on Mac) to switch the camera: first person → behind → in front. Press <b>Z</b> to open the emote menu and <b>1–6</b> to pick (wave, dance, cheer, thumbs up, laugh, GG): your character performs it with an emoji above the head. In an online room, hold <b>0</b> to talk: your voice fades with distance and is cut off at about 37 m; while in a spawn area only your team hears you. Speakers appear on the left with a microphone icon (also on the TAB board). Turn other players' voices off in <b>SETTINGS → VOICE CHAT</b>. Press <b>period (.)</b> to text chat.</p>
+    <h3>HEALTH ORBS</h3>
+    <p>Green plus-shaped <b>health orbs</b> (green + on the minimap) give <b>+50 HP</b> (max 100) and respawn after 25 s.</p>
+    <h3>REBOOT</h3>
+    <p>A dead player's <b>reboot card</b> drops. A teammate picks it up, carries it to the <b>reboot station</b> at A or B and holds <b>F</b> for 4 s; the owner respawns next to it with 100 HP, a pistol and the sword. Each station then cools down for 15 s.</p>
+    <h3>ECONOMY</h3>
+    <p>Start ¤800 · Kill ¤200 · Round win ¤3000 · Loss ¤1900/2400/2900 (streak) · Attackers get ¤300 if the Spike was planted. Survive to keep your weapon and shield.</p>
+    <h3>PLAYING ACROSS NETWORKS</h3>
+    <p>The room code is found via the PeerJS matchmaking server, then game data flows directly between devices. If players on different networks can't connect, add a free TURN server in <b>CONNECTION SETTINGS</b> (e.g. ExpressTURN or Metered) and use <b>TEST CONNECTION</b>.</p>
+    </div>
+    <div class="row-btn"><button data-back class="primary">ANLADIM</button></div>
+  </div>
+</div>
+
+<div id="buy" class="overlay hidden">
+  <div class="panel">
+    <div class="buyhead"><div><h2>MAĞAZA</h2><div class="sub">Kalan: <span id="buyTime"></span> · Tıkla ve satın al (aynı raunt içinde değiştirirsen iade edilir)</div></div><div id="buyCredits">¤ 0</div></div>
+    <div id="buyBody"></div>
+    <div class="row-btn"><button id="buyClose" class="ghost">KAPAT (B / ESC)</button></div>
+  </div>
+</div>
+
+<div id="emoteBox" class="hidden"></div>
+<div id="chatBox" class="hidden"><b>SOHBET</b><input id="chatIn" maxlength="120" autocomplete="off" enterkeyhint="send" placeholder="Mesajını yaz, Enter ile gönder · Esc kapat"></div>
+
+<div id="pause" class="overlay hidden">
+  <div class="panel">
+    <h2>MENÜ</h2><div class="sub" id="pauseNote"></div>
+    <button id="btnQuit" class="primary">OYUNDAN ÇIK <span class="kh">ENTER</span></button>
+    <div class="quitsub">Maçı bırakıp ana menüye dönersin</div>
+    <button id="btnResume" class="ghost">MAÇA DÖN <span class="kh">ESC</span></button>
+    <div class="sens">HASSASİYET <input type="range" id="sensR" min="0.2" max="3" step="0.05" value="1"><span id="sensV">1.00</span></div>
+    <button id="btnPauseSet">AYARLAR</button>
+    <button id="btnFF" class="fftog">TAKIM ATEŞİ: AÇIK</button>
+    <button id="btnMute">SESİ KAPAT</button>
+  </div>
+</div>
+
+<div id="scr-pub" class="screen hidden">
+  <div class="panel" style="width:min(520px,92vw)">
+    <h2>HERKESE AÇIK SUNUCU</h2>
+    <div class="sub">Rastgele oyuncularla eşleşiyorsun</div>
+    <div class="pubspin"><span></span><span></span><span></span></div>
+    <div id="pubStatus" class="pubst">Açık sunucular aranıyor…</div>
+    <div id="pubInfo" class="note"></div>
+    <div class="note">Boş yer olan bir odaya otomatik girersin. Hiç oda yoksa yeni bir açık oda kurulur ve başkaları sana katılır. Lobide 2 kişi olunca maç 25 saniye içinde kendiliğinden başlar, boş yerleri botlar doldurur.</div>
+    <div class="row-btn"><button id="btnPubCancel" class="ghost">İPTAL</button></div>
+  </div>
+</div>
+
+<div id="scr-store" class="screen hidden">
+  <div class="panel" style="width:min(980px,96vw)">
+    <div class="st-head"><h2>MAĞAZA</h2><div class="gems"><span class="gi">💎</span> <b id="stGems">0</b> <span>GEMS</span></div></div>
+    <div class="sub">Maç bittikçe gems kazanırsın: galibiyet 150 · beraberlik 70 · yenilgi 30 · öldürme başına +5 · Silah skinleri mermiye de renk ve iz verir</div>
+    <div id="stTabs" class="st-tabs"><button data-tab="sw" class="on">KILIÇLAR</button><button data-tab="ws">SİLAH SKİNLERİ</button><button data-tab="cs">KARAKTER SKİNLERİ</button></div>
+    <div id="stGrid" class="st-grid"></div>
+    <div class="row-btn"><button data-back class="primary">GERİ</button></div>
+  </div>
+</div>
+
+<div id="scr-friends" class="screen hidden">
+  <div class="panel" style="width:min(640px,94vw)">
+    <h2>ARKADAŞLAR</h2>
+    <div class="sub" id="frMe"></div>
+    <div id="frReqs"></div>
+    <div id="frList"></div>
+    <div class="note">Arkadaş eklemek için çok oyunculu bir odada oyuncunun adının yanındaki <b>+ ARKADAŞ</b> düğmesine bas. Arkadaşın bir odadaysa adına tıklayıp <b>OYUNA KATIL</b> diyebilirsin. Çevrimiçi görünmek için oyunun açık olması gerekir.</div>
+    <div class="row-btn"><button data-back class="primary">GERİ</button></div>
+  </div>
+</div>
+
+<div id="accOv" class="overlay hidden">
+  <div class="panel" style="width:min(440px,92vw)">
+    <h2 id="accTitle">HESAP OLUŞTUR</h2>
+    <div class="sub" id="accSub">Kullanıcı adın oyunda ve arkadaş listelerinde görünür. Sonradan değiştirilemez.</div>
+    <label for="accNick">KULLANICI ADI</label>
+    <input id="accNick" maxlength="16" autocomplete="username" placeholder="3–16 karakter: harf, rakam, _ . -">
+    <label for="accPass">ŞİFRE</label>
+    <input id="accPass" type="password" maxlength="64" autocomplete="new-password" placeholder="en az 6 karakter">
+    <div id="accErr" class="note" style="color:#ff6b78;min-height:18px"></div>
+    <div class="row-btn"><button id="accGo" class="primary">KAYIT OL</button></div>
+    <div class="acclink"><a href="#" id="accSwitch">Hesabın var mı? GİRİŞ YAP</a></div>
+    <div class="acclink small"><a href="#" id="accGuest">Misafir olarak oyna (arkadaş sistemi olmadan)</a></div>
+  </div>
+</div>
+
+<div id="frPop" class="hidden"><div id="frPopT"></div><div class="fpb"><button id="frPopYes" class="primary">KABUL ET</button><button id="frPopNo" class="ghost">REDDET</button></div></div>
+
+<div id="settings" class="overlay hidden">
+  <div class="panel setpanel">
+    <h2>AYARLAR</h2>
+    <h4>SES</h4>
+    <div class="setrow"><span>OYUN SESİ</span><button id="stSound" class="tog">AÇIK</button></div>
+    <div class="setrow"><span>MAĞAZA MÜZİĞİ</span><button id="stMus" class="tog">AÇIK</button><input type="range" id="musR" min="0" max="1" step="0.05" value="0.75"><b id="musRV">75%</b></div>
+    <h4>SESLİ SOHBET</h4>
+    <div class="setrow"><span>DİĞER OYUNCULARI DUY</span><button id="stVc" class="tog">AÇIK</button><input type="range" id="vcR" min="0" max="1" step="0.05" value="1"><b id="vcRV">100%</b></div>
+    <div class="note">Konuşmak için 0'a basılı tut; kısa dokunursan mikrofon açık kalır, tekrar dokununca kapanır. Uzaklaştıkça sesin azalır ve belli bir mesafeden sonra duyulmaz. Doğuş alanındayken seni yalnızca takımın duyar. Sohbet için nokta (.) tuşu.</div>
+    <h4>GRAFİK</h4>
+    <div class="setrow"><span>KALİTE</span><div class="seg" id="stGfx"><button data-v="low">DÜŞÜK</button><button data-v="mid">ORTA</button><button data-v="high">YÜKSEK</button></div></div>
+    <div class="note">Düşük: daha akıcı (düşük çözünürlük, dekor yok) · Yüksek: en net görüntü</div>
+    <h4>DİL / LANGUAGE</h4>
+    <div class="setrow"><span>DİL / LANGUAGE</span><div class="seg" id="stLang" data-noi18n><button data-v="tr">TÜRKÇE</button><button data-v="en">ENGLISH</button></div></div>
+    <h4>KONTROLLER</h4>
+    <div class="setrow"><span>FARE HASSASİYETİ</span><input type="range" id="sensR2" min="0.2" max="3" step="0.05" value="1"><b id="sensV2">1.00</b></div>
+    <div class="row-btn"><button id="btnSetBack" class="primary">GERİ</button></div>
+  </div>
+</div>
+
+<div id="end" class="overlay hidden">
+  <div class="panel" style="width:min(720px,94vw)">
+    <div id="endTitle">ZAFER</div>
+    <div id="endScore">5 — 3</div>
+    <div id="endGems"></div>
+    <table id="endTable"></table>
+    <button id="btnEndMenu" class="primary">ANA MENÜ</button>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<div id="lockHint" class="hidden"><b>TIKLA</b> fareyi oyuna kilitle<small>Kilitliyken imleç görünmez · ESC: menü</small></div>
+
+<div id="bye" class="hidden">
+  <div class="logo">SPIKE</div>
+  <div>Oyundan çıktın. Bu sekmeyi kapatabilirsin.</div>
+  <button id="btnBye" class="primary">OYUNA GERİ DÖN</button>
+</div>
+
+<script>
+//__JS__
+</script>
+</body>
+</html>
