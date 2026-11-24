@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SPIKE günlük sağlık kontrolü.
+"""NOVA günlük sağlık kontrolü.
 
 Kullanım (depo kökünden):  python3 tests/check.py [--quick]
   1) src/ derlenir ve yayındaki index.html ile karşılaştırılır (biri index.html'i elle değiştirdiyse yakalar)

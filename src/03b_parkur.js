@@ -251,12 +251,12 @@ function pkStartRound() {
   const m = pkLoadMap(S.round, S.cfg.pkSeed);
   S.phase = 'buy'; S.phaseT = PK_CINE + PK_COUNT; S.lastResult = null;
   S.proj.length = 0; S.areas.length = 0; S.deps.length = 0; S.beams.length = 0; S.corpses.length = 0; S.cards = []; S.rb = []; S.orbs = []; S.heal = [];
-  S.spike = { state: 'none', carrier: null, x: 0, y: 0, t: 0, site: null, defuser: null, prog: 0, half: false };
+  S.bomb = { state: 'none', carrier: null, x: 0, y: 0, t: 0, site: null, defuser: null, prog: 0, half: false };
   S.pk.bk = m.brk.map(() => 3); S.pk.fin = {}; S.pk.winner = null; S.pk.ord = [];
   const spots = shuffle(m.cps[0].pts.slice());
   S.players.forEach((p, i) => {
     const sp = spots[i % spots.length], pos = tc(sp[0], sp[1]);
-    p.alive = true; p.hp = 100; p.armor = 0; p.st = {}; p.imp = null; p.plantT = 0; p.defT = 0; p.hasSpike = false; p.rebirth = null; p.kit = false;
+    p.alive = true; p.hp = 100; p.armor = 0; p.st = {}; p.imp = null; p.plantT = 0; p.defT = 0; p.hasBomb = false; p.rebirth = null; p.kit = false;
     p.scoped = false; p.reloadT = 0; p.switchT = 0; p.fireCD = 0; p.bloom = 0; p.zoneSlow = 1; p.zoneFire = 1; p.vx = 0; p.vy = 0;
     p.dotAcc = {}; p.pend = false; p.jz = 0; p.jvz = 0; p.rbT = 0; p.primary = null; p.slot = 3; p.ch = { q: 0, e: 0 };
     p.pkCp = 0; p.pkP = 0; p.pkF = 0; p.pkSlot = i; p.pkW = p.pkW || 0; p.pkSum = p.pkSum || 0; p.pkT = p.pkT || 0;

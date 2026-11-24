@@ -127,7 +127,7 @@ const SFX = {
   rbstart(o, t) { AU.tone(o, t, 0.5, 'sine', 300, 900, 0.25, 0.05); },
   reboot(o, t) { [330, 440, 554, 659, 880, 1108].forEach((f, i) => AU.tone(o, t + i * 0.06, 0.5, 'triangle', f, f * 1.01, 0.22)); AU.noise(o, t, 0.9, 'bandpass', 500, 3000, 0.5, 1); },
   request(o, t) { AU.tone(o, t, 0.08, 'square', 900, 900, 0.18); AU.tone(o, t + 0.1, 0.08, 'square', 1200, 1200, 0.18); },
-  spikebeep(o, t) { AU.tone(o, t, 0.07, 'sine', 1650, 1650, 0.35); },
+  bombbeep(o, t) { AU.tone(o, t, 0.07, 'sine', 1650, 1650, 0.35); },
   plant(o, t) { [600, 800, 1000, 1200].forEach((f, i) => AU.tone(o, t + i * 0.1, 0.08, 'square', f, f, 0.15)); },
   defstart(o, t) { [0, 0.15, 0.3].forEach(d => AU.tone(o, t + d, 0.09, 'square', 2200, 2200, 0.2)); AU.noise(o, t, 0.4, 'bandpass', 3000, 1500, 0.3, 3); },
   defused(o, t) { [1200, 900, 600].forEach((f, i) => AU.tone(o, t + i * 0.12, 0.12, 'triangle', f, f, 0.3)); },

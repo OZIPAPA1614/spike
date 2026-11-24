@@ -1,6 +1,6 @@
 'use strict';
 /* =====================================================================
-   NOVA (eski adı SPIKE) — Taktik Nişancı
+   NOVA — Taktik Nişancı
    01 · ÇEKİRDEK: sabitler, yardımcılar, harita, çarpışma, ışın izleme,
         görüş, A* yol bulma, silah/ajan veri tabloları
    ===================================================================== */
@@ -14,7 +14,7 @@ const EYE = 64, P_TOP = 75, HEAD_LO = 57, LEG_TOP = 26, BOX_H = 84, KNOCK_LIFT =
 const EYE_C = 42, P_TOP_C = 48, HEAD_LO_C = 32, LEG_TOP_C = 15, LOW_H = 50;
 let WALL_H = 120;
 const BUY_TIME = 20, END_TIME = 5;
-let ROUND_TIME = 115, SPIKE_TIME = 45; // haritaya göre loadMap'te ayarlanır
+let ROUND_TIME = 115, BOMB_TIME = 45; // haritaya göre loadMap'te ayarlanır
 const PLANT_TIME = 4, DEFUSE_TIME = 7, MAX_CREDITS = 9000;
 let MATCH_ROUNDS = 20, HALF_ROUNDS = 10; // maç 20 raunt sürer, 10. rauntten sonra taraflar değişir
 const KIT_PRICE = 600, KIT_TIME = 1;

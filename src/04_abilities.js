@@ -168,7 +168,7 @@ const ABIL = {
         if (!(tt === T_FLOOR || tt === T_A || tt === T_B)) continue;
         let occ = false;
         for (const o of S.players) if (o.alive && circleRect(o.x, o.y, PR + 2, tx * TILE, ty * TILE)) occ = true;
-        if ((S.spike.state === 'planted' || S.spike.state === 'dropped') && circleRect(S.spike.x, S.spike.y, 12, tx * TILE, ty * TILE)) occ = true;
+        if ((S.bomb.state === 'planted' || S.bomb.state === 'dropped') && circleRect(S.bomb.x, S.bomb.y, 12, tx * TILE, ty * TILE)) occ = true;
         if (!occ) tiles.push(i);
       }
       if (tiles.length < 2) return false;

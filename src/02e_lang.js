@@ -78,7 +78,7 @@ const EN_FRAG = {
   'WebGL başlatılamadı — tarayıcın 3D grafiği desteklemiyor olabilir.': 'WebGL failed to start — your browser may not support 3D graphics.',
   'PeerJS yüklenemedi — çok oyunculu mod için internet bağlantısı gerekli.': 'PeerJS failed to load — multiplayer needs an internet connection.',
   'PeerJS yüklenemedi: çok oyunculu mod için internet gerekir. Tek oyunculu mod çalışır.': 'PeerJS failed to load: multiplayer needs internet. Single player works.',
-  'Dokunmatik kontroller hazır — telefonu yatay tut, TAM EKRAN önerilir.': 'Touch controls ready — hold your phone sideways, FULLSCREEN recommended.',
+  'Dokunmatik kontroller hazır — telefonu yatay tut, tam ekran (⛶) önerilir.': 'Touch controls ready — hold your phone sideways, fullscreen (⛶) recommended.',
   "Tam ekran için: Safari'de Paylaş → Ana Ekrana Ekle, sonra oyunu ana ekrandaki simgeden aç": 'For fullscreen: in Safari tap Share → Add to Home Screen, then open the game from the home screen icon',
   'TURN ayarları kaydedildi.': 'TURN settings saved.', 'Özel TURN kaldırıldı, varsayılanlar kullanılacak.': 'Custom TURN removed, defaults will be used.',
   'Oda açık': 'Room open', '— arkadaşların kodla katılabilir.': '— friends can join with the code.', 'Eşleştirme sunucusu bağlantısı koptu': 'Lost connection to the matchmaking server',

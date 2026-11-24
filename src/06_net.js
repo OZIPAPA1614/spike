@@ -174,8 +174,8 @@ function hostRecv(conn, d) {
       else if (d.a === 'buy') buyItem(p, d.it);
       else if (d.a === 'reload') startReload(p);
       else if (d.a === 'slot') switchSlot(p, d.s | 0);
-      else if (d.a === 'drop') dropSpike(p);
-      else if (d.a === 'req') requestSpike(p);
+      else if (d.a === 'drop') dropBomb(p);
+      else if (d.a === 'req') requestBomb(p);
       else if (d.a === 'emote') hostEmote(p, d.e);
       break;
     }
@@ -283,7 +283,7 @@ function snapP(p) {
   return {
     id: p.id, name: p.name, team: p.team, agent: p.agent, isBot: p.isBot, x: r1(p.x), y: r1(p.y), ang: r2(p.ang), pitch: r2(p.pitch || 0), vx: r1(p.vx), vy: r1(p.vy),
     hp: Math.ceil(p.hp), armor: Math.ceil(p.armor), alive: p.alive, credits: p.credits, primary: p.primary, secondary: p.secondary, slot: p.slot,
-    ammo: p.ammo, ch: p.ch, ult: p.ult, st, slowAmt: p.slowAmt, zoneSlow: r2(p.zoneSlow), zoneFire: r2(p.zoneFire), hasSpike: p.hasSpike, kit: p.kit ? 1 : 0,
+    ammo: p.ammo, ch: p.ch, ult: p.ult, st, slowAmt: p.slowAmt, zoneSlow: r2(p.zoneSlow), zoneFire: r2(p.zoneFire), hasBomb: p.hasBomb, kit: p.kit ? 1 : 0,
     plantT: r2(p.plantT), defT: r2(p.defT), crouch: p.crouch, kills: p.kills, deaths: p.deaths, dmg: Math.round(p.dmg), posVer: p.posVer, reloadT: r2(p.reloadT),
     switchT: r2(p.switchT), bloom: Math.round(p.bloom * 1000) / 1000, scoped: p.scoped, spd: Math.round(p.spd), shotN: p.shotN, jz: r1(p.jz || 0), rbT: r2(p.rbT || 0), tk: p.tk || 0, vm: p.vm ? 1 : 0, vt: p.vt ? 1 : 0,
     pkCp: p.pkCp | 0, pkW: p.pkW | 0, pkP: r2(p.pkP || 0), pkF: p.pkF || 0, pkSum: r2(p.pkSum || 0), pkT: r1(p.pkT || 0)
@@ -298,7 +298,7 @@ function makeSnapshot() {
     dp: S.deps.map(d => ({ id: d.id, type: d.type, x: r1(d.x), y: r1(d.y), team: d.team, owner: d.owner, hp: Math.ceil(d.hp || 0), hr: d.hr, ang: r2(d.ang || 0), aim: r2(d.aim || 0), arm: r2(d.arm || 0), trig: r2(d.trig || 0), wind: r2(d.wind || 0), r: d.r || 0 })),
     bm: S.beams.map(b => ({ id: b.id, type: b.type, x1: b.x1, y1: b.y1, x2: b.x2, y2: b.y2, w: b.w, wind: r2(b.wind), shots: b.shots, team: b.team })),
     tw: S.twalls.map(w => ({ id: w.id, tiles: w.tiles, hp: Math.ceil(w.hp), t: r1(w.t) })),
-    sp: { state: S.spike.state, carrier: S.spike.carrier, x: r1(S.spike.x), y: r1(S.spike.y), t: r2(S.spike.t), site: S.spike.site, defuser: S.spike.defuser, prog: r2(S.spike.prog), half: S.spike.half },
+    sp: { state: S.bomb.state, carrier: S.bomb.carrier, x: r1(S.bomb.x), y: r1(S.bomb.y), t: r2(S.bomb.t), site: S.bomb.site, defuser: S.bomb.defuser, prog: r2(S.bomb.prog), half: S.bomb.half },
     ob: S.orbs, cp: S.corpses, cd: S.cards || [], rb: (S.rb || []).map(r => r2(r.cd)), hl: (S.heal || []).map(h => h.cd > 0 ? 1 : 0), ev: S.evq.slice(),
     pk: S.pk ? { bk: S.pk.bk, fin: S.pk.fin, w: S.pk.winner, c: S.pk.champ, t0: r2(S.pk.t0) } : 0
   };
@@ -542,7 +542,7 @@ function clientApplySnap(d) {
   if ('ar' in d) S.areas = s.ar;
   if ('dp' in d) S.deps = s.dp;
   if ('bm' in d) S.beams = s.bm;
-  if ('sp' in d) S.spike = s.sp;
+  if ('sp' in d) S.bomb = s.sp;
   if ('ob' in d) S.orbs = s.ob;
   if ('cp' in d) S.corpses = s.cp;
   if ('cd' in d) S.cards = s.cd || [];
@@ -587,7 +587,7 @@ function clientUpdate(dt) {
   }
   for (const a of S.areas) a.t -= dt;
   for (const p of S.players) for (const k in p.st) { p.st[k] -= dt; if (p.st[k] <= 0) delete p.st[k]; }
-  if (S.spike.state === 'planted') S.spike.t = Math.max(0, S.spike.t - dt);
+  if (S.bomb.state === 'planted') S.bomb.t = Math.max(0, S.bomb.t - dt);
   if (S.phase !== 'over') S.phaseT = Math.max(0, S.phaseT - dt);
   if (me) {
     const inp = buildLocalInput(me);

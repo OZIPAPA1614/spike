@@ -1,7 +1,7 @@
-# NOVA (formerly SPIKE) — notes for Claude
+# NOVA — notes for Claude
 
-NOVA (formerly SPIKE) is a single-file browser 3D tactical shooter (Turkish UI, English toggle). It is published by
-GitHub Pages straight from `main/index.html`: https://ozipapa1614.github.io/spike/ — every push to
+NOVA is a single-file browser 3D tactical shooter (Turkish UI, English toggle). It is published by
+GitHub Pages straight from `main/index.html`: https://ozipapa1614.github.io/nova/ — every push to
 `main` goes live for all players within 1–2 minutes.
 
 The owner writes in Turkish: reply to them in Turkish and write commit messages in Turkish.
@@ -22,7 +22,9 @@ The owner writes in Turkish: reply to them in Turkish and write commit messages 
 
 ## Live services (do not change without the owner's OK)
 - Firebase project `spike-oyun` (Realtime DB europe-west1). Accounts are nickname+password
-  (stored as base32 emails `n…@spike-oyun.app`). Rules allow `users/<uid>` (owner writes),
+  (stored as base32 emails `n…@spike-oyun.app`). These two ids keep the game's old name on purpose:
+  a Firebase project id cannot be renamed and changing the email domain would lock every player out.
+  Rules allow `users/<uid>` (owner writes),
   `pub/<code>` (public room list) and `clk` (server clock).
 - Multiplayer signalling: public PeerJS server 0.peerjs.com via the embedded MiniPeer (`src/00_peer.js`).
 

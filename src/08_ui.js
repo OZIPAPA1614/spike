@@ -22,7 +22,7 @@ function toggleFullscreen() {
   try { if (document.fullscreenElement) document.exitFullscreen(); else enterFullscreen(); } catch (e) { }
 }
 const SETTINGS = { sens: 1, gfx: 'high' };
-try { const g = localStorage.getItem('spk_gfx'); SETTINGS.gfx = g === 'low' || g === 'mid' || g === 'high' ? g : (typeof IS_TOUCH !== 'undefined' && IS_TOUCH ? 'mid' : 'high'); } catch (e) { }
+try { const g = localStorage.getItem('spk_gfx'); SETTINGS.gfx = g === 'low' || g === 'mid' || g === 'high' ? g : 'high'; } catch (e) { }
 const TOUCH = { jx: 0, jy: 0, fire: false, use: false, alt: false, walk: false, crouch: false, ptr: {} };
 /* ---- Fare kilidi (Pointer Lock) ----
    Kilit yalnızca doğrudan bir kullanıcı eyleminin (tıklama/tuş) içinde istenirse güvenilir çalışır (özellikle Safari).
@@ -309,7 +309,7 @@ function uiInit() {
     const i = +$('spMap').value;
     $('spMapNote').textContent = pk ? 'Elinde yalnızca kılıç var: rakipleri it, barikatları kır, boşluklardan atla. Düşersen son kontrol noktasından devam edersin.' : i >= 0 ? MAPS[i].desc : 'Her maçta ' + MAPS.length + ' haritadan biri rastgele seçilir.';
   };
-  try { const md = localStorage.getItem('spk_mode'); if (md === 'pk' || md === 'spike') $('spMode').value = md; } catch (e) { }
+  try { const md = localStorage.getItem('spk_mode'); if (md === 'pk' || md === 'bomb') $('spMode').value = md; } catch (e) { }
   $('spMode').onchange = () => { try { localStorage.setItem('spk_mode', $('spMode').value); } catch (e) { } spNote(); };
   spNote();
   $('spMap').onchange = () => {
@@ -320,7 +320,7 @@ function uiInit() {
   for (const b of document.querySelectorAll('[data-back]')) b.onclick = () => { if (NET.mode !== 'off') netShutdown(); uiShow(b.dataset.back || 'scr-menu'); };
   $('btnSpGo').onclick = () => {
     NET.mode = 'off'; G.myId = 'h';
-    const cfg = { teamSize: +$('spSize').value, fill: true, diff: $('spDiff').value, map: +$('spMap').value, mode: $('spMode').value === 'pk' ? 'pk' : 'spike' };
+    const cfg = { teamSize: +$('spSize').value, fill: true, diff: $('spDiff').value, map: +$('spMap').value, mode: $('spMode').value === 'pk' ? 'pk' : 'bomb' };
     const team = $('spSide').value === 'atk' ? 0 : 1;
     selStart([{ id: 'h', name: playerName(), team, cos: SHOP.cos() }], cfg);
   };
@@ -343,7 +343,7 @@ function uiInit() {
   $('btnLobbyLeave').onclick = () => { netShutdown(); uiShow('scr-play'); };
   for (const id of ['lbSize', 'lbFill', 'lbDiff', 'lbMap', 'lbMode']) $(id).onchange = () => {
     if (NET.mode !== 'host') return;
-    NET.lobby.cfg = { teamSize: +$('lbSize').value, fill: $('lbFill').checked, diff: $('lbDiff').value, map: +$('lbMap').value, ff: NET.lobby.cfg.ff !== false, mode: $('lbMode').value === 'pk' ? 'pk' : 'spike' };
+    NET.lobby.cfg = { teamSize: +$('lbSize').value, fill: $('lbFill').checked, diff: $('lbDiff').value, map: +$('lbMap').value, ff: NET.lobby.cfg.ff !== false, mode: $('lbMode').value === 'pk' ? 'pk' : 'bomb' };
     broadcastLobby();
   };
   // TAKIM ATEŞİ: tek tıkla aç/kapa (lobide host, maçta host veya tek oyunculu)
@@ -411,7 +411,7 @@ function uiInit() {
   document.addEventListener('contextmenu', e => { if (G.running) e.preventDefault(); });
   if (IN_PREVIEW) $('netStatus').textContent = 'Önizleme penceresindesin: tek oyunculu çalışır, ama çok oyunculu burada çalışmaz. Çok oyunculu için dosyayı indirip Safari veya Chrome\'da doğrudan aç.';
   else if (!netAvailable()) $('netStatus').textContent = 'PeerJS yüklenemedi: çok oyunculu mod için internet gerekir. Tek oyunculu mod çalışır.';
-  if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) uiToast('Dokunmatik kontroller hazır — telefonu yatay tut, TAM EKRAN önerilir.');
+  if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) uiToast('Dokunmatik kontroller hazır — telefonu yatay tut, tam ekran (⛶) önerilir.');
   uiShow('scr-menu');
   requestAnimationFrame(frame);
 }
@@ -426,7 +426,7 @@ function uiRenderLobby() {
   uiNetStatus();
   const mv = L.cfg.map === undefined ? 0 : L.cfg.map;
   const pkm = L.cfg.mode === 'pk';
-  $('lbSize').value = L.cfg.teamSize; $('lbFill').checked = L.cfg.fill; $('lbDiff').value = L.cfg.diff; $('lbMap').value = String(mv); $('lbMode').value = pkm ? 'pk' : 'spike';
+  $('lbSize').value = L.cfg.teamSize; $('lbFill').checked = L.cfg.fill; $('lbDiff').value = L.cfg.diff; $('lbMap').value = String(mv); $('lbMode').value = pkm ? 'pk' : 'bomb';
   $('lbSize').disabled = $('lbFill').disabled = $('lbDiff').disabled = $('lbMap').disabled = $('lbFF').disabled = $('lbMode').disabled = !host;
   $('lbMapRow').style.display = $('lbFF').parentNode.style.display = pkm ? 'none' : '';
   const ffv = L.cfg.ff !== false; $('lbFF').textContent = 'TAKIM ATEŞİ: ' + (ffv ? 'AÇIK' : 'KAPALI') + (host ? '  ·  tıkla' : ''); $('lbFF').classList.toggle('off', !ffv);
@@ -725,7 +725,7 @@ function doReload() { const me = S && S.pmap[G.myId]; if (!me) return; if (G.mod
 /* 1 → 2 → 3 (kılıç) döngüsü */
 function nextSlot(me, dir) { const order = me.primary ? [1, 2, 3] : [2, 3]; const i = order.indexOf(me.slot); return order[(i + (dir || 1) + order.length) % order.length]; }
 function doJump() { const me = S && S.pmap[G.myId]; if (!me || !me.alive) return; G.jc = ((G.jc || 0) + 1) | 0; }
-function doRequest() { const me = S && S.pmap[G.myId]; if (!me || !me.alive) return; if (G.mode === 'client') netSend(NET.conn, { t: 'act', a: 'req' }); else requestSpike(me); }
+function doRequest() { const me = S && S.pmap[G.myId]; if (!me || !me.alive) return; if (G.mode === 'client') netSend(NET.conn, { t: 'act', a: 'req' }); else requestBomb(me); }
 function doSlot(s) { const me = S && S.pmap[G.myId]; if (!me) return; if (G.mode === 'client') netSend(NET.conn, { t: 'act', a: 'slot', s }); else switchSlot(me, s); }
 function cycleSpec() {
   const me = S && S.pmap[G.myId]; if (!me || me.alive) return;
@@ -771,7 +771,7 @@ function onKeyDown(e) {
     case 'Digit3': doSlot(3); break;
     case 'Space': { const me = S.pmap[G.myId]; if (me && me.alive) { if (!UI.overlay) doJump(); } else cycleSpec(); break; }
     case 'KeyT': if (!UI.overlay) doRequest(); break;
-    case 'KeyG': if (!UI.overlay) { const me = S.pmap[G.myId]; if (me && me.hasSpike) { if (G.mode === 'client') netSend(NET.conn, { t: 'act', a: 'drop' }); else dropSpike(me); } } break;
+    case 'KeyG': if (!UI.overlay) { const me = S.pmap[G.myId]; if (me && me.hasBomb) { if (G.mode === 'client') netSend(NET.conn, { t: 'act', a: 'drop' }); else dropBomb(me); } } break;
     case 'KeyM': AU.setEnabled(!AU.enabled); showMsg(null, AU.enabled ? 'SES AÇIK' : 'SES KAPALI'); break;
   }
 }
@@ -817,7 +817,7 @@ function setupTouch() {
       case 'crouch': TOUCH.crouch = !TOUCH.crouch; el.classList.toggle('lit', TOUCH.crouch); break;
       case 'buy': toggleBuy(); break;
       case 'board': UI.board = true; break;
-      case 'drop': if (me && me.hasSpike) { if (G.mode === 'client') netSend(NET.conn, { t: 'act', a: 'drop' }); else dropSpike(me); } break;
+      case 'drop': if (me && me.hasBomb) { if (G.mode === 'client') netSend(NET.conn, { t: 'act', a: 'drop' }); else dropBomb(me); } break;
       case 'pause': togglePause(true); break;
       case 'full': toggleFullscreen(); break;
     }
@@ -878,14 +878,14 @@ function updateTouchButtons() {
     el.querySelector('small').textContent = k === 'x' ? me.ult + '/' + ag.x.pts : '×' + me.ch[k];
     el.querySelector('i').textContent = ag[k].name.split(' ')[0];
   }
-  $('tbDrop').classList.toggle('hidden', !me.hasSpike);
-  const car = S.spike && S.spike.state === 'carried' ? S.pmap[S.spike.carrier] : null;
-  $('tbReq').classList.toggle('hidden', !(me.alive && !me.hasSpike && car && car.team === me.team && (S.phase === 'live' || S.phase === 'buy')));
+  $('tbDrop').classList.toggle('hidden', !me.hasBomb);
+  const car = S.bomb && S.bomb.state === 'carried' ? S.pmap[S.bomb.carrier] : null;
+  $('tbReq').classList.toggle('hidden', !(me.alive && !me.hasBomb && car && car.team === me.team && (S.phase === 'live' || S.phase === 'buy')));
   $('tbBuy').classList.toggle('hidden', S.phase !== 'buy');
   $('tbScope').classList.toggle('hidden', !WEAPONS[curW(me)].scope);
   const use = $('tbUse');
   const nearRb = (MAPDATA.reboot || []).some((r, i) => (S.cards || []).some(c => c.carrier === me.id) && dist(me.x, me.y, r.x, r.y) < REBOOT_R && !(S.rb[i] && S.rb[i].cd > 0));
-  const canUse = me.alive && ((me.hasSpike && siteAt(me.x, me.y) && S.phase === 'live') || (S.phase === 'planted' && sideOf(me.team) === 'def' && dist(me.x, me.y, S.spike.x, S.spike.y) < 70) || nearRb);
+  const canUse = me.alive && ((me.hasBomb && siteAt(me.x, me.y) && S.phase === 'live') || (S.phase === 'planted' && sideOf(me.team) === 'def' && dist(me.x, me.y, S.bomb.x, S.bomb.y) < 70) || nearRb);
   use.classList.toggle('ready', !!canUse);
 }
 function uiGameTick(dt) {

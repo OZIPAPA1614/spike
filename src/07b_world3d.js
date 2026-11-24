@@ -506,7 +506,7 @@ function drawC4(x, h, z, ang, pitch, s, mode, t, alpha) {
   P(-7.5, 3.25, 0, 3, 6.7, 19.6, C4C.tape); P(7.5, 3.25, 0, 3, 6.7, 19.6, C4C.tape);
   // zamanlayıcı modülü + ekran + tuş takımı
   P(0, 7.6, 0, 12, 2.6, 10, C4C.box);
-  const sp = S && S.spike, planted = mode === 'planted', urgent = planted && sp && sp.t < 10;
+  const sp = S && S.bomb, planted = mode === 'planted', urgent = planted && sp && sp.t < 10;
   const blink = planted ? ((t * (urgent ? 5 : 1.6)) % 1 < 0.5) : false;
   P(-2.2, 9, 0, 6, 0.4, 7, planted ? [0.25, 0.9, 0.35] : [0.08, 0.2, 0.1], { lit: 0, em: planted ? [0.15, 0.55, 0.2] : ZERO3 });
   for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) P(3 + j * 2.1, 9.1, -2.6 + i * 2.6, 1.5, 0.5, 1.6, C4C.key);
@@ -604,7 +604,7 @@ function drawCharacter(p, rel, alpha, xray, t) {
     const prog = p.plantT > 0 ? p.plantT / PLANT_TIME : p.defT > 0 ? p.defT / DEFUSE_TIME : 0;
     if (prog > 0) Q('ring', p.x, 2, p.y, 0, 0, 40 + prog * 30, 1, 40 + prog * 30, [0.96, 0.77, 0.32, 0.9], { add: true, lit: 0 });
     // sırtta taşınan C4
-    if (p.hasSpike) { const bo = xf(R, -10.5, 36 + dy + lift, 0); drawC4(p.x + bo[0], bo[1], p.y + bo[2], A, Math.PI / 2, 0.8, 'carried', t, alpha); }
+    if (p.hasBomb) { const bo = xf(R, -10.5, 36 + dy + lift, 0); drawC4(p.x + bo[0], bo[1], p.y + bo[2], A, Math.PI / 2, 0.8, 'carried', t, alpha); }
   }
 }
 function drawCorpse(c, ally) {
@@ -784,8 +784,8 @@ function drawWorldDynamic(v, me, t) {
     if (!ally && !(v.alive && losClear(v.x, v.y, c.x, c.y, true))) continue;
     drawCorpse(c, ally);
   }
-  // spike
-  const sp = S.spike;
+  // bomba
+  const sp = S.bomb;
   if (sp.state === 'planted' || sp.state === 'dropped') {
     const show = sp.state === 'planted' || (me && sideOf(me.team) === 'atk') || (v.alive && losClear(v.x, v.y, sp.x, sp.y, true));
     if (show) {

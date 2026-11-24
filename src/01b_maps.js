@@ -566,7 +566,7 @@ function mapTimers() {
   const bc = MAPDATA.sites.B.center, ab = dS[bc[1] * MW + bc[0]] >= 0 ? dS[bc[1] * MW + bc[0]] : toSite;
   const sec = tiles => tiles * TILE * 0.82 / RUN; // 4 yönlü BFS mesafesi çaprazlardan biraz uzundur
   ROUND_TIME = Math.round(clamp(sec(toSite) * 1.9 + 45, 100, 420) / 5) * 5;
-  SPIKE_TIME = Math.round(clamp(sec(ab) + DEFUSE_TIME + 35, 55, 240) / 5) * 5;
+  BOMB_TIME = Math.round(clamp(sec(ab) + DEFUSE_TIME + 35, 55, 240) / 5) * 5;
 }
 function loadMap(i) {
   i = clamp(i | 0, 0, MAPS.length - 1);

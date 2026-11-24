@@ -1,7 +1,7 @@
 /* =====================================================================
    05 · BOT YAPAY ZEKASI
         algılama (görüş + ses + takım bilgisi), tepki süresi, nişan hatası,
-        siper alma, A* ile rota, spike görevleri, ajan bazlı yetenek kullanımı,
+        siper alma, A* ile rota, bomba görevleri, ajan bazlı yetenek kullanımı,
         ekonomik satın alma
    ===================================================================== */
 /* hsP: nişan tekrarında kafaya gitme olasılığı (geri kalan atışlar göğüs/gövdeye) */
@@ -137,7 +137,7 @@ function threatSite(team) {
     const c = tc(...MAPDATA.sites[s].center);
     if (dist(k.x, k.y, c.x, c.y) < 800 * MS) cnt[s]++;
   }
-  const sp = S.spike;
+  const sp = S.bomb;
   if (sp.state === 'carried' || sp.state === 'dropped') {
     const car = getP(sp.carrier);
     if ((car && S.known[team][car.id] && S.time - S.known[team][car.id].t < 3) || sp.state === 'dropped') {
@@ -150,7 +150,7 @@ function threatSite(team) {
 }
 
 function botGoal(p, ai) {
-  const side = sideOf(p.team), sp = S.spike, plan = S.plan;
+  const side = sideOf(p.team), sp = S.bomb, plan = S.plan;
   if (ai.retreatT > S.time && ai.cover) return { x: ai.cover.x, y: ai.cover.y, key: 'cv' + (ai.cover.x | 0), look: ai.lk };
   if (ai.reviveGoal) {
     const c = S.corpses.find(c => c.id === ai.reviveGoal);
@@ -179,7 +179,7 @@ function botGoal(p, ai) {
     const site = MAPDATA.sites[plan.site];
     if (!ai.route) ai.route = (plan.routes[p.id] === 'mid' ? site.routeMid : site.routeMain).map(w => tc(w[0], w[1]));
     while (ai.route.length && dist(p.x, p.y, ai.route[0].x, ai.route[0].y) < 80) ai.route.shift();
-    if (p.hasSpike) {
+    if (p.hasBomb) {
       if (ai.route.length) return { x: ai.route[0].x, y: ai.route[0].y, key: 'r' + ai.route.length };
       if (!ai.plantSpot) { const c = pick(site.plant); ai.plantSpot = tc(c[0], c[1]); }
       const d = dist(p.x, p.y, ai.plantSpot.x, ai.plantSpot.y);
@@ -229,10 +229,10 @@ function botGoal(p, ai) {
 function healGoal(p, ai) {
   if (!S.heal || !S.heal.length || p.hp > 55 || ai.visNow) return null;
   if (S.phase !== 'live' && S.phase !== 'planted') return null;
-  const sp = S.spike, side = sideOf(p.team);
+  const sp = S.bomb, side = sideOf(p.team);
   if (side === 'def' && sp.state === 'planted' && sp.t < 25) return null;
   if (side === 'atk' && sp.state === 'planted' && sp.defuser) return null;
-  if (p.hasSpike && S.phase === 'live' && p.hp > 30) return null;
+  if (p.hasBomb && S.phase === 'live' && p.hp > 30) return null;
   let best = null, bd = 1e9;
   for (const h of S.heal) if (h.cd <= 0) { const d = dist(p.x, p.y, h.x, h.y); if (d < bd) { bd = d; best = h; } }
   if (!best || bd > 1300) return null;
@@ -242,9 +242,9 @@ function healGoal(p, ai) {
 function rebootGoal(p, ai) {
   if (!S.cards || !S.cards.length || !MAPDATA.reboot || !MAPDATA.reboot.length) return null;
   if ((S.phase !== 'live' && S.phase !== 'planted') || ai.visNow) return null;
-  const side = sideOf(p.team), sp = S.spike;
+  const side = sideOf(p.team), sp = S.bomb;
   if (side === 'def' && sp.state === 'planted' && sp.t < 30) return null;   // önce bomba
-  if (p.hasSpike && S.phase === 'live') return null;                         // taşıyıcı kurulumdan sapmaz
+  if (p.hasBomb && S.phase === 'live') return null;                         // taşıyıcı kurulumdan sapmaz
   const mine = S.cards.filter(c => c.carrier === p.id);
   if (mine.length) {
     let best = -1, bd = 1e9;
@@ -260,7 +260,7 @@ function rebootGoal(p, ai) {
   let card = null, cd = 1e9;
   for (const c of S.cards) if (!c.carrier && c.team === p.team) { const d = dist(p.x, p.y, c.x, c.y); if (d < cd) { cd = d; card = c; } }
   if (!card || cd > 1500) return null;
-  for (const o of S.players) if (o !== p && o.alive && o.team === p.team && o.ai && !o.hasSpike && dist(o.x, o.y, card.x, card.y) < cd - 40) return null;
+  for (const o of S.players) if (o !== p && o.alive && o.team === p.team && o.ai && !o.hasBomb && dist(o.x, o.y, card.x, card.y) < cd - 40) return null;
   return { x: card.x, y: card.y, key: 'card' + card.id };
 }
 function followPath(p, ai, inp) {
@@ -294,7 +294,7 @@ function findCover(p, e) {
 function botAct(p, ai, D, dt) {
   const inp = p.input, t = ai.visNow, wid = curW(p), w = WEAPONS[wid];
   const gg = ai.goal;
-  if (gg && gg.force && gg.use && dist(p.x, p.y, S.spike.x, S.spike.y) < 50) { inp.use = true; inp.crouch = true; return; }
+  if (gg && gg.force && gg.use && dist(p.x, p.y, S.bomb.x, S.bomb.y) < 50) { inp.use = true; inp.crouch = true; return; }
   if (t && w.melee) {
     // kılıç eldeyken düşman: yakınsa sapla, değilse silaha geç
     const d0 = dist(p.x, p.y, t.x, t.y);
@@ -416,7 +416,7 @@ function botBuy(p, dt) {
 /* ---------- AJAN BAZLI YETENEK KULLANIMI ---------- */
 function botAbilities(p, ai) {
   if (!canAct(p) || (S.phase !== 'live' && S.phase !== 'planted') || p.plantT > 0 || p.defT > 0) return;
-  const side = sideOf(p.team), sp = S.spike, vis = ai.visNow, now = S.time;
+  const side = sideOf(p.team), sp = S.bomb, vis = ai.visNow, now = S.time;
   const lk = ai.lk && now - ai.lk.t < 3 ? ai.lk : null;
   const tk = knownEnemies(p.team, 5).sort((a, b) => dist(p.x, p.y, a.x, a.y) - dist(p.x, p.y, b.x, b.y));
   const siteKey = side === 'atk' ? S.plan.site : (ai.holdRole && ai.holdRole !== 'M' ? ai.holdRole : null);
@@ -443,7 +443,7 @@ function botAbilities(p, ai) {
       if (has('q') && !vis && lk && D2(lk) < 720 && D2(lk) > 140) { U('q', lk); return; }
       if (has('q') && side === 'atk' && preplant && dSite < 720 * MS && !ai.used.flash) { ai.used.flash = 1; U('q', siteC); return; }
       if (has('e') && vis && p.hp < 55) { faceTo(vis); U('e', vis); return; }
-      if (has('e') && p.hasSpike && ai.plantSpot && D2(ai.plantSpot) < 140 && tk.length) { U('e', tk[0]); }
+      if (has('e') && p.hasBomb && ai.plantSpot && D2(ai.plantSpot) < 140 && tk.length) { U('e', tk[0]); }
       break;
     case 'mist':
       if (has('q') && side === 'atk' && preplant && dSite < 1050 * MS && !S.plan.smoked) {
@@ -486,7 +486,7 @@ function botAbilities(p, ai) {
       break;
     case 'chrono':
       if (has('q') && vis && p.hp < 70 && D2(vis) < 650) { U('q', p); return; }
-      if (has('q') && p.hasSpike && ai.plantSpot && D2(ai.plantSpot) < 90) { U('q', p); return; }
+      if (has('q') && p.hasBomb && ai.plantSpot && D2(ai.plantSpot) < 90) { U('q', p); return; }
       if (has('e') && vis && p.hp < 40) {
         const a = Math.atan2(p.y - vis.y, p.x - vis.x); U('e', { x: p.x + Math.cos(a) * 300, y: p.y + Math.sin(a) * 300 }); return;
       }
@@ -497,7 +497,7 @@ function botAbilities(p, ai) {
       if (has('q') && vis && D2(vis) < 520) { faceTo(vis); U('q', vis); return; }
       if (ready && tgt && D2(tgt) < 900) { faceTo(tgt); U('x', tgt); return; }
       if (has('e') && vis && p.hp < 40) { faceTo(vis); U('e', vis); return; }
-      if (has('e') && lk && ((p.hasSpike && ai.plantSpot && D2(ai.plantSpot) < 90) || (side === 'def' && !preplant && D2(sp) < 90))) { faceTo(lk); U('e', lk); }
+      if (has('e') && lk && ((p.hasBomb && ai.plantSpot && D2(ai.plantSpot) < 90) || (side === 'def' && !preplant && D2(sp) < 90))) { faceTo(lk); U('e', lk); }
       break;
     case 'vital': {
       if (ready) {

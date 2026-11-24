@@ -10,8 +10,8 @@ const UI = { overlay: false, buyOpen: false, pauseOpen: false, board: false, scr
 const KEYS = {}, MOUSE = { x: 640, y: 360, down: false, right: false, fp: 0 };
 const LOOK = { yaw: 0, pitch: 0 };
 const FONT = '"Bahnschrift","DIN Alternate","Arial Narrow","Roboto Condensed","Segoe UI",Arial,sans-serif';
-const SRC_NAMES = { sword: 'Kılıç', blade: 'Karanlık Kesik', fire: 'Ateş Duvarı', poison: 'Zehir Sisi', mine: 'Tuzak Mayını', turret: 'Mini Taret', shock: 'Şok Oku', orbital: 'Yörünge Lazeri', quake: 'Sarsıntı Dalgası', rift: 'Tektonik Yarık', chain: 'Zincir Yük', overload: 'Aşırı Yük', wolf: 'Gölge Kurdu', spike: 'BOMBA', nightmare: 'Kabus Alanı', tcollapse: 'Zaman Çöküşü', railgun: 'Railgun' };
-const REASONS = { elim: 'Rakip takım elendi', time: 'Süre doldu', spike: 'Bomba patladı', defuse: 'Bomba imha edildi' };
+const SRC_NAMES = { sword: 'Kılıç', blade: 'Karanlık Kesik', fire: 'Ateş Duvarı', poison: 'Zehir Sisi', mine: 'Tuzak Mayını', turret: 'Mini Taret', shock: 'Şok Oku', orbital: 'Yörünge Lazeri', quake: 'Sarsıntı Dalgası', rift: 'Tektonik Yarık', chain: 'Zincir Yük', overload: 'Aşırı Yük', wolf: 'Gölge Kurdu', bomb: 'BOMBA', nightmare: 'Kabus Alanı', tcollapse: 'Zaman Çöküşü', railgun: 'Railgun' };
+const REASONS = { elim: 'Rakip takım elendi', time: 'Süre doldu', bomb: 'Bomba patladı', defuse: 'Bomba imha edildi' };
 
 function initRender() {
   glcv = document.getElementById('gl'); cv = document.getElementById('hud'); ctx = cv.getContext('2d');
@@ -21,9 +21,13 @@ function initRender() {
   resize(); window.addEventListener('resize', resize);
   return ok;
 }
+let HUD_DPR = 1;
 function resize() {
   W = window.innerWidth; H = window.innerHeight;
-  cv.width = W; cv.height = H;
+  // arayüz katmanı ekranın piksel yoğunluğunda (yazılar ve simgeler telefonda bulanık/pikselli olmasın)
+  HUD_DPR = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = Math.round(W * HUD_DPR); cv.height = Math.round(H * HUD_DPR);
+  cv.style.width = W + 'px'; cv.style.height = H + 'px';
   glResize(W, H);
 }
 function buildMinimap() {
@@ -196,7 +200,7 @@ function handleEvent(ev) {
       break;
     }
     case 'plant':
-      showMsg('BOMBA KURULDU', (ev.site || '') + ' BÖLGESİ — ' + SPIKE_TIME + ' SANİYE', PAL.red, 3);
+      showMsg('BOMBA KURULDU', (ev.site || '') + ' BÖLGESİ — ' + BOMB_TIME + ' SANİYE', PAL.red, 3);
       AU.play('plant', ev.x, ev.y); UIS.beepT = 0;
       break;
     case 'ult': {
@@ -229,14 +233,14 @@ function render(dt) {
   try { if (GLX.ok) render3D(dt, me, v); }
   finally { if (ex > 0) for (const pr of S.proj) { pr.x = pr._ox; pr.y = pr._oy; } }
   if (ctx.reset) ctx.reset(); // sızan save/clip durumları birikmesin (nişangâh kaybolma hatası)
-  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H); ctx.globalAlpha = 1;
+  ctx.setTransform(HUD_DPR, 0, 0, HUD_DPR, 0, 0); ctx.clearRect(0, 0, W, H); ctx.globalAlpha = 1;
   if (CINE.on) { drawCine(dt, me); drawChat(dt, me); } else drawHUD(dt, me, v);
-  spikeBeeps(dt); footstepSounds(dt, v);
+  bombBeeps(dt); footstepSounds(dt, v);
 }
 function renderMenuBg(dt) {
   UIS.menuT += dt;
   if (GLX.ok) render3D(dt, null, null);
-  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H);
+  ctx.setTransform(HUD_DPR, 0, 0, HUD_DPR, 0, 0); ctx.clearRect(0, 0, W, H);
   ctx.fillStyle = 'rgba(8,13,20,0.55)'; ctx.fillRect(0, 0, W, H);
   vignette('5,8,12', 0.85, 0.2);
 }
@@ -247,7 +251,7 @@ function circle(x, y, r, fill, stroke, lw) {
   if (fill) { ctx.fillStyle = fill; ctx.fill(); }
   if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw || 2; ctx.stroke(); }
 }
-function drawSpikeIcon(x, y, s, blink) {
+function drawBombIcon(x, y, s, blink) {
   ctx.save(); ctx.translate(x, y);
   // C4: üç kalıp, bant ve yanıp sönen LED
   const w = s * 2, h = s * 1.3;
@@ -274,7 +278,7 @@ function txt(s, x, y, size, col, align, weight) {
   ctx.fillStyle = col; ctx.fillText(tl(s), x, y);
 }
 function drawTopBar(me) {
-  const mt = me ? me.team : 0, et = 1 - mt, cx = W / 2, y = 10;
+  const mt = me ? me.team : 0, et = 1 - mt, cx = W / 2, y = IS_TOUCH ? 46 : 10; // dokunmatikte üstteki düğme sırasının altında
   const myScore = S.score[mt], enScore = S.score[et];
   panel(cx - 60, y, 120, 48, 0.9);
   let timeTxt = fmtTime(S.phaseT), timeCol = PAL.white;
@@ -282,8 +286,8 @@ function drawTopBar(me) {
   if (S.phase === 'end' || S.phase === 'over') timeTxt = '—';
   txt(timeTxt, cx, y + 21, 26, timeCol, 'center');
   if (S.phase === 'planted') {
-    const sp = S.spike, blink = (S.time * (sp.t < 10 ? 4 : 2)) % 1 < 0.5;
-    drawSpikeIcon(cx, y + 20, 13, blink);
+    const sp = S.bomb, blink = (S.time * (sp.t < 10 ? 4 : 2)) % 1 < 0.5;
+    drawBombIcon(cx, y + 20, 13, blink);
     txt(Math.ceil(sp.t) + 's', cx + 34, y + 21, 14, PAL.red, 'center');
   }
   const phaseName = S.phase === 'buy' ? 'SATIN ALMA' : S.phase === 'planted' ? 'BOMBA KURULU' : S.phase === 'end' ? 'RAUNT SONU' : S.phase === 'over' ? 'MAÇ BİTTİ' : 'RAUNT ' + S.round + '/' + MATCH_ROUNDS;
@@ -365,8 +369,8 @@ function drawMinimap(me, v) {
       ctx.strokeStyle = p.id === G.myId ? '#fff' : PAL.teal; ctx.lineWidth = 1.5; ctx.beginPath(); const pa = p.id === G.myId && p.alive ? LOOK.yaw : p.ang; ctx.moveTo(px, py); ctx.lineTo(px + Math.cos(pa) * 8, py + Math.sin(pa) * 8); ctx.stroke();
     } else if (UIS.teamSeen.has(p.id)) circle(px, py, 3.5, PAL.red);
   }
-  const sp = S.spike;
-  if (sp.state === 'planted' || (sp.state === 'dropped' && me && sideOf(me.team) === 'atk')) { const [px, py] = P(sp.x, sp.y); drawSpikeIcon(px, py, 5, S.time * 3 % 1 < 0.5); }
+  const sp = S.bomb;
+  if (sp.state === 'planted' || (sp.state === 'dropped' && me && sideOf(me.team) === 'atk')) { const [px, py] = P(sp.x, sp.y); drawBombIcon(px, py, 5, S.time * 3 % 1 < 0.5); }
   // reboot istasyonları ve takım kartları
   (MAPDATA.reboot || []).forEach((r, i) => {
     const [px, py] = P(r.x, r.y), cd = S.rb[i] && S.rb[i].cd > 0;
@@ -478,9 +482,9 @@ function drawDeathPanel(me, v) {
 }
 function drawHints(me) {
   let h = null;
-  const sp = S.spike;
+  const sp = S.bomb;
   if (S.phase === 'buy' && me.alive) h = '[B] MAĞAZA · ' + Math.ceil(S.phaseT) + ' sn';
-  else if (me.alive && me.hasSpike && S.phase === 'live') h = siteAt(me.x, me.y) ? '[F] BASILI TUT: BOMBA KUR' : 'BOMBA SENDE — A/B bölgesine götür · [G] bırak';
+  else if (me.alive && me.hasBomb && S.phase === 'live') h = siteAt(me.x, me.y) ? '[F] BASILI TUT: BOMBA KUR' : 'BOMBA SENDE — A/B bölgesine götür · [G] bırak';
   else if (me.alive && S.phase === 'planted' && sideOf(me.team) === 'def' && dist(me.x, me.y, sp.x, sp.y) < 58) h = '[F] BASILI TUT: BOMBA İMHA ET' + (me.kit ? ' · KİT: 1 SN' : '');
   const myCards = me.alive ? (S.cards || []).filter(c => c.carrier === me.id) : [];
   if (myCards.length && (S.phase === 'live' || S.phase === 'planted')) {
@@ -489,7 +493,7 @@ function drawHints(me) {
     if (near >= 0) h = S.rb[near] && S.rb[near].cd > 0 ? 'REBOOT İSTASYONU SOĞUYOR · ' + Math.ceil(S.rb[near].cd) + ' sn' : '[F] BASILI TUT: ' + names.toLocaleUpperCase('tr-TR') + ' — REBOOT';
     else if (!h) h = '🂠 KART: ' + names + ' — A veya B\'deki REBOOT istasyonuna götür';
   }
-  if (!h && me.alive && sideOf(me.team) === 'atk' && !me.hasSpike && sp.state === 'carried' && (S.phase === 'live' || S.phase === 'buy')) {
+  if (!h && me.alive && sideOf(me.team) === 'atk' && !me.hasBomb && sp.state === 'carried' && (S.phase === 'live' || S.phase === 'buy')) {
     const c = S.pmap[sp.carrier]; if (c && c.team === me.team && !IS_TOUCH && S.phase !== 'buy') h = 'BOMBA: ' + c.name + ' · [T] İSTE';
   }
   if (h) { ctx.font = 'bold 14px ' + FONT; const tw = ctx.measureText(tl(h)).width + 30; panel(W / 2 - tw / 2, H - 140, tw, 26, 0.8); txt(h, W / 2, H - 127, 14, PAL.gold, 'center'); }
@@ -665,7 +669,7 @@ function drawWorldMarkers(dt, me, v) {
     ctx.fillStyle = PAL.teal; ctx.fillText(p.name, s[0], s[1]);
     ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(s[0] - 16 * sc, s[1] + 4, 32 * sc, 4);
     ctx.fillStyle = PAL.teal; ctx.fillRect(s[0] - 16 * sc, s[1] + 4, 32 * sc * p.hp / 100, 4);
-    if (p.hasSpike) drawSpikeIcon(s[0] + 26 * sc, s[1] - 4, 6, true);
+    if (p.hasBomb) drawBombIcon(s[0] + 26 * sc, s[1] - 4, 6, true);
   }
   for (const p of S.players) {
     if (!p.alive || p.team === mt || !(p.st.reveal > 0) || (v.alive && visibleFPS(v, p))) continue;
@@ -673,12 +677,12 @@ function drawWorldMarkers(dt, me, v) {
     ctx.fillStyle = 'rgba(255,70,85,' + (0.6 + 0.3 * Math.sin(S.time * 10)) + ')';
     ctx.beginPath(); ctx.moveTo(s[0], s[1] + 8); ctx.lineTo(s[0] - 7, s[1] - 4); ctx.lineTo(s[0] + 7, s[1] - 4); ctx.closePath(); ctx.fill();
   }
-  const sp = S.spike;
+  const sp = S.bomb;
   if (sp.state === 'planted' || (sp.state === 'dropped' && me && sideOf(me.team) === 'atk')) {
     const s = worldToScreen(sp.x, 40, sp.y);
     if (s) {
       const blink = sp.state === 'planted' ? (S.time * (sp.t < 10 ? 4 : 1.5)) % 1 < 0.5 : true;
-      drawSpikeIcon(s[0], s[1], 10, blink);
+      drawBombIcon(s[0], s[1], 10, blink);
       txt(Math.round(dist(v.x, v.y, sp.x, sp.y) / 40) + 'm', s[0], s[1] + 22, 11, PAL.red, 'center');
     }
   }
@@ -798,13 +802,13 @@ function drawScoreboard(me) {
 }
 
 /* ---------------- SES YARDIMCILARI ---------------- */
-function spikeBeeps(dt) {
-  const sp = S.spike;
+function bombBeeps(dt) {
+  const sp = S.bomb;
   if (sp.state !== 'planted' || S.phase !== 'planted') return;
   UIS.beepT -= dt;
   if (UIS.beepT <= 0) {
     UIS.beepT = sp.t > 15 ? 1 : sp.t > 8 ? 0.55 : sp.t > 3 ? 0.28 : 0.12;
-    AU.play('spikebeep', sp.x, sp.y, 1.4);
+    AU.play('bombbeep', sp.x, sp.y, 1.4);
   }
 }
 function footstepSounds(dt, v) {

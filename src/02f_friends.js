@@ -1,7 +1,7 @@
 /* =====================================================================
    02f · KULLANICI ADI + ARKADAŞ SİSTEMİ
    Her oyuncunun kalıcı bir kimliği (uid) ve bir kez seçilen, değiştirilemeyen
-   kullanıcı adı vardır. Oyun açıkken eşleştirme sunucusunda "SPIKE-u-<uid>"
+   kullanıcı adı vardır. Oyun açıkken eşleştirme sunucusunda "<PEER_PREFIX>u-<uid>"
    adıyla kayıtlıdır; arkadaşlar bu adla birbirine doğrudan bağlanıp
    çevrimiçi durumunu, odasını, arkadaşlık ve "oyuna katıl" isteklerini iletir.
    ===================================================================== */

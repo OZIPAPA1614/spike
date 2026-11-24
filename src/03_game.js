@@ -18,7 +18,7 @@ function newState(cfg) {
   return {
     cfg, time: 0, phase: 'buy', phaseT: BUY_TIME, round: 0, score: [0, 0], swapped: false, lossStreak: [0, 0],
     players: [], pmap: {}, proj: [], areas: [], deps: [], beams: [], twalls: [], orbs: [], heal: [], corpses: [],
-    spike: { state: 'none', carrier: null, x: 0, y: 0, t: 0, site: null, defuser: null, prog: 0, half: false },
+    bomb: { state: 'none', carrier: null, x: 0, y: 0, t: 0, site: null, defuser: null, prog: 0, half: false },
     cards: [], rb: [],
     evq: [], nid: 1, matchWinner: null, lastResult: null, known: [{}, {}], plan: null, planted: false, stepT: 0
   };
@@ -37,7 +37,7 @@ function makePlayer(o) {
     credits: 800, primary: null, secondary: 'classic', slot: 2, ammo: { classic: { mag: 12, res: 36 } },
     fireCD: 0, reloadT: 0, switchT: 0, bloom: 0, shotN: 0, lastShot: -9, pend: false, pendT: 0, lastFp: 0, scoped: false,
     ch: { q: 0, e: 0 }, ult: 0, st: {}, slowAmt: 0, zoneSlow: 1, zoneFire: 1, imp: null, posVer: 0,
-    plantT: 0, defT: 0, hasSpike: false, kit: false, crouch: false, kills: 0, deaths: 0, dmg: 0, jz: 0, jvz: 0, lastJc: 0, rbT: 0, cards: [], tk: 0, reqT: 0,
+    plantT: 0, defT: 0, hasBomb: false, kit: false, crouch: false, kills: 0, deaths: 0, dmg: 0, jz: 0, jvz: 0, lastJc: 0, rbT: 0, cards: [], tk: 0, reqT: 0,
     input: blankInput(), rt: 0, netMv: 0, rebirth: null, ai: null, dotAcc: {}, roundBuys: {}, beamT: 0, hist: []
   };
   { const c = cosClean(o.cos); p.swt = c.sw; p.wsk = c.ws; p.csk = c.cs; } // kozmetik: kılıç seviyesi + skinler
@@ -84,7 +84,7 @@ function startRound() {
     const side = sideOf(p.team);
     if (!p.alive) { p.primary = null; p.secondary = 'classic'; p.armor = 0; p.kit = false; }
     if (side !== 'def') p.kit = false;
-    p.alive = true; p.hp = 100; p.st = {}; p.imp = null; p.plantT = 0; p.defT = 0; p.hasSpike = false; p.rebirth = null;
+    p.alive = true; p.hp = 100; p.st = {}; p.imp = null; p.plantT = 0; p.defT = 0; p.hasBomb = false; p.rebirth = null;
     p.scoped = false; p.reloadT = 0; p.switchT = 0; p.fireCD = 0; p.bloom = 0; p.zoneSlow = 1; p.zoneFire = 1; p.vx = 0; p.vy = 0;
     p.dotAcc = {}; p.roundBuys = {}; p.pend = false; p.jz = 0; p.jvz = 0; p.rbT = 0; p.reqT = 0;
     const sp = order[side][idx[side]++ % order[side].length], pos = tc(sp[0], sp[1]);
@@ -98,10 +98,10 @@ function startRound() {
     if (p.ctrl === 'bot') p.ai = newAI(p);
   }
   const atks = S.players.filter(p => sideOf(p.team) === 'atk');
-  S.spike = { state: 'none', carrier: null, x: 0, y: 0, t: 0, site: null, defuser: null, prog: 0, half: false };
+  S.bomb = { state: 'none', carrier: null, x: 0, y: 0, t: 0, site: null, defuser: null, prog: 0, half: false };
   if (atks.length) {
-    const c = pick(atks); c.hasSpike = true;
-    S.spike.state = 'carried'; S.spike.carrier = c.id; S.spike.x = c.x; S.spike.y = c.y;
+    const c = pick(atks); c.hasBomb = true;
+    S.bomb.state = 'carried'; S.bomb.carrier = c.id; S.bomb.x = c.x; S.bomb.y = c.y;
   }
   S.plan = makeRoundPlan();
   emit({ k: 'round', n: S.round });
@@ -139,14 +139,14 @@ function hostTick(dt) {
   separatePlayers();
   for (const p of S.players) updateCombat(p, dt);
   updateProjectiles(dt); updateDeps(dt); updateBeams(dt); updateTWalls(dt);
-  updateOrbs(); updateHeal(dt); updateReboot(dt); updateSpike(dt); footstepsHear(dt);
+  updateOrbs(); updateHeal(dt); updateReboot(dt); updateBomb(dt); footstepsHear(dt);
   // faz geçişleri
   S.phaseT -= dt;
   if (S.phase === 'buy' && S.phaseT <= 0) { S.phase = 'live'; S.phaseT = ROUND_TIME; emit({ k: 'go' }); }
   else if (S.phase === 'live' && S.phaseT <= 0) endRound(teamOfSide('def'), 'time');
   else if (S.phase === 'planted') {
-    S.spike.t -= dt; S.phaseT = S.spike.t;
-    if (S.spike.t <= 0) explodeSpike();
+    S.bomb.t -= dt; S.phaseT = S.bomb.t;
+    if (S.bomb.t <= 0) explodeBomb();
   } else if (S.phase === 'end' && S.phaseT <= 0) {
     if (S.matchWinner !== null) { S.phase = 'over'; S.phaseT = 0; emit({ k: 'over', w: S.matchWinner }); }
     else startRound();
@@ -450,7 +450,7 @@ function damage(t, amt, att, src, hs, quiet) {
   if (!t || !t.alive || S.phase === 'buy' || S.phase === 'over' || PKMAP) return;
   amt = Math.round(amt); if (amt <= 0) return;
   let rem = amt;
-  if (src === 'blade' || src === 'spike' || src === 'railgun') rem = 9999;
+  if (src === 'blade' || src === 'bomb' || src === 'railgun') rem = 9999;
   else if (t.armor > 0) { const ab = Math.min(t.armor, rem); t.armor -= ab; rem -= ab; }
   t.hp -= rem;
   if (att && att.team !== t.team) att.dmg += amt;
@@ -480,13 +480,13 @@ function killPlayer(t, att, src, hs) {
       S.cards.push({ id: nid(), owner: t.id, team: t.team, x: r1(f.x), y: r1(f.y), carrier: null });
     }
   }
-  if (t.hasSpike) {
-    t.hasSpike = false;
+  if (t.hasBomb) {
+    t.hasBomb = false;
     const f = findFree(t.x, t.y, 6);
-    S.spike.state = 'dropped'; S.spike.x = f.x; S.spike.y = f.y; S.spike.carrier = null;
+    S.bomb.state = 'dropped'; S.bomb.x = f.x; S.bomb.y = f.y; S.bomb.carrier = null;
     emit({ k: 'msg', side: 'atk', small: 'BOMBA DÜŞTÜ' });
   }
-  if (S.spike.defuser === t.id) { S.spike.defuser = null; S.spike.prog = S.spike.half ? DEFUSE_TIME / 2 : 0; }
+  if (S.bomb.defuser === t.id) { S.bomb.defuser = null; S.bomb.prog = S.bomb.half ? DEFUSE_TIME / 2 : 0; }
   emit({ k: 'kill', a: att ? att.id : null, v: t.id, w: src, hs: hs ? 1 : 0, tk: att && att !== t && att.team === t.team ? 1 : 0 });
 }
 function doRebirth(t) {
@@ -541,24 +541,24 @@ function buyItem(p, item) {
 }
 
 /* ---------- BOMBA ---------- */
-function updateSpike(dt) {
-  const sp = S.spike;
+function updateBomb(dt) {
+  const sp = S.bomb;
   if (sp.state === 'carried') {
     const c = getP(sp.carrier);
     if (c && c.alive) { sp.x = c.x; sp.y = c.y; }
   } else if (sp.state === 'dropped' && (S.phase === 'live' || S.phase === 'buy')) {
     for (const p of S.players) if (p.alive && sideOf(p.team) === 'atk' && dist2(p.x, p.y, sp.x, sp.y) < 30 * 30 && !(sp.noPick && sp.noPick.id === p.id && S.time < sp.noPick.t) && !(sp.res && sp.res.id !== p.id && S.time < sp.res.t)) {
-      p.hasSpike = true; sp.state = 'carried'; sp.carrier = p.id;
+      p.hasBomb = true; sp.state = 'carried'; sp.carrier = p.id;
       emit({ k: 'msg', side: 'atk', small: p.name + ' BOMBAYI ALDI' }); break;
     }
   }
   if (S.phase === 'live') {
     for (const p of S.players) {
-      if (!p.hasSpike || !p.alive) continue;
+      if (!p.hasBomb || !p.alive) continue;
       const site = siteAt(p.x, p.y);
       if (p.input.use && site && canAct(p) && !(p.rbT > 0)) {
         p.plantT += dt;
-        if (p.plantT >= PLANT_TIME) { plantSpike(p, site); break; }
+        if (p.plantT >= PLANT_TIME) { plantBomb(p, site); break; }
       } else p.plantT = 0;
     }
   }
@@ -586,32 +586,32 @@ function updateSpike(dt) {
     } else if (sp.defuser) { sp.defuser = null; sp.prog = sp.half ? DEFUSE_TIME / 2 : 0; }
   }
 }
-function dropSpike(p) {
-  if (!p || !p.hasSpike || !p.alive || (S.phase !== 'live' && S.phase !== 'buy')) return false;
+function dropBomb(p) {
+  if (!p || !p.hasBomb || !p.alive || (S.phase !== 'live' && S.phase !== 'buy')) return false;
   const f = findFree(p.x + Math.cos(p.ang) * 34, p.y + Math.sin(p.ang) * 34, 6);
-  p.hasSpike = false; p.plantT = 0;
-  S.spike.state = 'dropped'; S.spike.x = f.x; S.spike.y = f.y; S.spike.carrier = null; S.spike.noPick = { id: p.id, t: S.time + 2 };
+  p.hasBomb = false; p.plantT = 0;
+  S.bomb.state = 'dropped'; S.bomb.x = f.x; S.bomb.y = f.y; S.bomb.carrier = null; S.bomb.noPick = { id: p.id, t: S.time + 2 };
   emit({ k: 'msg', side: 'atk', small: p.name + ' BOMBAYI BIRAKTI' });
   return true;
 }
 /* Takım arkadaşından bomba isteme: bot taşıyıcı yakındaysa verir, uzaktaysa bırakıp sana ayırır;
    oyuncu taşıyıcıya bildirim gider */
-function requestSpike(p) {
-  if (!p || !p.alive || sideOf(p.team) !== 'atk' || p.hasSpike || (S.phase !== 'live' && S.phase !== 'buy')) return;
+function requestBomb(p) {
+  if (!p || !p.alive || sideOf(p.team) !== 'atk' || p.hasBomb || (S.phase !== 'live' && S.phase !== 'buy')) return;
   if (S.time < (p.reqT || 0)) return;
   p.reqT = S.time + 2.5;
-  const sp = S.spike;
+  const sp = S.bomb;
   if (sp.state === 'dropped') { emit({ k: 'msg', to: p.id, small: 'BOMBA YERDE — MİNİ HARİTADA İŞARETLİ' }); return; }
   const c = getP(sp.carrier);
   if (sp.state !== 'carried' || !c || !c.alive || c.team !== p.team) return;
   emit({ k: 'req', id: p.id, c: c.id });
   if (c.ctrl === 'bot') {
     if (dist(c.x, c.y, p.x, p.y) < 650 && losClear(c.x, c.y, p.x, p.y, true)) {
-      c.hasSpike = false; c.plantT = 0; p.hasSpike = true; sp.carrier = p.id; sp.x = p.x; sp.y = p.y;
+      c.hasBomb = false; c.plantT = 0; p.hasBomb = true; sp.carrier = p.id; sp.x = p.x; sp.y = p.y;
       emit({ k: 'msg', side: 'atk', small: c.name + ' BOMBAYI ' + p.name.toLocaleUpperCase('tr-TR') + ' OYUNCUSUNA VERDİ' });
       emitSnd('card', p.x, p.y);
     } else {
-      dropSpike(c);
+      dropBomb(c);
       sp.res = { id: p.id, t: S.time + 15 };
       emit({ k: 'msg', side: 'atk', small: c.name + ' BOMBAYI BIRAKTI — ' + p.name.toLocaleUpperCase('tr-TR') + ' İÇİN AYRILDI' });
     }
@@ -646,7 +646,7 @@ function updateReboot(dt) {
     if (!p.alive) { p.rbT = 0; continue; }
     let st = -1;
     if (p.input.use && canAct(p) && S.cards.some(c => c.carrier === p.id)) {
-      const defusing = S.phase === 'planted' && sideOf(p.team) === 'def' && dist2(p.x, p.y, S.spike.x, S.spike.y) < 58 * 58;
+      const defusing = S.phase === 'planted' && sideOf(p.team) === 'def' && dist2(p.x, p.y, S.bomb.x, S.bomb.y) < 58 * 58;
       if (!defusing) MAPDATA.reboot.forEach((r, i) => { if (st < 0 && S.rb[i].cd <= 0 && dist2(p.x, p.y, r.x, r.y) < REBOOT_R * REBOOT_R) st = i; });
     }
     if (st < 0) { p.rbT = 0; continue; }
@@ -672,19 +672,19 @@ function doReboot(p, i) {
   emit({ k: 'reboot', id: o.id, by: p.id, st: i, x: r1(f.x), y: r1(f.y) });
   emitSnd('reboot', R.x, R.y);
 }
-function plantSpike(p, site) {
-  const sp = S.spike;
-  sp.state = 'planted'; sp.x = p.x; sp.y = p.y; sp.site = site; sp.t = SPIKE_TIME; sp.carrier = null; sp.prog = 0; sp.half = false; sp.defuser = null;
-  p.hasSpike = false; p.plantT = 0; p.ult = Math.min(AGENTS[p.agent].x.pts, p.ult + 1);
-  S.phase = 'planted'; S.phaseT = SPIKE_TIME; S.planted = true;
+function plantBomb(p, site) {
+  const sp = S.bomb;
+  sp.state = 'planted'; sp.x = p.x; sp.y = p.y; sp.site = site; sp.t = BOMB_TIME; sp.carrier = null; sp.prog = 0; sp.half = false; sp.defuser = null;
+  p.hasBomb = false; p.plantT = 0; p.ult = Math.min(AGENTS[p.agent].x.pts, p.ult + 1);
+  S.phase = 'planted'; S.phaseT = BOMB_TIME; S.planted = true;
   emit({ k: 'plant', x: r1(p.x), y: r1(p.y), site, id: p.id });
 }
-function explodeSpike() {
-  const sp = S.spike; sp.state = 'exploded'; sp.t = 0;
+function explodeBomb() {
+  const sp = S.bomb; sp.state = 'exploded'; sp.t = 0;
   emitFx({ t: 'nuke', x: r1(sp.x), y: r1(sp.y) });
   emit({ k: 'snd', s: 'bigboom', x: r1(sp.x), y: r1(sp.y) });
-  for (const p of S.players) if (p.alive && dist(p.x, p.y, sp.x, sp.y) < 520) killPlayer(p, null, 'spike', false);
-  endRound(teamOfSide('atk'), 'spike');
+  for (const p of S.players) if (p.alive && dist(p.x, p.y, sp.x, sp.y) < 520) killPlayer(p, null, 'bomb', false);
+  endRound(teamOfSide('atk'), 'bomb');
 }
 /* CAN KÜRESİ: canı 100'den az olan oyuncu üstünden geçince +50 can */
 function updateHeal(dt) {

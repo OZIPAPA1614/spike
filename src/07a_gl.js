@@ -69,7 +69,7 @@ function glInit(canvas) {
   GLX.cv = canvas;
   const mobile = IS_TOUCH;
   let gl = null;
-  try { gl = canvas.getContext('webgl', { antialias: !mobile, alpha: false, powerPreference: 'high-performance' }) || canvas.getContext('experimental-webgl'); } catch (e) { gl = null; }
+  try { gl = canvas.getContext('webgl', { antialias: true, alpha: false, powerPreference: 'high-performance' }) || canvas.getContext('experimental-webgl'); } catch (e) { gl = null; }
   if (!gl) return false;
   GLX.gl = gl;
   const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
@@ -92,8 +92,9 @@ function glInit(canvas) {
 }
 function glResize(w, h) {
   if (!GLX.ok) return;
-  const q = (typeof SETTINGS !== 'undefined' && SETTINGS.gfx) || 'high', base = Math.min(window.devicePixelRatio || 1, IS_TOUCH ? 1.25 : 1.5);
-  GLX.dpr = (q === 'low' ? Math.min(base, 1) * 0.6 : q === 'mid' ? Math.min(base, 1) * 0.85 : base) * DYN.s; // grafik kalitesi × otomatik ölçek
+  // ekranın gerçek piksel yoğunluğunda çiz (telefonda da keskin görüntü); kalite yalnızca üst sınırı belirler
+  const q = (typeof SETTINGS !== 'undefined' && SETTINGS.gfx) || 'high', dpr = window.devicePixelRatio || 1;
+  GLX.dpr = Math.min(dpr, q === 'low' ? 1 : q === 'mid' ? 1.5 : 2) * DYN.s; // grafik kalitesi × otomatik ölçek
   GLX.cv.width = Math.round(w * GLX.dpr); GLX.cv.height = Math.round(h * GLX.dpr);
   GLX.cv.style.width = w + 'px'; GLX.cv.style.height = h + 'px';
 }
@@ -101,7 +102,7 @@ function glResize(w, h) {
 /* ---------- OTOMATİK ÇÖZÜNÜRLÜK ----------
    Kare hızı düşerse çizim çözünürlüğü kademeli olarak azaltılır (en fazla %50), oyun akıcılaşınca
    yavaşça geri yükseltilir. Takılmaya yol açan ölçeğe 20 sn boyunca geri dönülmez (gidip gelme olmasın). */
-const DYN = { s: 1, acc: 0, n: 0, good: 0, cap: 1, capT: 0, min: 0.5, mx: 0 };
+const DYN = { s: 1, acc: 0, n: 0, good: 0, cap: 1, capT: 0, min: 0.7, mx: 0 };
 function dynRes(rawDt) {
   if (!GLX.ok || document.hidden || rawDt > 0.5) { DYN.acc = 0; DYN.n = 0; return; }
   DYN.acc += rawDt; DYN.n++; if (rawDt > DYN.mx) DYN.mx = rawDt;
@@ -310,14 +311,25 @@ function mkTex(src, repeat) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   const wrap = repeat && pot ? gl.REPEAT : gl.CLAMP_TO_EDGE;
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
-  if (pot && GLX.aniso) gl.texParameterf(gl.TEXTURE_2D, GLX.aniso.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(IS_TOUCH ? 2 : 4, gl.getParameter(GLX.aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
+  if (pot && GLX.aniso) gl.texParameterf(gl.TEXTURE_2D, GLX.aniso.TEXTURE_MAX_ANISOTROPY_EXT, Math.min(IS_TOUCH ? 4 : 8, gl.getParameter(GLX.aniso.MAX_TEXTURE_MAX_ANISOTROPY_EXT)));
   _boundTex = null;
   return t;
 }
-/* ---------- üretilmiş doku paketi (01c_texgen: tamamen kodla üretilir) ---------- */
-const TEXIMG = { get: name => TEXGEN.get(name) };
-function loadTexPack() { /* dokular ilk kullanımda üretilir (01c_texgen) */ }
-/* Dekor doku atlası (4×4 hücre, 256 px): kodla üretilen malzeme dokularından türetilir.
+/* ---------- fotoğraf doku paketi (01c, CC0) ---------- */
+const TEXIMG = {};
+let TEXPACK_READY = false;
+function loadTexPack() {
+  if (typeof TEXPACK_SRC === 'undefined') return;
+  const keys = Object.keys(TEXPACK_SRC); let left = keys.length;
+  for (const k of keys) {
+    const im = new Image();
+    im.onload = () => { TEXIMG[k] = im; if (--left === 0) texPackDone(); };
+    im.onerror = () => { if (--left === 0) texPackDone(); };
+    im.src = TEXPACK_SRC[k];
+  }
+}
+function texPackDone() { TEXPACK_READY = true; if (GLX.ok && CUR_MAP >= 0) buildThemeTextures(THEME); }
+/* Dekor doku atlası (4×4 hücre, 256 px): Poly Haven CC0 fotoğraflarından türetilir.
    0 ahşap · 1 koyu metal · 2 altın · 3 kemik · 4 çuval bezi · 5 pas boyalı varil · 6 taş · 7 pişmiş toprak
    8 yaprak · 9 sunucu paneli · 10 beyaz · 11 siyah · 12 kırmızı boya · 13 kar · 14 kaktüs · 15 kauçuk */
 const PC = { wood: 0, metal: 1, gold: 2, bone: 3, burlap: 4, rust: 5, stone: 6, clay: 7, leaf: 8, panel: 9, white: 10, black: 11, red: 12, snow: 13, cactus: 14, rubber: 15 };
@@ -329,7 +341,7 @@ function buildPropAtlas() {
     ['rusty_metal_03', '#ff5040', '#b02a22'], ['snow_02', '#ffffff', '#f2f6fa'], ['leaves_forest_ground', '#4c9a40', '#3f7a35'], ['granular_concrete', '#404040', '#262626']];
   return canvasOf(1024, 1024, (c) => {
     spec.forEach(([img, tint, base], k) => {
-      const x = (k % 4) * 256, y = Math.floor(k / 4) * 256, im = img && TEXIMG.get(img);
+      const x = (k % 4) * 256, y = Math.floor(k / 4) * 256, im = img && TEXIMG[img];
       c.save(); c.beginPath(); c.rect(x, y, 256, 256); c.clip();
       if (im) {
         c.drawImage(im, x, y, 256, 256);
@@ -363,9 +375,9 @@ function buildWaterCanvas() {
   x2.putImageData(img, 0, 0);
   return c;
 }
-/* Üretilmiş malzeme dokusunu tuvale çiz, isteğe bağlı renk çarpanı ve parlaklık uygula */
+/* Fotoğrafı tuvale çiz, isteğe bağlı renk çarpanı ve parlaklık uygula */
 function photoCanvas(name, size, tint, fn) {
-  const im = TEXIMG.get(name); if (!im) return null;
+  const im = TEXIMG[name]; if (!im) return null;
   return canvasOf(size, size, (c, w, h) => {
     c.drawImage(im, 0, 0, w, h);
     if (tint) { c.globalCompositeOperation = 'multiply'; c.fillStyle = tint; c.fillRect(0, 0, w, h); c.globalCompositeOperation = 'source-over'; }
@@ -405,7 +417,7 @@ function buildThemeTextures(th) {
 function buildFloorCanvas(th) {
   const F = th.floor, map = mapDef();
   const mx = Math.min(4096, (GLX.gl && GLX.gl.getParameter(GLX.gl.MAX_TEXTURE_SIZE)) || 2048);
-  const big = MW * 16 > 2048 && !(typeof IS_TOUCH !== 'undefined' && IS_TOUCH);
+  const big = MW * 16 > 2048 && (!(typeof IS_TOUCH !== 'undefined' && IS_TOUCH) || SETTINGS.gfx === 'high');
   const fw = big ? mx : 2048, fh = big ? Math.min(2048, Math.round(fw * MH / MW)) : 1024;
   return canvasOf(fw, fh, (c, w, h) => {
     const sx = w / WW, sy = h / WH;
