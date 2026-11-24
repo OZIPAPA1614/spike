@@ -27,7 +27,7 @@ const EN_FRAG = {
   // menü
   'TAKTİKSEL 5v5 · BOMBA · AJANLAR': 'TACTICAL 5v5 · BOMB · AGENTS', 'TEK OYUNCULU · BOTLARA KARŞI': 'SINGLE PLAYER · VS BOTS', 'ODA KUR (HOST)': 'CREATE ROOM (HOST)',
   'ODAYA KATIL (JOIN)': 'JOIN ROOM', 'KONTROLLER & KURALLAR': 'CONTROLS & RULES', 'BAĞLANTI AYARLARI': 'CONNECTION SETTINGS', 'OYUNDAN ÇIK': 'QUIT GAME',
-  '3D TAKTİK FPS': '3D TACTICAL FPS', 'Telefonunu yatay çevir': 'Rotate your phone to landscape', 'SPIKE yatay ekranda oynanır': 'SPIKE is played in landscape',
+  '3D TAKTİK FPS': '3D TACTICAL FPS', 'Telefonunu yatay çevir': 'Rotate your phone to landscape', 'NOVA yatay ekranda oynanır': 'NOVA is played in landscape',
   'Botlara karşı tam maç · 20 raunt · 10. rauntten sonra taraf değişir': 'Full match vs bots · 20 rounds · sides swap after round 10',
   'TAKIM BOYUTU': 'TEAM SIZE', 'BOT ZORLUĞU': 'BOT DIFFICULTY', 'İLK YARI TARAFI': 'FIRST HALF SIDE', 'Saldıran (Bomba sende)': 'Attacker (you carry the bomb)',
   "Host'un verdiği 5 haneli oda kodunu gir": "Enter the 5-character room code from the host", 'Farklı ağlardan bağlanamıyor musunuz?': "Can't connect across networks?",
@@ -139,12 +139,20 @@ Object.assign(EN_FRAG, {
 // büyük harfle yazılan adlar (ör. yetenek kutuları) için büyük harfli kopyalar
 /* yeni menü · sinematik giriş · PARKUR modu */
 Object.assign(EN_EXACT, {
-  'OYNA': 'PLAY', '💎 MAĞAZA': '💎 SHOP', 'OYUNCU': 'PLAYER', 'OYUN MODU': 'GAME MODE', 'YARIŞÇI SAYISI': 'RACERS', 'PARKURA BAŞLA': 'START PARKOUR',
+  'YÜKLENİYOR': 'LOADING', 'TAKTİK FPS · PARKUR': 'TACTICAL FPS · PARKOUR', 'OYNA': 'PLAY', '💎 MAĞAZA': '💎 SHOP', 'OYUNCU': 'PLAYER', 'OYUN MODU': 'GAME MODE', 'YARIŞÇI SAYISI': 'RACERS', 'PARKURA BAŞLA': 'START PARKOUR',
   'SIRALAMA': 'STANDINGS', 'HAZIR': 'READY', 'KOŞ!': 'RUN!', 'ŞAMPİYON': 'CHAMPION', 'İLERLEME': 'PROGRESS', 'SÜRE': 'TIME', 'RAUNT': 'ROUND',
   'BİRİNCİ GELDİN!': 'YOU CAME FIRST!', 'RAUNDU KAZANDIN!': 'YOU WON THE ROUND!', 'RAUNT BİTTİ': 'ROUND OVER', 'A BÖLGESİ': 'SITE A', 'B BÖLGESİ': 'SITE B',
   '[BOŞLUK] ATLA': '[SPACE] SKIP', 'ATLAMAK İÇİN DOKUN': 'TAP TO SKIP', 'TAKIMLAR': 'TEAMS', '#': '#'
 });
 Object.assign(EN_FRAG, {
+  'İpucu: BOŞLUK ile zıpla — parkurda boşlukların üstünden böyle geçersin': 'Tip: jump with SPACE — that is how you clear gaps in parkour',
+  'İpucu: Parkurda kılıçla vurduğun rakip geri savrulur': 'Tip: in parkour, rivals you hit with the sword get knocked back',
+  'İpucu: Barikatları kılıçla kır, sağ tık güçlü darbe vurur': 'Tip: break barricades with the sword; right click hits harder',
+  'İpucu: Eğilince (SHIFT) daha isabetli ateş edersin': 'Tip: crouch (SHIFT) to shoot more accurately',
+  'İpucu: Bombayı A ya da B bölgesine kur, savunanlar imha etmeye çalışır': 'Tip: plant the bomb at site A or B; defenders try to defuse it',
+  'İpucu: Mavi pedler seni havaya fırlatır': 'Tip: blue pads launch you into the air',
+  "İpucu: AYARLAR'dan grafik kalitesini düşürüp oyunu akıcılaştırabilirsin": 'Tip: lower the graphics quality in SETTINGS for smoother play',
+  'İpucu: Z tuşuyla emote yapabilirsin': 'Tip: press Z to emote',
   'KLASİK · 5v5 taktik bomba maçı': 'CLASSIC · 5v5 tactical bomb match', 'PARKUR · kılıçla engel yarışı (5 parkur)': 'PARKOUR · sword obstacle race (5 courses)', ' yarışçı': ' racers',
   'Kılıçla engel yarışı · 5 raunt, her raunt farklı uzun parkur · bitişe ilk varan raundu alır': 'Sword obstacle race · 5 rounds, a different long course every round · first to the finish wins the round',
   'Elinde yalnızca kılıç var: rakipleri it, barikatları kır, boşluklardan atla. Düşersen son kontrol noktasından devam edersin.': 'You only have a sword: push rivals, break barricades, jump over gaps. If you fall you continue from the last checkpoint.',

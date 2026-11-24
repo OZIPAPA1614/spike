@@ -1,6 +1,6 @@
-# SPIKE — notes for Claude
+# NOVA (formerly SPIKE) — notes for Claude
 
-SPIKE is a single-file browser 3D tactical shooter (Turkish UI, English toggle). It is published by
+NOVA (formerly SPIKE) is a single-file browser 3D tactical shooter (Turkish UI, English toggle). It is published by
 GitHub Pages straight from `main/index.html`: https://ozipapa1614.github.io/spike/ — every push to
 `main` goes live for all players within 1–2 minutes.
 

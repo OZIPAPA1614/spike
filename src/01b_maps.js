@@ -58,7 +58,7 @@ const THEMES = {
       c.fillStyle = '#b8402f'; c.fillRect(0, 0, w, h);
       for (let x = 0; x < w; x += 10) { c.fillStyle = 'rgba(255,255,255,0.1)'; c.fillRect(x, 0, 4, h); c.fillStyle = 'rgba(0,0,0,0.2)'; c.fillRect(x + 6, 0, 3, h); }
       c.fillStyle = '#7d2a1f'; c.fillRect(0, 0, w, 7); c.fillRect(0, h - 7, w, 7); c.fillRect(0, 0, 7, h); c.fillRect(w - 7, 0, 7, h);
-      c.fillStyle = 'rgba(255,255,255,0.75)'; c.font = 'bold 22px Arial'; c.fillText('SPK', 34, 70);
+      c.fillStyle = 'rgba(255,255,255,0.75)'; c.font = 'bold 22px Arial'; c.fillText('NVA', 34, 70);
     },
     low(c, w, h) { c.fillStyle = '#b9bdc0'; c.fillRect(0, 0, w, h); nz(c, w, h, 600, 0.12); c.fillStyle = 'rgba(0,0,0,0.25)'; c.fillRect(0, h - 14, w, 14); c.fillStyle = '#e1b33a'; for (let i = 0; i < 4; i++) { c.save(); c.translate(i * 34, 0); c.fillRect(0, 20, 18, 12); c.restore(); } },
     decor: 'liman'

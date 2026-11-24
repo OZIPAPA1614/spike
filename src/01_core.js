@@ -1,6 +1,6 @@
 'use strict';
 /* =====================================================================
-   SPIKE — Taktik Nişancı
+   NOVA (eski adı SPIKE) — Taktik Nişancı
    01 · ÇEKİRDEK: sabitler, yardımcılar, harita, çarpışma, ışın izleme,
         görüş, A* yol bulma, silah/ajan veri tabloları
    ===================================================================== */

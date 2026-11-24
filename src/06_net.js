@@ -251,7 +251,7 @@ function selFinish() {
   for (const id in NET.conns) NET.conns[id]._last = performance.now() + 20000;
   launchGame(roster, s.cfg);
 }
-const BOT_NAMES = ['Kuzgun', 'Atlas', 'Nova', 'Poyraz', 'Kor', 'Demir', 'Yıldız', 'Tufan', 'Alaz', 'Bora', 'Kaya', 'Sarp'];
+const BOT_NAMES = ['Kuzgun', 'Atlas', 'Ege', 'Poyraz', 'Kor', 'Demir', 'Yıldız', 'Tufan', 'Alaz', 'Bora', 'Kaya', 'Sarp'];
 function buildRoster(humans, cfg) {
   const roster = humans.map(h => Object.assign({}, h));
   const names = shuffle(BOT_NAMES.slice());

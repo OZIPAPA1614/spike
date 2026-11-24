@@ -983,4 +983,4 @@ function startBgTicker() {
     if (!document.hidden) hostReconnect();
   });
 }
-window.addEventListener('DOMContentLoaded', () => { uiInit(); startBgTicker(); });
+window.addEventListener('DOMContentLoaded', () => splashStart(() => { uiInit(); startBgTicker(); })); // açılış ekranı (07f) çizildikten sonra yükle

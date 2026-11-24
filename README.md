@@ -1,4 +1,4 @@
-# SPIKE
+# NOVA (eski adı SPIKE)
 
 Tarayıcıda oynanan 3D taktik FPS (5v5, ajanlar, Spike kur/imha et).
 

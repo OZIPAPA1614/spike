@@ -47,7 +47,7 @@ sig = subprocess.Popen([sys.executable, os.path.join(ROOT, 'tests', 'sigserver.p
 fb = subprocess.Popen([sys.executable, os.path.join(ROOT, 'tests', 'fbmock.py'), str(FBP)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 time.sleep(0.8)
 URL = f'http://127.0.0.1:{PORT}/index.html'
-INIT = ("window.__PEER_OPTS={host:'127.0.0.1',port:%d,secure:false,path:'/'};" % SIG +
+INIT = ("window.__NOSPLASH=1;window.__PEER_OPTS={host:'127.0.0.1',port:%d,secure:false,path:'/'};" % SIG +
         "window.__FB_OPTS={auth:'http://127.0.0.1:%d/v1/',tok:'http://127.0.0.1:%d/token',db:'http://127.0.0.1:%d/db'};" % (FBP, FBP, FBP) +
         "try{localStorage.setItem('spk_mus','0');localStorage.setItem('spk_gfx','low');localStorage.setItem('spk_guest','1');}catch(e){}")
 
@@ -81,6 +81,21 @@ def report_errs(errs, where):
 try:
   with sync_playwright() as p:
     b = p.chromium.launch(executable_path=CHROME, args=ARGS)
+
+    # ---------- 1b) açılış ekranı (OZN studios → NOVA yükleme) ----------
+    errs = []
+    ctx = b.new_context(viewport={'width': 960, 'height': 540})
+    try:
+        SP = ctx.new_page()
+        SP.on('pageerror', lambda e: errs.append(f'AÇILIŞ sayfa hatası: {e}'))
+        SP.add_init_script("try{localStorage.setItem('spk_mus','0');localStorage.setItem('spk_guest','1');localStorage.setItem('spk_nick','Acilis');}catch(e){}")
+        SP.goto(URL); SP.wait_for_timeout(300)
+        if not SP.evaluate("() => !!document.getElementById('splash') && document.getElementById('splash').classList.contains('on')"): fail('açılış ekranı görünmedi')
+        elif not until(SP, "() => !document.getElementById('splash') && UI.screen==='scr-menu'", 60): fail('açılış ekranı kapanmadı / menü gelmedi')
+        else: ok('açılış ekranı: OZN studios → NOVA yükleme → menü')
+    except Exception as e: fail('açılış ekranı: ' + str(e)[:300])
+    report_errs(errs, 'açılış ekranı')
+    ctx.close()
 
     # ---------- 2) menüler ----------
     errs = []
