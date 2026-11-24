@@ -20,7 +20,7 @@ let MATCH_ROUNDS = 20, HALF_ROUNDS = 10; // maç 20 raunt sürer, 10. rauntten s
 const KIT_PRICE = 600, KIT_TIME = 1;
 /* EMOTE'lar: Z menüsü, 1–6 */
 const EMOTES = [{ k: 'wave', e: '👋', n: 'EL SALLA' }, { k: 'dance', e: '💃', n: 'DANS' }, { k: 'cheer', e: '🙌', n: 'SEVİN' }, { k: 'thumb', e: '👍', n: 'TAMAM' }, { k: 'laugh', e: '😂', n: 'GÜL' }, { k: 'gg', e: '🏆', n: 'GG' }];
-const EMOTE_TIME = 2.6;     // İMHA KİTİ: yalnızca savunanlar, Spike'ı 1 sn'de imha eder
+const EMOTE_TIME = 2.6;     // İMHA KİTİ: yalnızca savunanlar, bombayı 1 sn'de imha eder
 /* zıplama (tepe ≈ 1,05 m, havada ≈ 0,6 sn) ve reboot */
 const JUMP_V = 280, GRAV = 935, REBOOT_TIME = 4, REBOOT_CD = 15, REBOOT_R = 82;
 const HEAL_AMT = 50, HEAL_CD = 25, HEAL_R = 34, HEAL_MAX = 100; // can küresi: +50 can (en fazla 100), 25 sn'de yeniden çıkar
@@ -376,47 +376,47 @@ for (const k in WEAPONS) { const w = WEAPONS[k]; w.range = Math.round(w.range * 
    Sol tık: hızlı kesik (50, sırttan 100) · Sağ tık: ağır darbe (75, sırttan 150) */
 WEAPONS.sword = { vk: 0, name: 'Kılıç', type: 'Yakın Dövüş', slot: 3, price: 0, melee: true, dmg: 50, heavy: 75, hs: 1, rate: 1.7, heavyRate: 0.95, reach: 78,
   auto: true, mag: 1, res: 0, reload: 0, base: 0, move: 0, bloom: 0, bmax: 0, range: 78, fall: [], snd: 'sword', sway: 0, spd: 1.22, trace: '#ffffff', len: 30 };
-const ARMOR = { light: { name: 'Hafif Kalkan', price: 400, val: 25 }, heavy: { name: 'Ağır Kalkan', price: 1000, val: 50 } };
+const ARMOR = { light: { name: 'Hafif Zırh', price: 400, val: 25 }, heavy: { name: 'Ağır Zırh', price: 1000, val: 50 } };
 
 /* ---------- AJANLAR ---------- */
 const AGENTS = {
-  vex: { name: 'KUZGUN', role: 'Düellocu', color: '#a86bff', icon: 'K',
+  vex: { name: 'KUZGUN', role: 'Akıncı', color: '#a86bff', icon: 'K',
     q: { name: 'Gölge Atılma', cost: 150, max: 2, desc: 'Hareket ettiğin yöne doğru anında hızlı bir atılma yapar.' },
     e: { name: 'Hayalet Örtüsü', cost: 200, max: 1, free: true, desc: '3.5 sn görünmez olursun. Ateş etmek görünmezliği bozar.' },
     x: { name: 'Karanlık Kesik', pts: 6, desc: 'Duvarlardan geçen, haritanın öbür ucuna kadar giden ve değdiği her düşmanı tek vuruşta öldüren dev bir enerji bıçağı fırlatır.' } },
-  ignis: { name: 'ALAZ', role: 'Düellocu', color: '#ff8a3d', icon: 'A',
+  ignis: { name: 'ALAZ', role: 'Akıncı', color: '#ff8a3d', icon: 'A',
     q: { name: 'Alev Topu', cost: 250, max: 2, desc: 'Patladığı noktaya bakan düşmanları kör eden alev topu (flash).' },
     e: { name: 'Ateş Duvarı', cost: 200, max: 1, free: true, desc: 'Görüşü kesen, düşmanları yakan ateş duvarı. ALAZ alevin içinde iyileşir.' },
-    x: { name: 'Anka Doğuşu', pts: 5, desc: '15 sn klon modu: bu sürede ölürsen ultiyi açtığın noktada tam can ve zırhla yeniden doğarsın.' } },
-  mist: { name: 'PUS', role: 'Kontrol Uzmanı', color: '#8a8cff', icon: 'P',
+    x: { name: 'Küllerden Doğuş', pts: 5, desc: '15 sn klon modu: bu sürede ölürsen ultiyi açtığın noktada tam can ve zırhla yeniden doğarsın.' } },
+  mist: { name: 'PUS', role: 'Stratejist', color: '#8a8cff', icon: 'P',
     q: { name: 'Sis Küresi', cost: 100, max: 3, free: true, desc: 'İmlecin olduğu yere, duvarların üzerinden görüş kesen duman küresi yerleştirir.' },
-    e: { name: 'Zehir Bulutu', cost: 200, max: 1, desc: 'İçindeki düşmanları %45 yavaşlatan ve zehirleyen bulut.' },
+    e: { name: 'Zehir Sisi', cost: 200, max: 1, desc: 'İçindeki düşmanları %45 yavaşlatan ve zehirleyen bulut.' },
     x: { name: 'Kabus Alanı', pts: 6, desc: 'Devasa bir alanı 13 sn zehirli sisle kaplar; içerideki düşmanlar yavaşlar, canları hızla 1\'e iner ve yerleri açığa çıkar.' } },
-  aegis: { name: 'SUR', role: 'Gözcü', color: '#ffd166', icon: 'S',
+  aegis: { name: 'SUR', role: 'Bekçi', color: '#ffd166', icon: 'S',
     q: { name: 'Tuzak Mayını', cost: 200, max: 2, desc: 'Düşman yaklaştığında patlayan gizli mayın (aynı anda en fazla 2).' },
     e: { name: 'Mini Taret', cost: 0, max: 1, free: true, desc: 'Görüş konisine giren düşmanlara otomatik ateş eden taret.' },
     x: { name: 'Mutlak Kilit', pts: 6, desc: 'Kurulan cihaz 3 sn sonra çok geniş alandaki tüm düşmanları 7.5 sn sersemletir; silah ve yetenek kullanamazlar.' } },
-  pulse: { name: 'YANKI', role: 'Öncü', color: '#3ec1ff', icon: 'Y',
+  pulse: { name: 'YANKI', role: 'İzci', color: '#3ec1ff', icon: 'Y',
     q: { name: 'Sonar Oku', cost: 150, max: 2, free: true, desc: 'Saplandığı yerde iki kez tarama yapar, duvar arkasındaki düşmanları gösterir. 1 kez seker.' },
     e: { name: 'Şok Oku', cost: 200, max: 2, desc: 'İki kez sekip patlayan, alan hasarı veren ok.' },
     x: { name: 'Yörünge Lazeri', pts: 6, desc: 'Seçtiğin koridor boyunca haritanın sonuna kadar uzanan, duvarları delen dört ölümcül enerji huzmesi indirir.' } },
-  chrono: { name: 'ÇAĞ', role: 'Kontrol Uzmanı', color: '#4be0a8', icon: 'Ç',
+  chrono: { name: 'ÇAĞ', role: 'Stratejist', color: '#4be0a8', icon: 'Ç',
     q: { name: 'Zaman Küresi', cost: 200, max: 1, desc: 'İçine giren düşman mermilerini durduran zaman küresi.' },
     e: { name: 'Kuantum Sıçrama', cost: 150, max: 2, free: true, desc: 'İmleç yönünde kısa mesafeli ışınlanma.' },
     x: { name: 'Zaman Çöküşü', pts: 6, desc: 'Seçilen geniş bölgedeki düşmanların hareket ve ateş hızını %78 yavaşlatır ve onlara hasar verir.' } },
-  terra: { name: 'TOPRAK', role: 'Öncü', color: '#d4a25f', icon: 'T',
+  terra: { name: 'TOPRAK', role: 'İzci', color: '#d4a25f', icon: 'T',
     q: { name: 'Sarsıntı Dalgası', cost: 200, max: 2, desc: 'İleri giden şok dalgası; değdiği düşmanların nişanını 3 sn bozar.' },
     e: { name: 'Taş Siper', cost: 0, max: 1, free: true, desc: 'Önüne geçici, kurşun geçirmez taş duvar örer (vurularak yıkılabilir).' },
     x: { name: 'Tektonik Yarık', pts: 6, desc: 'Önündeki çok uzun bir hattı yarar; üzerindeki düşmanları havaya savurur, sersemletir ve ağır hasar verir.' } },
-  vital: { name: 'DERMAN', role: 'Gözcü', color: '#7cf29a', icon: '✚',
-    q: { name: 'Şifa Küresi', cost: 150, max: 2, free: true, desc: 'İçindeki takım arkadaşlarını (ve seni) iyileştiren şifa alanı.' },
+  vital: { name: 'DERMAN', role: 'Bekçi', color: '#7cf29a', icon: '✚',
+    q: { name: 'Derman Halkası', cost: 150, max: 2, free: true, desc: 'İçindeki takım arkadaşlarını (ve seni) iyileştiren şifa alanı.' },
     e: { name: 'Buz Zemini', cost: 200, max: 2, desc: 'Düşmanları %50 yavaşlatan buz zemini.' },
-    x: { name: 'Diriliş', pts: 6, desc: 'Yakınındaki ölmüş bir takım arkadaşını tam can ve zırhla diriltir; yakındaki canlı takım arkadaşlarını da tam iyileştirir.' } },
-  volt: { name: 'ŞİMŞEK', role: 'Düellocu', color: '#f7f35a', icon: 'ϟ',
+    x: { name: 'Yeniden Uyanış', pts: 6, desc: 'Yakınındaki ölmüş bir takım arkadaşını tam can ve zırhla diriltir; yakındaki canlı takım arkadaşlarını da tam iyileştirir.' } },
+  volt: { name: 'ŞİMŞEK', role: 'Akıncı', color: '#f7f35a', icon: 'ϟ',
     q: { name: 'Akım Kayması', cost: 100, max: 2, desc: 'Ani kayma + 4 sn %35 hız artışı.' },
     e: { name: 'Zincir Yük', cost: 200, max: 1, free: true, desc: 'Düşmandan düşmana seken elektrik yükü.' },
     x: { name: 'Aşırı Yük', pts: 6, desc: '11 sn hareket hızın iki katına çıkar ve parmaklarından uzun menzilli, kesintisiz, yüksek hasarlı elektrik ışını ateşlersin.' } },
-  phantom: { name: 'BÖRÜ', role: 'Öncü', color: '#9aa7c7', icon: 'B',
+  phantom: { name: 'BÖRÜ', role: 'İzci', color: '#9aa7c7', icon: 'B',
     q: { name: 'Sağırlık Küresi', cost: 200, max: 1, desc: 'İçindeki düşmanları sağır eder: ses duyamazlar, minimap uyarıları kesilir.' },
     e: { name: 'Gölge Kurdu', cost: 250, max: 2, free: true, desc: 'İleri koşup en yakın düşmanı takip eden kurt; yakaladığını yakın görüşlü yapar ve açığa çıkarır.' },
     x: { name: 'Karanlık Örtü', pts: 6, desc: '13 sn boyunca tüm düşmanların haritası kararır, görüş mesafeleri minimuma iner ve 4 sn yerleri açığa çıkar.' } }

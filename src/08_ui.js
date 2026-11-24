@@ -696,10 +696,10 @@ function uiRenderBuy() {
   for (const id of ['classic', 'sheriff']) html += item(id, WEAPONS[id].name, wsub(WEAPONS[id]), WEAPONS[id].price, me.secondary === id);
   html += '</div></div><div class="cat"><h4>SİLAHLAR</h4><div class="row">';
   for (const id of ['spectre', 'vandal', 'phantom', 'railgun', 'operator']) html += item(id, WEAPONS[id].name, WEAPONS[id].type + ' · ' + wsub(WEAPONS[id]), WEAPONS[id].price, me.primary === id);
-  html += '</div></div><div class="cat"><h4>KALKAN</h4><div class="row">';
-  html += item('light', 'Hafif Kalkan', '+25 zırh', 400, me.armor >= 25);
-  html += item('heavy', 'Ağır Kalkan', '+50 zırh', 1000, me.armor >= 50);
-  if (sideOf(me.team) === 'def') html += item('kit', '✂ İmha Kiti', 'Spike\'ı 1 saniyede imha et · ölünce gider', KIT_PRICE, !!me.kit);
+  html += '</div></div><div class="cat"><h4>ZIRH</h4><div class="row">';
+  html += item('light', 'Hafif Zırh', '+25 zırh', 400, me.armor >= 25);
+  html += item('heavy', 'Ağır Zırh', '+50 zırh', 1000, me.armor >= 50);
+  if (sideOf(me.team) === 'def') html += item('kit', '✂ İmha Kiti', 'Bombayı 1 saniyede imha et · ölünce gider', KIT_PRICE, !!me.kit);
   html += '</div></div><div class="cat"><h4>YETENEKLER — ' + ag.name + '</h4><div class="row">';
   for (const k of ['q', 'e']) {
     const ab = ag[k];

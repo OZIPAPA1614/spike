@@ -10,8 +10,8 @@ const UI = { overlay: false, buyOpen: false, pauseOpen: false, board: false, scr
 const KEYS = {}, MOUSE = { x: 640, y: 360, down: false, right: false, fp: 0 };
 const LOOK = { yaw: 0, pitch: 0 };
 const FONT = '"Bahnschrift","DIN Alternate","Arial Narrow","Roboto Condensed","Segoe UI",Arial,sans-serif';
-const SRC_NAMES = { sword: 'Kılıç', blade: 'Karanlık Kesik', fire: 'Ateş Duvarı', poison: 'Zehir Bulutu', mine: 'Tuzak Mayını', turret: 'Mini Taret', shock: 'Şok Oku', orbital: 'Yörünge Lazeri', quake: 'Sarsıntı Dalgası', rift: 'Tektonik Yarık', chain: 'Zincir Yük', overload: 'Aşırı Yük', wolf: 'Gölge Kurdu', spike: 'SPIKE', nightmare: 'Kabus Alanı', tcollapse: 'Zaman Çöküşü', railgun: 'Railgun' };
-const REASONS = { elim: 'Rakip takım elendi', time: 'Süre doldu', spike: 'Spike patladı', defuse: 'Spike imha edildi' };
+const SRC_NAMES = { sword: 'Kılıç', blade: 'Karanlık Kesik', fire: 'Ateş Duvarı', poison: 'Zehir Sisi', mine: 'Tuzak Mayını', turret: 'Mini Taret', shock: 'Şok Oku', orbital: 'Yörünge Lazeri', quake: 'Sarsıntı Dalgası', rift: 'Tektonik Yarık', chain: 'Zincir Yük', overload: 'Aşırı Yük', wolf: 'Gölge Kurdu', spike: 'BOMBA', nightmare: 'Kabus Alanı', tcollapse: 'Zaman Çöküşü', railgun: 'Railgun' };
+const REASONS = { elim: 'Rakip takım elendi', time: 'Süre doldu', spike: 'Bomba patladı', defuse: 'Bomba imha edildi' };
 
 function initRender() {
   glcv = document.getElementById('gl'); cv = document.getElementById('hud'); ctx = cv.getContext('2d');
@@ -182,7 +182,7 @@ function handleEvent(ev) {
     case 'round': {
       const side = me ? sideOf(me.team) : 'atk';
       if (ev.n === MATCH_ROUNDS) setTimeout(() => showMsg(null, 'SON RAUNT!', PAL.gold), 900);
-      showMsg('RAUNT ' + ev.n + ' / ' + MATCH_ROUNDS, side === 'atk' ? 'SALDIRI — Spike\'ı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, Spike\'ı imha et', side === 'atk' ? PAL.red : PAL.teal, 3);
+      showMsg('RAUNT ' + ev.n + ' / ' + MATCH_ROUNDS, side === 'atk' ? 'SALDIRI — Bombayı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, bombayı imha et', side === 'atk' ? PAL.red : PAL.teal, 3);
       AU.play('round'); G.spec = null; UIS.deathBy = undefined; UIS.pings.length = 0;
       LOOK.yaw = side === 'atk' ? -Math.PI / 2 : Math.PI / 2; LOOK.pitch = 0;
       if (ev.n === 1 && G.running) cineStart('match'); // maç başı sinematik giriş
@@ -196,7 +196,7 @@ function handleEvent(ev) {
       break;
     }
     case 'plant':
-      showMsg('SPIKE KURULDU', (ev.site || '') + ' BÖLGESİ — ' + SPIKE_TIME + ' SANİYE', PAL.red, 3);
+      showMsg('BOMBA KURULDU', (ev.site || '') + ' BÖLGESİ — ' + SPIKE_TIME + ' SANİYE', PAL.red, 3);
       AU.play('plant', ev.x, ev.y); UIS.beepT = 0;
       break;
     case 'ult': {
@@ -286,7 +286,7 @@ function drawTopBar(me) {
     drawSpikeIcon(cx, y + 20, 13, blink);
     txt(Math.ceil(sp.t) + 's', cx + 34, y + 21, 14, PAL.red, 'center');
   }
-  const phaseName = S.phase === 'buy' ? 'SATIN ALMA' : S.phase === 'planted' ? 'SPIKE KURULU' : S.phase === 'end' ? 'RAUNT SONU' : S.phase === 'over' ? 'MAÇ BİTTİ' : 'RAUNT ' + S.round + '/' + MATCH_ROUNDS;
+  const phaseName = S.phase === 'buy' ? 'SATIN ALMA' : S.phase === 'planted' ? 'BOMBA KURULU' : S.phase === 'end' ? 'RAUNT SONU' : S.phase === 'over' ? 'MAÇ BİTTİ' : 'RAUNT ' + S.round + '/' + MATCH_ROUNDS;
   txt(phaseName, cx, y + 40, 11, S.phase === 'buy' ? PAL.gold : PAL.dim, 'center');
   ctx.fillStyle = 'rgba(30,227,207,0.92)'; ctx.fillRect(cx - 124, y, 60, 48);
   txt(String(myScore), cx - 94, y + 25, 30, '#062a27', 'center');
@@ -445,7 +445,7 @@ function drawBottom(me) {
   if (st.blind > 0) chips.push(['KÖR', st.blind]); if (st.deaf > 0) chips.push(['SAĞIR', st.deaf]); if (st.lock > 0) chips.push(['KİLİTLİ', st.lock]);
   if (st.concuss > 0) chips.push(['SARSILMIŞ', st.concuss]); if (st.knock > 0) chips.push(['HAVADA', st.knock]); if (st.near > 0) chips.push(['YAKIN GÖRÜŞ', st.near]);
   if (st.shroud > 0) chips.push(['KARANLIK', st.shroud]); if (st.reveal > 0) chips.push(['AÇIĞA ÇIKTIN', st.reveal]); if (me.zoneSlow < 1 || st.slow > 0) chips.push(['YAVAŞ', st.slow || 0]);
-  if (st.invis > 0) chips.push(['GÖRÜNMEZ', st.invis]); if (st.clone > 0) chips.push(['ANKA KLONU', st.clone]); if (st.ovl > 0) chips.push(['AŞIRI YÜK', st.ovl]); if (st.boost > 0) chips.push(['HIZ', st.boost]);
+  if (st.invis > 0) chips.push(['GÖRÜNMEZ', st.invis]); if (st.clone > 0) chips.push(['KÜL KLONU', st.clone]); if (st.ovl > 0) chips.push(['AŞIRI YÜK', st.ovl]); if (st.boost > 0) chips.push(['HIZ', st.boost]);
   let cxp = W / 2 - chips.length * 50;
   for (const c of chips) {
     panel(cxp, by - 26, 96, 20, 0.85);
@@ -480,8 +480,8 @@ function drawHints(me) {
   let h = null;
   const sp = S.spike;
   if (S.phase === 'buy' && me.alive) h = '[B] MAĞAZA · ' + Math.ceil(S.phaseT) + ' sn';
-  else if (me.alive && me.hasSpike && S.phase === 'live') h = siteAt(me.x, me.y) ? '[F] BASILI TUT: SPIKE KUR' : 'SPIKE SENDE — A/B bölgesine götür · [G] bırak';
-  else if (me.alive && S.phase === 'planted' && sideOf(me.team) === 'def' && dist(me.x, me.y, sp.x, sp.y) < 58) h = '[F] BASILI TUT: SPIKE İMHA ET' + (me.kit ? ' · KİT: 1 SN' : '');
+  else if (me.alive && me.hasSpike && S.phase === 'live') h = siteAt(me.x, me.y) ? '[F] BASILI TUT: BOMBA KUR' : 'BOMBA SENDE — A/B bölgesine götür · [G] bırak';
+  else if (me.alive && S.phase === 'planted' && sideOf(me.team) === 'def' && dist(me.x, me.y, sp.x, sp.y) < 58) h = '[F] BASILI TUT: BOMBA İMHA ET' + (me.kit ? ' · KİT: 1 SN' : '');
   const myCards = me.alive ? (S.cards || []).filter(c => c.carrier === me.id) : [];
   if (myCards.length && (S.phase === 'live' || S.phase === 'planted')) {
     let near = -1; (MAPDATA.reboot || []).forEach((r, i) => { if (dist(me.x, me.y, r.x, r.y) < REBOOT_R) near = i; });
@@ -490,10 +490,10 @@ function drawHints(me) {
     else if (!h) h = '🂠 KART: ' + names + ' — A veya B\'deki REBOOT istasyonuna götür';
   }
   if (!h && me.alive && sideOf(me.team) === 'atk' && !me.hasSpike && sp.state === 'carried' && (S.phase === 'live' || S.phase === 'buy')) {
-    const c = S.pmap[sp.carrier]; if (c && c.team === me.team && !IS_TOUCH && S.phase !== 'buy') h = 'SPIKE: ' + c.name + ' · [T] İSTE';
+    const c = S.pmap[sp.carrier]; if (c && c.team === me.team && !IS_TOUCH && S.phase !== 'buy') h = 'BOMBA: ' + c.name + ' · [T] İSTE';
   }
   if (h) { ctx.font = 'bold 14px ' + FONT; const tw = ctx.measureText(tl(h)).width + 30; panel(W / 2 - tw / 2, H - 140, tw, 26, 0.8); txt(h, W / 2, H - 127, 14, PAL.gold, 'center'); }
-  const prog = me.plantT > 0 ? [me.plantT / PLANT_TIME, 'SPIKE KURULUYOR'] : me.defT > 0 ? [me.defT / DEFUSE_TIME, 'SPIKE İMHA EDİLİYOR'] : me.rbT > 0 ? [me.rbT / REBOOT_TIME, 'REBOOT EDİLİYOR'] : null;
+  const prog = me.plantT > 0 ? [me.plantT / PLANT_TIME, 'BOMBA KURULUYOR'] : me.defT > 0 ? [me.defT / DEFUSE_TIME, 'BOMBA İMHA EDİLİYOR'] : me.rbT > 0 ? [me.rbT / REBOOT_TIME, 'REBOOT EDİLİYOR'] : null;
   if (prog) {
     const w = 320, x = W / 2 - w / 2, y = H / 2 + 70;
     panel(x - 4, y - 22, w + 8, 40, 0.88);
@@ -648,10 +648,10 @@ function drawMobileStats(me) {
   const st = me.st, chips = [];
   if (st.blind > 0) chips.push('KÖR'); if (st.deaf > 0) chips.push('SAĞIR'); if (st.lock > 0) chips.push('KİLİTLİ'); if (st.concuss > 0) chips.push('SARSILMIŞ');
   if (st.near > 0) chips.push('YAKIN GÖRÜŞ'); if (st.shroud > 0) chips.push('KARANLIK'); if (st.reveal > 0) chips.push('AÇIĞA ÇIKTIN'); if (st.invis > 0) chips.push('GÖRÜNMEZ');
-  if (st.clone > 0) chips.push('ANKA'); if (st.ovl > 0) chips.push('AŞIRI YÜK'); if (me.zoneSlow < 1 || st.slow > 0) chips.push('YAVAŞ');
+  if (st.clone > 0) chips.push('KÜL'); if (st.ovl > 0) chips.push('AŞIRI YÜK'); if (me.zoneSlow < 1 || st.slow > 0) chips.push('YAVAŞ');
   if (chips.length) txt(chips.join(' · '), x, y + 78, 11, PAL.gold);
 }
-/* Dünya işaretleri: takım arkadaşı isimleri, Spike konumu, hasar sayıları */
+/* Dünya işaretleri: takım arkadaşı isimleri, bomba konumu, hasar sayıları */
 function drawWorldMarkers(dt, me, v) {
   if (!GLX.ok) return;
   const mt = me ? me.team : 0;

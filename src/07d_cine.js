@@ -19,9 +19,9 @@ function cineMatchShots() {
     { d: 2.3, p0: [cx - big * 0.42, hi * 1.05, cz + WH * 0.62], p1: [cx + big * 0.12, hi * 0.85, cz + WH * 0.58], l0: [cx, 0, cz - WH * 0.05], l1: [cx, 0, cz - WH * 0.1],
       title: m.name, sub: m.desc, col: PAL.white },
     { d: 1.8, p0: [A.x - 1100, 760, A.y + 820], p1: [A.x - 260, 460, A.y + 620], l0: [A.x, 20, A.y], l1: [A.x + 80, 20, A.y],
-      title: 'A BÖLGESİ', sub: 'Spike burada kurulabilir', col: PAL.gold },
+      title: 'A BÖLGESİ', sub: 'Bomba burada kurulabilir', col: PAL.gold },
     { d: 1.8, p0: [B.x + 1100, 760, B.y + 820], p1: [B.x + 260, 460, B.y + 620], l0: [B.x, 20, B.y], l1: [B.x - 80, 20, B.y],
-      title: 'B BÖLGESİ', sub: 'Spike burada kurulabilir', col: PAL.gold },
+      title: 'B BÖLGESİ', sub: 'Bomba burada kurulabilir', col: PAL.gold },
     { d: INTRO_TIME - 5.9, me: true, title: 'TAKIMLAR', col: PAL.teal }
   ];
 }
@@ -91,7 +91,7 @@ function drawCine(dt, me) {
     }
     { const g = ctx.createLinearGradient(0, H - bh - 90 * sm, 0, H - bh); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.7)'); ctx.fillStyle = g; ctx.fillRect(0, H - bh - 90 * sm, W, 90 * sm); }
     txt('RAUNT 1 / ' + MATCH_ROUNDS, W / 2, H - bh - 46 * sm, Math.round(30 * sm), PAL.white, 'center');
-    txt(me && sideOf(me.team) === 'atk' ? 'SALDIRI — Spike\'ı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, Spike\'ı imha et', W / 2, H - bh - 18 * sm, Math.round(14 * sm), me && sideOf(me.team) === 'atk' ? PAL.red : PAL.teal, 'center', 'normal');
+    txt(me && sideOf(me.team) === 'atk' ? 'SALDIRI — Bombayı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, bombayı imha et', W / 2, H - bh - 18 * sm, Math.round(14 * sm), me && sideOf(me.team) === 'atk' ? PAL.red : PAL.teal, 'center', 'normal');
   } else if (s.title) {
     const y = H - bh - 70 * sm;
     { const g = ctx.createLinearGradient(0, 0, W * 0.6, 0); g.addColorStop(0, 'rgba(0,0,0,0.55)'); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.fillRect(0, y - 50 * sm, W * 0.6, 100 * sm); }

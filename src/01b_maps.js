@@ -188,24 +188,24 @@ const THEMES = {
    (A ↔ B adil). Ortada doğuş odaları ve orta meydan; geri kalan alan çok yollu bağlı odalar,
    kıvrımlı koridorlar ve bol engelle doludur. Boyutlar ilk geniş sürümün her yönde 4 katıdır. */
 const MAPS = [
-  // Boyutlar gerçek VALORANT haritalarından esinlenmiştir: koşarak saldıran doğuşundan bölgeye ~18–25 sn,
-  // A↔B dönüşü ~12–20 sn (Liman, Breeze gibi geniş: ~25 sn). 1 karo = 2 m, koşu hızı 6,25 m/sn.
-  { id: 'merkez', name: 'MERKEZ', desc: 'Kapalı tesis · Bind gibi derli toplu, dar dönüşler', w: 104, h: 76, theme: THEMES.merkez,
+  // Boyutlar: koşarak saldıran doğuşundan bölgeye ~18–25 sn,
+  // A↔B dönüşü ~12–20 sn (Liman gibi geniş haritalarda ~25 sn). 1 karo = 2 m, koşu hızı 6,25 m/sn.
+  { id: 'merkez', name: 'MERKEZ', desc: 'Kapalı tesis · derli toplu, dar dönüşler', w: 104, h: 76, theme: THEMES.merkez,
     gen: { room: [10, 16], corr: [4, 4], fill: 0.36, gap: 5, loops: 0.35, dens: 34, site: [20, 15], mid: [20, 14], obs: { crate: 5, low: 2, pillar: 2 }, water: 0,
       names: ['DEPO', 'LAB', 'JENERATÖR', 'SUNUCU', 'OFİS', 'HANGAR', 'KONTROL', 'ARŞİV'] } },
-  { id: 'liman', name: 'LİMAN', desc: 'Konteyner limanı · Breeze gibi geniş ve açık · gündüz', w: 140, h: 96, theme: THEMES.liman,
+  { id: 'liman', name: 'LİMAN', desc: 'Konteyner limanı · geniş ve açık · gündüz', w: 140, h: 96, theme: THEMES.liman,
     gen: { room: [13, 22], corr: [5, 6], fill: 0.40, gap: 5, loops: 0.3, dens: 30, site: [26, 19], mid: [26, 18], obs: { crate: 7, low: 2, pillar: 1 }, water: 0.35,
       names: ['DOK', 'VİNÇ', 'GÜMRÜK', 'AMBAR', 'RIHTIM', 'TERSANE', 'İSKELE', 'YÜKLEME'] } },
-  { id: 'col', name: 'ÇÖL HARABESİ', desc: 'Antik kalıntılar · Ascent gibi geniş orta avlu', w: 120, h: 84, theme: THEMES.col,
+  { id: 'col', name: 'ÇÖL HARABESİ', desc: 'Antik kalıntılar · geniş orta avlu', w: 120, h: 84, theme: THEMES.col,
     gen: { room: [11, 18], corr: [4, 5], fill: 0.37, gap: 5, loops: 0.35, dens: 30, site: [22, 17], mid: [30, 20], obs: { crate: 2, low: 5, pillar: 4 }, water: 0.08,
       names: ['MEZAR', 'SÜTUNLAR', 'KUYU', 'PAZAR', 'KERVANSARAY', 'HAN', 'ÇEŞME', 'HAMAM'] } },
-  { id: 'buzul', name: 'BUZUL ÜSSÜ', desc: 'Kutup üssü · Icebox gibi uzun hatlar, donmuş havuzlar', w: 120, h: 88, theme: THEMES.buzul,
+  { id: 'buzul', name: 'BUZUL ÜSSÜ', desc: 'Kutup üssü · uzun hatlar, donmuş havuzlar', w: 120, h: 88, theme: THEMES.buzul,
     gen: { seed: 'v4', room: [11, 18], corr: [4, 5], fill: 0.37, gap: 5, loops: 0.3, dens: 30, site: [22, 17], mid: [22, 16], obs: { crate: 5, low: 3, pillar: 2 }, water: 0.3,
       names: ['LAB', 'HANGAR', 'RADAR', 'JENERATÖR', 'DEPO', 'REVİR', 'YAKIT', 'SERA'] } },
-  { id: 'tapinak', name: 'ORMAN TAPINAĞI', desc: 'Tapınak şehri · Haven/Lotus gibi dolambaçlı yollar, gölet', w: 128, h: 88, theme: THEMES.tapinak,
+  { id: 'tapinak', name: 'ORMAN TAPINAĞI', desc: 'Tapınak şehri · dolambaçlı yollar, gölet', w: 128, h: 88, theme: THEMES.tapinak,
     gen: { seed: 'v4', room: [11, 18], corr: [4, 5], fill: 0.37, gap: 5, loops: 0.4, dens: 30, site: [22, 17], mid: [22, 16], obs: { crate: 2, low: 4, pillar: 3 }, water: 0.35,
       names: ['SUNAK', 'HARABE', 'KUYU', 'AĞAÇ EV', 'MAĞARA', 'KULE', 'BAHÇE', 'HEYKEL'] } },
-  { id: 'neon', name: 'NEON ŞEHİR', desc: 'Gece şehri · Split gibi sıkışık sokaklar, pasajlar', w: 108, h: 84, theme: THEMES.neon,
+  { id: 'neon', name: 'NEON ŞEHİR', desc: 'Gece şehri · sıkışık sokaklar, pasajlar', w: 108, h: 84, theme: THEMES.neon,
     gen: { room: [10, 16], corr: [4, 5], fill: 0.38, gap: 5, loops: 0.4, dens: 30, site: [20, 16], mid: [20, 14], obs: { crate: 4, low: 4, pillar: 2 }, water: 0.05,
       names: ['ÇARŞI', 'OTOPARK', 'METRO', 'SAHNE', 'KULÜP', 'OTEL', 'PASAJ', 'GARAJ'] } },
   // ---- 5 yeni dokulu harita (mevcutlar kadar büyük) ----
@@ -558,7 +558,7 @@ function placeSpeakers() {
   }
   return res;
 }
-/* Raunt ve Spike süreleri haritadaki yürüme mesafesine göre */
+/* Raunt ve bomba süreleri haritadaki yürüme mesafesine göre */
 function mapTimers() {
   const dA = bfsFrom(T_ATK), dS = bfsFrom(T_A);
   const at = p => { const k = p[1] * MW + p[0]; return dA[k] >= 0 ? dA[k] : 0; };

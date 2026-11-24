@@ -194,7 +194,7 @@ function botGoal(p, ai) {
   }
   // SAVUNMA
   if (sp.state === 'planted') {
-    // AZİM: kurulu Spike'ı geri almak için birlikte gir, zaman daralınca ne olursa olsun imha et
+    // AZİM: kurulu bombayı geri almak için birlikte gir, zaman daralınca ne olursa olsun imha et
     const d = dist(p.x, p.y, sp.x, sp.y), need = (DEFUSE_TIME - (sp.half ? DEFUSE_TIME / 2 : 0)) / (p.kit ? DEFUSE_TIME / KIT_TIME : 1);
     const critical = sp.t < need + 2.5;
     if (d < 40) {
@@ -243,7 +243,7 @@ function rebootGoal(p, ai) {
   if (!S.cards || !S.cards.length || !MAPDATA.reboot || !MAPDATA.reboot.length) return null;
   if ((S.phase !== 'live' && S.phase !== 'planted') || ai.visNow) return null;
   const side = sideOf(p.team), sp = S.spike;
-  if (side === 'def' && sp.state === 'planted' && sp.t < 30) return null;   // önce Spike
+  if (side === 'def' && sp.state === 'planted' && sp.t < 30) return null;   // önce bomba
   if (p.hasSpike && S.phase === 'live') return null;                         // taşıyıcı kurulumdan sapmaz
   const mine = S.cards.filter(c => c.carrier === p.id);
   if (mine.length) {

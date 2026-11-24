@@ -308,8 +308,8 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
   <div class="tb xs" id="tbPause" data-act="pause">❚❚</div>
   <div class="tb xs" id="tbBoard" data-act="board">SKOR</div>
   <div class="tb xs" id="tbBuy" data-act="buy">MAĞAZA</div>
-  <div class="tb xs hidden" id="tbDrop" data-act="drop">SPIKE BIRAK</div>
-  <div class="tb xs hidden" id="tbReq" data-act="req">SPIKE İSTE</div>
+  <div class="tb xs hidden" id="tbDrop" data-act="drop">BOMBA BIRAK</div>
+  <div class="tb xs hidden" id="tbReq" data-act="req">BOMBA İSTE</div>
   <div class="tb" id="tbJump" data-act="jump">ZIPLA</div>
   <div class="tb xs" id="tbMic" data-act="mic">🎤 KONUŞ</div>
   <div class="tb xs" id="tbChat" data-act="chat">💬 SOHBET</div>
@@ -321,7 +321,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
 
 <div id="scr-menu" class="screen">
   <div class="menu-col">
-    <div class="tagline">TAKTİKSEL 5v5 · SPIKE · AJANLAR</div>
+    <div class="tagline">TAKTİKSEL 5v5 · BOMBA · AJANLAR</div>
     <button id="btnPlay" class="primary big">OYNA</button>
     <button id="btnStore" class="store big">💎 MAĞAZA</button>
     <button id="btnSettings" class="big">AYARLAR</button>
@@ -332,7 +332,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
 
 <div id="scr-play" class="screen hidden">
   <div class="menu-col">
-    <div class="tagline">TAKTİKSEL 5v5 · SPIKE · AJANLAR</div>
+    <div class="tagline">TAKTİKSEL 5v5 · BOMBA · AJANLAR</div>
     <h2 class="playh">OYNA</h2>
     <button id="btnSP" class="primary">TEK OYUNCULU · BOTLARA KARŞI</button>
     <button id="btnHost">ODA KUR (HOST)</button>
@@ -349,10 +349,10 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <h2>TEK OYUNCULU</h2>
     <div class="sub" id="spSub">Botlara karşı tam maç · 20 raunt · 10. rauntten sonra taraf değişir</div>
     <div class="grid2">
-      <div style="grid-column:1/3"><label>OYUN MODU</label><select id="spMode"><option value="spike">SPIKE · 5v5 taktik maç</option><option value="pk">PARKUR · kılıçla engel yarışı (5 parkur)</option></select></div>
+      <div style="grid-column:1/3"><label>OYUN MODU</label><select id="spMode"><option value="spike">KLASİK · 5v5 taktik bomba maçı</option><option value="pk">PARKUR · kılıçla engel yarışı (5 parkur)</option></select></div>
       <div><label id="spSizeL">TAKIM BOYUTU</label><select id="spSize"><option value="1">1v1</option><option value="2">2v2</option><option value="3">3v3</option><option value="4">4v4</option><option value="5" selected>5v5</option></select></div>
       <div><label>BOT ZORLUĞU</label><select id="spDiff"><option value="kolay">Kolay</option><option value="normal" selected>Normal</option><option value="zor">Zor</option></select></div>
-      <div id="spSideRow"><label>İLK YARI TARAFI</label><select id="spSide"><option value="atk">Saldıran (Spike sende)</option><option value="def">Savunan</option></select></div>
+      <div id="spSideRow"><label>İLK YARI TARAFI</label><select id="spSide"><option value="atk">Saldıran (Bomba sende)</option><option value="def">Savunan</option></select></div>
       <div id="spMapRow"><label>HARİTA</label><select id="spMap"></select></div>
       <div style="grid-column:1/3" class="note" id="spMapNote"></div>
     </div>
@@ -384,7 +384,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <div class="grid2">
       <div><label>TAKIM BOYUTU</label><select id="lbSize"><option value="1">1v1</option><option value="2">2v2</option><option value="3">3v3</option><option value="4">4v4</option><option value="5" selected>5v5</option></select></div>
       <div><label>BOT ZORLUĞU</label><select id="lbDiff"><option value="kolay">Kolay</option><option value="normal" selected>Normal</option><option value="zor">Zor</option></select></div>
-      <div style="grid-column:1/3"><label>OYUN MODU</label><select id="lbMode"><option value="spike">SPIKE · 5v5 taktik maç</option><option value="pk">PARKUR · kılıçla engel yarışı (5 parkur)</option></select></div>
+      <div style="grid-column:1/3"><label>OYUN MODU</label><select id="lbMode"><option value="spike">KLASİK · 5v5 taktik bomba maçı</option><option value="pk">PARKUR · kılıçla engel yarışı (5 parkur)</option></select></div>
       <div style="grid-column:1/3" id="lbMapRow"><label>HARİTA</label><select id="lbMap"></select></div>
       <div style="grid-column:1/3"><button id="lbFF" type="button" class="fftog">TAKIM ATEŞİ: AÇIK</button></div>
       <div style="grid-column:1/3"><label><input type="checkbox" id="lbFill" checked style="width:auto;margin-right:8px;vertical-align:middle">BOŞ SLOTLARI BOTLARLA DOLDUR</label></div>
@@ -437,8 +437,8 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
       <tr><td>FARE</td><td>Bakış (ekrana tıklayınca fare kilitlenir) · Sol tık: ateş · Sağ tık: Atmaca dürbünü</td></tr>
       <tr><td>Q · E · X</td><td>Yetenekler ve ulti — nişangahın gösterdiği yere/yöne kullanılır</td></tr>
       <tr><td>MOBİL</td><td>Sol yarı: sürükleyerek hareket (az itersen yürür) · Sağ yarı: kaydırarak bakış · ATEŞ'e basılı tutup kaydırınca hem ateş edip hem nişan alırsın · EĞİL düğmesi eğilmeyi açar/kapatır</td></tr>
-      <tr><td>F (basılı)</td><td>Spike kur (saldıran, A/B bölgesinde) · Spike imha et (savunan) · Reboot istasyonunda takım arkadaşını dirilt</td></tr>
-      <tr><td>G · T</td><td>Spike'ı yere bırak · Takım arkadaşından Spike iste (yakındaki bot hemen verir, uzaktaki bırakıp sana ayırır)</td></tr>
+      <tr><td>F (basılı)</td><td>Bomba kur (saldıran, A/B bölgesinde) · Bomba imha et (savunan) · Reboot istasyonunda takım arkadaşını dirilt</td></tr>
+      <tr><td>G · T</td><td>Bombayı yere bırak · Takım arkadaşından bomba iste (yakındaki bot hemen verir, uzaktaki bırakıp sana ayırır)</td></tr>
       <tr><td>R · 1 · 2 · 3 · Tekerlek</td><td>Şarjör değiştir · Ana silah · Tabanca · <b>Kılıç</b> (elde tutarken %22 daha hızlı koşarsın; sol tık hızlı kesik 50, sağ tık ağır darbe 75, sırttan iki katı) · Silah değiştir</td></tr>
       <tr><td>B</td><td>Mağaza (yalnızca 20 sn'lik satın alma evresinde)</td></tr>
       <tr><td>0</td><td>Sesli sohbet: basılı tut = konuş · kısa dokun = mikrofon açık kalsın (tekrar dokununca kapanır)</td></tr>
@@ -448,11 +448,11 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
       <tr><td>P · TAB · M</td><td>Duraklat / ayarlar · Skor tablosu · Ses aç/kapa</td></tr>
     </table>
     <h3>MAÇ</h3>
-    <p>İki takım: Saldıranlar ve Savunanlar. Maç <b>20 raunt</b> sürer; <b>10. rauntten sonra</b> taraflar değişir ve ekonomi sıfırlanır. 20 raunt sonunda daha çok raunt kazanan takım maçı alır (10–10 berabere). Saldıranlar Spike'ı A veya B bölgesine kurar; kurulan Spike (C4) haritaya göre 45–50 saniyede patlar; raunt 100 saniyedir (gerçek VALORANT süreleri). Savunanlar 7 saniyede imha eder (yarıda bırakılırsa 3.5 sn'den devam eder).</p>
+    <p>İki takım: Saldıranlar ve Savunanlar. Maç <b>20 raunt</b> sürer; <b>10. rauntten sonra</b> taraflar değişir ve ekonomi sıfırlanır. 20 raunt sonunda daha çok raunt kazanan takım maçı alır (10–10 berabere). Saldıranlar bombayı A veya B bölgesine kurar; kurulan bomba (C4) haritaya göre 45–50 saniyede patlar; raunt 100 saniyedir. Savunanlar 7 saniyede imha eder (yarıda bırakılırsa 3.5 sn'den devam eder).</p>
     <h3>TAKIM ATEŞİ</h3>
     <p>Mermiler ve kılıç takım arkadaşlarına da işler. Takım arkadaşını vurursan ekranın altında uyarı çıkar; takım arkadaşını öldürmek ödül vermez. Online odada <b>TAKIM ATEŞİ</b> düğmesine tek tıklayarak kapatabilirsin (lobide ya da maç sırasında ESC menüsünde; yalnızca odayı kuran değiştirir).</p>
     <h3>İMHA KİTİ</h3>
-    <p>Savunanlar mağazadan <b>İmha Kiti</b> alabilir (¤600). Kiti olan oyuncu Spike'ı <b>1 saniyede</b> imha eder. Kit ölünce gider; raundu sağ bitirirsen sende kalır.</p>
+    <p>Savunanlar mağazadan <b>İmha Kiti</b> alabilir (¤600). Kiti olan oyuncu bombayı <b>1 saniyede</b> imha eder. Kit ölünce gider; raundu sağ bitirirsen sende kalır.</p>
     <h3>HOPARLÖR MÜZİĞİ VE EMOTE</h3>
     <p>Doğuş alanlarındaki hoparlörlerden yankılı bir müzik çalar: satın almada başlar, raunt boyunca sürer, raunt bitince susar. Hoparlörden uzaklaştıkça kısılır, uzakta hiç duyulmaz. <b>F3</b> (Mac'te <b>fn+F3</b>) ile kamerayı değiştir: birinci şahıs → arkadan → önden. <b>Z</b> ile emote menüsünü aç, <b>1–6</b> ile seç (el salla, dans, sevin, tamam, gül, GG): karakterin hareketi yapar ve başının üstünde emoji çıkar. Seviyelerini <b>AYARLAR</b>'dan ayarlayabilir ya da kapatabilirsin.</p>
     <h3>SESLİ SOHBET VE YAZILI SOHBET</h3>
@@ -462,15 +462,15 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <h3>REBOOT (YENİDEN DOĞMA)</h3>
     <p>Ölen oyuncunun <b>reboot kartı</b> yere düşer. Bir takım arkadaşı kartın üstünden geçerek alır ve A ya da B bölgesindeki <b>reboot istasyonuna</b> götürüp <b>F</b>'yi 4 saniye basılı tutar; kartın sahibi istasyonun yanında 100 canla, sadece tabanca ve kılıçla yeniden doğar. Her istasyon kullanıldıktan sonra 15 saniye bekler. Kart taşıyan ölürse kartlar yere düşer.</p>
     <h3>EKONOMİ</h3>
-    <p>Başlangıç ¤800 · Öldürme ¤200 · Raunt galibiyeti ¤3000 · Mağlubiyet ¤1900/2400/2900 (seri) · Spike kurulursa saldıranlara ¤300. Hayatta kalırsan silah ve kalkanını korursun.</p>
+    <p>Başlangıç ¤800 · Öldürme ¤200 · Raunt galibiyeti ¤3000 · Mağlubiyet ¤1900/2400/2900 (seri) · Bomba kurulursa saldıranlara ¤300. Hayatta kalırsan silah ve zırhını korursun.</p>
     <h3>SAVAŞ</h3>
     <h3>FARKLI AĞLARDAN OYNAMAK</h3>
     <p>Oda kodu PeerJS eşleştirme sunucusu üzerinden bulunur, sonra oyun verisi doğrudan cihazlar arasında akar. Farklı ağlarda (mobil veri, başka ev, okul/iş ağı) doğrudan yol kurulamazsa <b>BAĞLANTI AYARLARI</b>'ndan ücretsiz bir TURN sunucusu ekle (ExpressTURN veya Metered'da ücretsiz hesap açıp verilen adres, kullanıcı adı ve şifreyi gir) ve <b>BAĞLANTIYI TEST ET</b> ile "Aktarma (TURN) ✓" gördüğünden emin ol. Host telefondaysa kodu paylaşırken oyunu arka planda uzun süre bırakmasın.</p>
     <h3>PARKUR MODU</h3>
     <p>OYNA → TEK OYUNCULU (ya da oda kurarken) <b>OYUN MODU: PARKUR</b>. 5 raunt; her raunt farklı, çok uzun ve ince bir pist. Bitişe ilk varan raundu alır, 5 raunt sonunda en çok raunt alan şampiyon olur. Elinde yalnızca <b>kılıç</b> var: <b>sol tık</b> hızlı darbe, <b>sağ tık</b> güçlü darbe. Kılıç rakibi öldürmez, <b>iter ve yavaşlatır</b> (boşluğa düşürebilirsin) ve <b>barikatları kırar</b>. <b>BOŞLUK</b> ile boşlukların ve blokların üstünden zıpla; mavi <b>pedler</b> seni havaya fırlatır, turuncu oklu <b>şeritler</b> hızlandırır, kırmızı-beyaz <b>dönen çubukların</b> üstünden zıpla. Düşersen son <b>kontrol noktasından</b> devam edersin. Her raunt öncesi pistin üstünden kısa bir kamera uçuşu ve 3-2-1 geri sayım var.</p>
     <h3>HARİTALAR</h3>
-    <p><b>Merkez</b> (klasik kapalı tesis), <b>Liman</b> (konteyner limanı, vinçler, su kanalı ve köprüler), <b>Çöl Harabesi</b> (kumtaşı kalıntılar, palmiyeler, piramitler), <b>Buzul Üssü</b> (karlı araştırma istasyonu, donmuş göl, dağlar), <b>Orman Tapınağı</b> (yeşil avlular, nehir, basamaklı tapınak) ve <b>Neon Şehir</b> (gece, gökdelenler, neon tabelalar). Haritaların boyutu gerçek VALORANT haritalarından esinlenmiştir (doğuştan bölgeye ~20–25 sn, A↔B dönüşü ~20 sn); geniş koridorlarla birbirine bağlı odalardan oluşur, A/B tarafları aynalıdır. Odalarda kuru kafalar, sandıklar, fıçılar, çuvallar, meşaleler gibi dekorlar vardır. Mini harita çevreni gösterir; TAB basılıyken tüm haritayı görürsün, bölge yönleri kenarda A/B okları olarak çıkar. Duvar ve zemin dokuları Poly Haven'ın ücretsiz (CC0) fotoğraf dokularıdır; bel hizasındaki alçak siperlerin arkasında eğilerek saklanabilirsin, ayakta durana ise üstünden ateş edilebilir.</p>
-    <p>Görüş konisi ve duvarlar düşmanları gizler; dumanlar görüşü keser. Kafaya isabet kritik hasardır; bacaklara isabet hasarı azaltır. Seri atışta namlu yukarı kalkar, aşağı çekerek kontrol et. Koşarken isabet düşer; seri atışta geri tepme yayılımı artırır. Ulti puanı: öldürme, ölme, Spike kurma/imha ve haritadaki turkuaz küreler.</p>
+    <p><b>Merkez</b> (klasik kapalı tesis), <b>Liman</b> (konteyner limanı, vinçler, su kanalı ve köprüler), <b>Çöl Harabesi</b> (kumtaşı kalıntılar, palmiyeler, piramitler), <b>Buzul Üssü</b> (karlı araştırma istasyonu, donmuş göl, dağlar), <b>Orman Tapınağı</b> (yeşil avlular, nehir, basamaklı tapınak) ve <b>Neon Şehir</b> (gece, gökdelenler, neon tabelalar). Haritalar, doğuştan bölgeye ~20–25 sn ve A↔B dönüşü ~20 sn sürecek büyüklüktedir; geniş koridorlarla birbirine bağlı odalardan oluşur, A/B tarafları aynalıdır. Odalarda kuru kafalar, sandıklar, fıçılar, çuvallar, meşaleler gibi dekorlar vardır. Mini harita çevreni gösterir; TAB basılıyken tüm haritayı görürsün, bölge yönleri kenarda A/B okları olarak çıkar. Duvar ve zemin dokuları Poly Haven'ın ücretsiz (CC0) fotoğraf dokularıdır; bel hizasındaki alçak siperlerin arkasında eğilerek saklanabilirsin, ayakta durana ise üstünden ateş edilebilir.</p>
+    <p>Görüş konisi ve duvarlar düşmanları gizler; dumanlar görüşü keser. Kafaya isabet kritik hasardır; bacaklara isabet hasarı azaltır. Seri atışta namlu yukarı kalkar, aşağı çekerek kontrol et. Koşarken isabet düşer; seri atışta geri tepme yayılımı artırır. Ulti puanı: öldürme, ölme, bomba kurma/imha ve haritadaki turkuaz küreler.</p>
     </div>
     <div id="helpEN" class="hidden" data-noi18n>
     <h2>CONTROLS &amp; RULES</h2>
@@ -482,8 +482,8 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
       <tr><td>MOUSE</td><td>Look (click the screen to lock the mouse) · Left click: fire · Right click: sniper scope</td></tr>
       <tr><td>Q · E · X</td><td>Abilities and ultimate — used where/toward your crosshair points</td></tr>
       <tr><td>MOBILE</td><td>Left half: drag to move · Right half: swipe to look · Hold FIRE and swipe to shoot and aim · CROUCH toggles crouching</td></tr>
-      <tr><td>F (hold)</td><td>Plant the Spike (attackers, at site A/B) · Defuse (defenders) · Revive a teammate at a reboot station</td></tr>
-      <tr><td>G · T</td><td>Drop the Spike · Request the Spike from a teammate</td></tr>
+      <tr><td>F (hold)</td><td>Plant the bomb (attackers, at site A/B) · Defuse (defenders) · Revive a teammate at a reboot station</td></tr>
+      <tr><td>G · T</td><td>Drop the bomb · Request the bomb from a teammate</td></tr>
       <tr><td>R · 1 · 2 · 3 · Wheel</td><td>Reload · Primary · Pistol · <b>Sword</b> (22% faster running; left click 50, right click heavy 75, double from behind) · Switch weapon</td></tr>
       <tr><td>B</td><td>Shop (only during the 20 s buy phase)</td></tr>
       <tr><td>0</td><td>Voice chat: hold = talk · short tap = keep the mic open (tap again to close)</td></tr>
@@ -493,11 +493,11 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
       <tr><td>P · TAB · M</td><td>Pause · Scoreboard · Sound on/off</td></tr>
     </table>
     <h3>MATCH</h3>
-    <p>Two teams: Attackers and Defenders. A match lasts <b>20 rounds</b>; sides swap <b>after round 10</b> and the economy resets. After 20 rounds the team with more round wins takes the match (10–10 is a draw). Attackers plant the Spike at site A or B; it detonates after 45–50 s depending on the map; a round lasts about 100 s. Defenders defuse in 7 s (resumes from 3.5 s if interrupted halfway).</p>
+    <p>Two teams: Attackers and Defenders. A match lasts <b>20 rounds</b>; sides swap <b>after round 10</b> and the economy resets. After 20 rounds the team with more round wins takes the match (10–10 is a draw). Attackers plant the bomb at site A or B; it detonates after 45–50 s depending on the map; a round lasts about 100 s. Defenders defuse in 7 s (resumes from 3.5 s if interrupted halfway).</p>
     <h3>FRIENDLY FIRE</h3>
     <p>Bullets and the sword also hurt teammates; a warning appears at the bottom of the screen. In an online room the host can turn it off with one click on the <b>FRIENDLY FIRE</b> button (in the lobby, or in the ESC menu during the match).</p>
     <h3>DEFUSE KIT</h3>
-    <p>Defenders can buy a <b>Defuse Kit</b> (¤600). With a kit you defuse the Spike in <b>1 second</b>. You lose it when you die; you keep it if you survive the round.</p>
+    <p>Defenders can buy a <b>Defuse Kit</b> (¤600). With a kit you defuse the bomb in <b>1 second</b>. You lose it when you die; you keep it if you survive the round.</p>
     <h3>SPEAKER MUSIC, EMOTES, CHAT</h3>
     <p>Music plays from the loudspeakers in the spawns: it starts in the buy phase, keeps playing through the round and stops when the round ends. It fades as you move away and is silent far from the speaker. Press <b>F3</b> (<b>fn+F3</b> on Mac) to switch the camera: first person → behind → in front. Press <b>Z</b> to open the emote menu and <b>1–6</b> to pick (wave, dance, cheer, thumbs up, laugh, GG): your character performs it with an emoji above the head. In an online room, hold <b>0</b> to talk: your voice fades with distance and is cut off at about 37 m; while in a spawn area only your team hears you. Speakers appear on the left with a microphone icon (also on the TAB board). Turn other players' voices off in <b>SETTINGS → VOICE CHAT</b>. Press <b>period (.)</b> to text chat.</p>
     <h3>HEALTH ORBS</h3>
@@ -505,7 +505,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <h3>REBOOT</h3>
     <p>A dead player's <b>reboot card</b> drops. A teammate picks it up, carries it to the <b>reboot station</b> at A or B and holds <b>F</b> for 4 s; the owner respawns next to it with 100 HP, a pistol and the sword. Each station then cools down for 15 s.</p>
     <h3>ECONOMY</h3>
-    <p>Start ¤800 · Kill ¤200 · Round win ¤3000 · Loss ¤1900/2400/2900 (streak) · Attackers get ¤300 if the Spike was planted. Survive to keep your weapon and shield.</p>
+    <p>Start ¤800 · Kill ¤200 · Round win ¤3000 · Loss ¤1900/2400/2900 (streak) · Attackers get ¤300 if the bomb was planted. Survive to keep your weapon and armor.</p>
     <h3>PARKOUR MODE</h3>
     <p>PLAY → SINGLE PLAYER (or when hosting a room) <b>GAME MODE: PARKOUR</b>. 5 rounds; each round is a different, very long and narrow course. First to the finish wins the round; whoever wins the most rounds after 5 is the champion. You only have a <b>sword</b>: <b>left click</b> quick hit, <b>right click</b> heavy hit. The sword doesn't kill — it <b>pushes and slows</b> rivals (you can knock them into the void) and <b>breaks barricades</b>. <b>SPACE</b> jumps over gaps and blocks; blue <b>pads</b> launch you, orange arrow <b>strips</b> speed you up, jump over the red-white <b>sweepers</b>. If you fall you continue from the last <b>checkpoint</b>. Before each round there is a short fly-over of the course and a 3-2-1 countdown.</p>
     <h3>PLAYING ACROSS NETWORKS</h3>
@@ -863,7 +863,7 @@ let MATCH_ROUNDS = 20, HALF_ROUNDS = 10; // maç 20 raunt sürer, 10. rauntten s
 const KIT_PRICE = 600, KIT_TIME = 1;
 /* EMOTE'lar: Z menüsü, 1–6 */
 const EMOTES = [{ k: 'wave', e: '👋', n: 'EL SALLA' }, { k: 'dance', e: '💃', n: 'DANS' }, { k: 'cheer', e: '🙌', n: 'SEVİN' }, { k: 'thumb', e: '👍', n: 'TAMAM' }, { k: 'laugh', e: '😂', n: 'GÜL' }, { k: 'gg', e: '🏆', n: 'GG' }];
-const EMOTE_TIME = 2.6;     // İMHA KİTİ: yalnızca savunanlar, Spike'ı 1 sn'de imha eder
+const EMOTE_TIME = 2.6;     // İMHA KİTİ: yalnızca savunanlar, bombayı 1 sn'de imha eder
 /* zıplama (tepe ≈ 1,05 m, havada ≈ 0,6 sn) ve reboot */
 const JUMP_V = 280, GRAV = 935, REBOOT_TIME = 4, REBOOT_CD = 15, REBOOT_R = 82;
 const HEAL_AMT = 50, HEAL_CD = 25, HEAL_R = 34, HEAL_MAX = 100; // can küresi: +50 can (en fazla 100), 25 sn'de yeniden çıkar
@@ -1219,47 +1219,47 @@ for (const k in WEAPONS) { const w = WEAPONS[k]; w.range = Math.round(w.range * 
    Sol tık: hızlı kesik (50, sırttan 100) · Sağ tık: ağır darbe (75, sırttan 150) */
 WEAPONS.sword = { vk: 0, name: 'Kılıç', type: 'Yakın Dövüş', slot: 3, price: 0, melee: true, dmg: 50, heavy: 75, hs: 1, rate: 1.7, heavyRate: 0.95, reach: 78,
   auto: true, mag: 1, res: 0, reload: 0, base: 0, move: 0, bloom: 0, bmax: 0, range: 78, fall: [], snd: 'sword', sway: 0, spd: 1.22, trace: '#ffffff', len: 30 };
-const ARMOR = { light: { name: 'Hafif Kalkan', price: 400, val: 25 }, heavy: { name: 'Ağır Kalkan', price: 1000, val: 50 } };
+const ARMOR = { light: { name: 'Hafif Zırh', price: 400, val: 25 }, heavy: { name: 'Ağır Zırh', price: 1000, val: 50 } };
 
 /* ---------- AJANLAR ---------- */
 const AGENTS = {
-  vex: { name: 'KUZGUN', role: 'Düellocu', color: '#a86bff', icon: 'K',
+  vex: { name: 'KUZGUN', role: 'Akıncı', color: '#a86bff', icon: 'K',
     q: { name: 'Gölge Atılma', cost: 150, max: 2, desc: 'Hareket ettiğin yöne doğru anında hızlı bir atılma yapar.' },
     e: { name: 'Hayalet Örtüsü', cost: 200, max: 1, free: true, desc: '3.5 sn görünmez olursun. Ateş etmek görünmezliği bozar.' },
     x: { name: 'Karanlık Kesik', pts: 6, desc: 'Duvarlardan geçen, haritanın öbür ucuna kadar giden ve değdiği her düşmanı tek vuruşta öldüren dev bir enerji bıçağı fırlatır.' } },
-  ignis: { name: 'ALAZ', role: 'Düellocu', color: '#ff8a3d', icon: 'A',
+  ignis: { name: 'ALAZ', role: 'Akıncı', color: '#ff8a3d', icon: 'A',
     q: { name: 'Alev Topu', cost: 250, max: 2, desc: 'Patladığı noktaya bakan düşmanları kör eden alev topu (flash).' },
     e: { name: 'Ateş Duvarı', cost: 200, max: 1, free: true, desc: 'Görüşü kesen, düşmanları yakan ateş duvarı. ALAZ alevin içinde iyileşir.' },
-    x: { name: 'Anka Doğuşu', pts: 5, desc: '15 sn klon modu: bu sürede ölürsen ultiyi açtığın noktada tam can ve zırhla yeniden doğarsın.' } },
-  mist: { name: 'PUS', role: 'Kontrol Uzmanı', color: '#8a8cff', icon: 'P',
+    x: { name: 'Küllerden Doğuş', pts: 5, desc: '15 sn klon modu: bu sürede ölürsen ultiyi açtığın noktada tam can ve zırhla yeniden doğarsın.' } },
+  mist: { name: 'PUS', role: 'Stratejist', color: '#8a8cff', icon: 'P',
     q: { name: 'Sis Küresi', cost: 100, max: 3, free: true, desc: 'İmlecin olduğu yere, duvarların üzerinden görüş kesen duman küresi yerleştirir.' },
-    e: { name: 'Zehir Bulutu', cost: 200, max: 1, desc: 'İçindeki düşmanları %45 yavaşlatan ve zehirleyen bulut.' },
+    e: { name: 'Zehir Sisi', cost: 200, max: 1, desc: 'İçindeki düşmanları %45 yavaşlatan ve zehirleyen bulut.' },
     x: { name: 'Kabus Alanı', pts: 6, desc: 'Devasa bir alanı 13 sn zehirli sisle kaplar; içerideki düşmanlar yavaşlar, canları hızla 1\'e iner ve yerleri açığa çıkar.' } },
-  aegis: { name: 'SUR', role: 'Gözcü', color: '#ffd166', icon: 'S',
+  aegis: { name: 'SUR', role: 'Bekçi', color: '#ffd166', icon: 'S',
     q: { name: 'Tuzak Mayını', cost: 200, max: 2, desc: 'Düşman yaklaştığında patlayan gizli mayın (aynı anda en fazla 2).' },
     e: { name: 'Mini Taret', cost: 0, max: 1, free: true, desc: 'Görüş konisine giren düşmanlara otomatik ateş eden taret.' },
     x: { name: 'Mutlak Kilit', pts: 6, desc: 'Kurulan cihaz 3 sn sonra çok geniş alandaki tüm düşmanları 7.5 sn sersemletir; silah ve yetenek kullanamazlar.' } },
-  pulse: { name: 'YANKI', role: 'Öncü', color: '#3ec1ff', icon: 'Y',
+  pulse: { name: 'YANKI', role: 'İzci', color: '#3ec1ff', icon: 'Y',
     q: { name: 'Sonar Oku', cost: 150, max: 2, free: true, desc: 'Saplandığı yerde iki kez tarama yapar, duvar arkasındaki düşmanları gösterir. 1 kez seker.' },
     e: { name: 'Şok Oku', cost: 200, max: 2, desc: 'İki kez sekip patlayan, alan hasarı veren ok.' },
     x: { name: 'Yörünge Lazeri', pts: 6, desc: 'Seçtiğin koridor boyunca haritanın sonuna kadar uzanan, duvarları delen dört ölümcül enerji huzmesi indirir.' } },
-  chrono: { name: 'ÇAĞ', role: 'Kontrol Uzmanı', color: '#4be0a8', icon: 'Ç',
+  chrono: { name: 'ÇAĞ', role: 'Stratejist', color: '#4be0a8', icon: 'Ç',
     q: { name: 'Zaman Küresi', cost: 200, max: 1, desc: 'İçine giren düşman mermilerini durduran zaman küresi.' },
     e: { name: 'Kuantum Sıçrama', cost: 150, max: 2, free: true, desc: 'İmleç yönünde kısa mesafeli ışınlanma.' },
     x: { name: 'Zaman Çöküşü', pts: 6, desc: 'Seçilen geniş bölgedeki düşmanların hareket ve ateş hızını %78 yavaşlatır ve onlara hasar verir.' } },
-  terra: { name: 'TOPRAK', role: 'Öncü', color: '#d4a25f', icon: 'T',
+  terra: { name: 'TOPRAK', role: 'İzci', color: '#d4a25f', icon: 'T',
     q: { name: 'Sarsıntı Dalgası', cost: 200, max: 2, desc: 'İleri giden şok dalgası; değdiği düşmanların nişanını 3 sn bozar.' },
     e: { name: 'Taş Siper', cost: 0, max: 1, free: true, desc: 'Önüne geçici, kurşun geçirmez taş duvar örer (vurularak yıkılabilir).' },
     x: { name: 'Tektonik Yarık', pts: 6, desc: 'Önündeki çok uzun bir hattı yarar; üzerindeki düşmanları havaya savurur, sersemletir ve ağır hasar verir.' } },
-  vital: { name: 'DERMAN', role: 'Gözcü', color: '#7cf29a', icon: '✚',
-    q: { name: 'Şifa Küresi', cost: 150, max: 2, free: true, desc: 'İçindeki takım arkadaşlarını (ve seni) iyileştiren şifa alanı.' },
+  vital: { name: 'DERMAN', role: 'Bekçi', color: '#7cf29a', icon: '✚',
+    q: { name: 'Derman Halkası', cost: 150, max: 2, free: true, desc: 'İçindeki takım arkadaşlarını (ve seni) iyileştiren şifa alanı.' },
     e: { name: 'Buz Zemini', cost: 200, max: 2, desc: 'Düşmanları %50 yavaşlatan buz zemini.' },
-    x: { name: 'Diriliş', pts: 6, desc: 'Yakınındaki ölmüş bir takım arkadaşını tam can ve zırhla diriltir; yakındaki canlı takım arkadaşlarını da tam iyileştirir.' } },
-  volt: { name: 'ŞİMŞEK', role: 'Düellocu', color: '#f7f35a', icon: 'ϟ',
+    x: { name: 'Yeniden Uyanış', pts: 6, desc: 'Yakınındaki ölmüş bir takım arkadaşını tam can ve zırhla diriltir; yakındaki canlı takım arkadaşlarını da tam iyileştirir.' } },
+  volt: { name: 'ŞİMŞEK', role: 'Akıncı', color: '#f7f35a', icon: 'ϟ',
     q: { name: 'Akım Kayması', cost: 100, max: 2, desc: 'Ani kayma + 4 sn %35 hız artışı.' },
     e: { name: 'Zincir Yük', cost: 200, max: 1, free: true, desc: 'Düşmandan düşmana seken elektrik yükü.' },
     x: { name: 'Aşırı Yük', pts: 6, desc: '11 sn hareket hızın iki katına çıkar ve parmaklarından uzun menzilli, kesintisiz, yüksek hasarlı elektrik ışını ateşlersin.' } },
-  phantom: { name: 'BÖRÜ', role: 'Öncü', color: '#9aa7c7', icon: 'B',
+  phantom: { name: 'BÖRÜ', role: 'İzci', color: '#9aa7c7', icon: 'B',
     q: { name: 'Sağırlık Küresi', cost: 200, max: 1, desc: 'İçindeki düşmanları sağır eder: ses duyamazlar, minimap uyarıları kesilir.' },
     e: { name: 'Gölge Kurdu', cost: 250, max: 2, free: true, desc: 'İleri koşup en yakın düşmanı takip eden kurt; yakaladığını yakın görüşlü yapar ve açığa çıkarır.' },
     x: { name: 'Karanlık Örtü', pts: 6, desc: '13 sn boyunca tüm düşmanların haritası kararır, görüş mesafeleri minimuma iner ve 4 sn yerleri açığa çıkar.' } }
@@ -1456,24 +1456,24 @@ const THEMES = {
    (A ↔ B adil). Ortada doğuş odaları ve orta meydan; geri kalan alan çok yollu bağlı odalar,
    kıvrımlı koridorlar ve bol engelle doludur. Boyutlar ilk geniş sürümün her yönde 4 katıdır. */
 const MAPS = [
-  // Boyutlar gerçek VALORANT haritalarından esinlenmiştir: koşarak saldıran doğuşundan bölgeye ~18–25 sn,
-  // A↔B dönüşü ~12–20 sn (Liman, Breeze gibi geniş: ~25 sn). 1 karo = 2 m, koşu hızı 6,25 m/sn.
-  { id: 'merkez', name: 'MERKEZ', desc: 'Kapalı tesis · Bind gibi derli toplu, dar dönüşler', w: 104, h: 76, theme: THEMES.merkez,
+  // Boyutlar: koşarak saldıran doğuşundan bölgeye ~18–25 sn,
+  // A↔B dönüşü ~12–20 sn (Liman gibi geniş haritalarda ~25 sn). 1 karo = 2 m, koşu hızı 6,25 m/sn.
+  { id: 'merkez', name: 'MERKEZ', desc: 'Kapalı tesis · derli toplu, dar dönüşler', w: 104, h: 76, theme: THEMES.merkez,
     gen: { room: [10, 16], corr: [4, 4], fill: 0.36, gap: 5, loops: 0.35, dens: 34, site: [20, 15], mid: [20, 14], obs: { crate: 5, low: 2, pillar: 2 }, water: 0,
       names: ['DEPO', 'LAB', 'JENERATÖR', 'SUNUCU', 'OFİS', 'HANGAR', 'KONTROL', 'ARŞİV'] } },
-  { id: 'liman', name: 'LİMAN', desc: 'Konteyner limanı · Breeze gibi geniş ve açık · gündüz', w: 140, h: 96, theme: THEMES.liman,
+  { id: 'liman', name: 'LİMAN', desc: 'Konteyner limanı · geniş ve açık · gündüz', w: 140, h: 96, theme: THEMES.liman,
     gen: { room: [13, 22], corr: [5, 6], fill: 0.40, gap: 5, loops: 0.3, dens: 30, site: [26, 19], mid: [26, 18], obs: { crate: 7, low: 2, pillar: 1 }, water: 0.35,
       names: ['DOK', 'VİNÇ', 'GÜMRÜK', 'AMBAR', 'RIHTIM', 'TERSANE', 'İSKELE', 'YÜKLEME'] } },
-  { id: 'col', name: 'ÇÖL HARABESİ', desc: 'Antik kalıntılar · Ascent gibi geniş orta avlu', w: 120, h: 84, theme: THEMES.col,
+  { id: 'col', name: 'ÇÖL HARABESİ', desc: 'Antik kalıntılar · geniş orta avlu', w: 120, h: 84, theme: THEMES.col,
     gen: { room: [11, 18], corr: [4, 5], fill: 0.37, gap: 5, loops: 0.35, dens: 30, site: [22, 17], mid: [30, 20], obs: { crate: 2, low: 5, pillar: 4 }, water: 0.08,
       names: ['MEZAR', 'SÜTUNLAR', 'KUYU', 'PAZAR', 'KERVANSARAY', 'HAN', 'ÇEŞME', 'HAMAM'] } },
-  { id: 'buzul', name: 'BUZUL ÜSSÜ', desc: 'Kutup üssü · Icebox gibi uzun hatlar, donmuş havuzlar', w: 120, h: 88, theme: THEMES.buzul,
+  { id: 'buzul', name: 'BUZUL ÜSSÜ', desc: 'Kutup üssü · uzun hatlar, donmuş havuzlar', w: 120, h: 88, theme: THEMES.buzul,
     gen: { seed: 'v4', room: [11, 18], corr: [4, 5], fill: 0.37, gap: 5, loops: 0.3, dens: 30, site: [22, 17], mid: [22, 16], obs: { crate: 5, low: 3, pillar: 2 }, water: 0.3,
       names: ['LAB', 'HANGAR', 'RADAR', 'JENERATÖR', 'DEPO', 'REVİR', 'YAKIT', 'SERA'] } },
-  { id: 'tapinak', name: 'ORMAN TAPINAĞI', desc: 'Tapınak şehri · Haven/Lotus gibi dolambaçlı yollar, gölet', w: 128, h: 88, theme: THEMES.tapinak,
+  { id: 'tapinak', name: 'ORMAN TAPINAĞI', desc: 'Tapınak şehri · dolambaçlı yollar, gölet', w: 128, h: 88, theme: THEMES.tapinak,
     gen: { seed: 'v4', room: [11, 18], corr: [4, 5], fill: 0.37, gap: 5, loops: 0.4, dens: 30, site: [22, 17], mid: [22, 16], obs: { crate: 2, low: 4, pillar: 3 }, water: 0.35,
       names: ['SUNAK', 'HARABE', 'KUYU', 'AĞAÇ EV', 'MAĞARA', 'KULE', 'BAHÇE', 'HEYKEL'] } },
-  { id: 'neon', name: 'NEON ŞEHİR', desc: 'Gece şehri · Split gibi sıkışık sokaklar, pasajlar', w: 108, h: 84, theme: THEMES.neon,
+  { id: 'neon', name: 'NEON ŞEHİR', desc: 'Gece şehri · sıkışık sokaklar, pasajlar', w: 108, h: 84, theme: THEMES.neon,
     gen: { room: [10, 16], corr: [4, 5], fill: 0.38, gap: 5, loops: 0.4, dens: 30, site: [20, 16], mid: [20, 14], obs: { crate: 4, low: 4, pillar: 2 }, water: 0.05,
       names: ['ÇARŞI', 'OTOPARK', 'METRO', 'SAHNE', 'KULÜP', 'OTEL', 'PASAJ', 'GARAJ'] } },
   // ---- 5 yeni dokulu harita (mevcutlar kadar büyük) ----
@@ -1826,7 +1826,7 @@ function placeSpeakers() {
   }
   return res;
 }
-/* Raunt ve Spike süreleri haritadaki yürüme mesafesine göre */
+/* Raunt ve bomba süreleri haritadaki yürüme mesafesine göre */
 function mapTimers() {
   const dA = bfsFrom(T_ATK), dS = bfsFrom(T_A);
   const at = p => { const k = p[1] * MW + p[0]; return dA[k] >= 0 ? dA[k] : 0; };
@@ -2847,8 +2847,8 @@ const EN_EXACT = {
   'TEK OYUNCULU': 'SINGLE PLAYER', 'ODAYA KATIL': 'JOIN ROOM', 'ODA KODU': 'ROOM CODE', 'OYUNCU ADI': 'PLAYER NAME', 'Adını yaz': 'Enter your name',
   'ÖRN: K7M2Q': 'E.G. K7M2Q', 'AJAN SEÇİMİ': 'AGENT SELECT', 'AJANINI SEÇ': 'PICK YOUR AGENT', 'KULLANICI ADI': 'USERNAME', 'TURN ADRES(LER)İ': 'TURN ADDRESS(ES)',
   'Tabanca': 'Pistol', 'Ağır Tabanca': 'Heavy Pistol', 'Hafif Makineli': 'SMG', 'Tüfek': 'Rifle', 'Susturuculu Tüfek': 'Silenced Rifle', 'Keskin Nişancı': 'Sniper', 'Raylı Top': 'Railgun', 'Yakın Dövüş': 'Melee',
-  'Düellocu': 'Duelist', 'Kontrol Uzmanı': 'Controller', 'Gözcü': 'Sentinel', 'Öncü': 'Initiator',
-  'Hafif Kalkan': 'Light Shield', 'Ağır Kalkan': 'Heavy Shield', '+25 zırh': '+25 armor', '+50 zırh': '+50 armor', '✂ İmha Kiti': '✂ Defuse Kit', 'İmha Kiti': 'Defuse Kit',
+  'Akıncı': 'Raider', 'Stratejist': 'Strategist', 'Bekçi': 'Warden', 'İzci': 'Scout',
+  'Hafif Zırh': 'Light Armor', 'Ağır Zırh': 'Heavy Armor', '+25 zırh': '+25 armor', '+50 zırh': '+50 armor', '✂ İmha Kiti': '✂ Defuse Kit', 'İmha Kiti': 'Defuse Kit',
   'SES AÇIK': 'SOUND ON', 'SES KAPALI': 'SOUND OFF', 'SESİ KAPAT': 'MUTE SOUND', 'SESİ AÇ': 'UNMUTE SOUND', 'seçiyor…': 'picking…', 'Maç sona erdi.': 'Match over.',
   'SALDIRAN': 'ATTACK', 'SAVUNAN': 'DEFENSE', 'CAN': 'HP', 'Ö': 'D', 'TEKRAR': 'AGAIN',
   'AÇIK': 'ON', 'KAPALI': 'OFF', 'DÜŞÜK': 'LOW', 'ORTA': 'MEDIUM', 'YÜKSEK': 'HIGH', 'TÜRKÇE': 'TÜRKÇE', 'ENGLISH': 'ENGLISH', 'AYARLAR': 'SETTINGS'
@@ -2856,11 +2856,11 @@ const EN_EXACT = {
 /* parça çevirileri (birleştirilmiş metinlerin içinde de geçerli; uzunlar önce denenir) */
 const EN_FRAG = {
   // menü
-  'TAKTİKSEL 5v5 · SPIKE · AJANLAR': 'TACTICAL 5v5 · SPIKE · AGENTS', 'TEK OYUNCULU · BOTLARA KARŞI': 'SINGLE PLAYER · VS BOTS', 'ODA KUR (HOST)': 'CREATE ROOM (HOST)',
+  'TAKTİKSEL 5v5 · BOMBA · AJANLAR': 'TACTICAL 5v5 · BOMB · AGENTS', 'TEK OYUNCULU · BOTLARA KARŞI': 'SINGLE PLAYER · VS BOTS', 'ODA KUR (HOST)': 'CREATE ROOM (HOST)',
   'ODAYA KATIL (JOIN)': 'JOIN ROOM', 'KONTROLLER & KURALLAR': 'CONTROLS & RULES', 'BAĞLANTI AYARLARI': 'CONNECTION SETTINGS', 'OYUNDAN ÇIK': 'QUIT GAME',
   '3D TAKTİK FPS': '3D TACTICAL FPS', 'Telefonunu yatay çevir': 'Rotate your phone to landscape', 'SPIKE yatay ekranda oynanır': 'SPIKE is played in landscape',
   'Botlara karşı tam maç · 20 raunt · 10. rauntten sonra taraf değişir': 'Full match vs bots · 20 rounds · sides swap after round 10',
-  'TAKIM BOYUTU': 'TEAM SIZE', 'BOT ZORLUĞU': 'BOT DIFFICULTY', 'İLK YARI TARAFI': 'FIRST HALF SIDE', 'Saldıran (Spike sende)': 'Attacker (you carry the Spike)',
+  'TAKIM BOYUTU': 'TEAM SIZE', 'BOT ZORLUĞU': 'BOT DIFFICULTY', 'İLK YARI TARAFI': 'FIRST HALF SIDE', 'Saldıran (Bomba sende)': 'Attacker (you carry the bomb)',
   "Host'un verdiği 5 haneli oda kodunu gir": "Enter the 5-character room code from the host", 'Farklı ağlardan bağlanamıyor musunuz?': "Can't connect across networks?",
   'Bağlantı ayarları (TURN)': 'Connection settings (TURN)', 'Arkadaşların bu kodla "Odaya Katıl" diyerek bağlanabilir': 'Friends can connect with this code via "Join Room"',
   'TAKIM 1 · İLK YARI SALDIRAN': 'TEAM 1 · ATTACKS FIRST HALF', 'TAKIM 2 · İLK YARI SAVUNAN': 'TEAM 2 · DEFENDS FIRST HALF', 'BOŞ SLOTLARI BOTLARLA DOLDUR': 'FILL EMPTY SLOTS WITH BOTS',
@@ -2870,7 +2870,7 @@ const EN_FRAG = {
   'KAPAT (B / ESC)': 'CLOSE (B / ESC)', '· Tıkla ve satın al (aynı raunt içinde değiştirirsen iade edilir)': '· Click to buy (refunded if you change it in the same round)',
   'Mesajını yaz, Enter ile gönder · Esc kapat': 'Type a message, Enter to send · Esc to close', 'fareyi oyuna kilitle': 'to lock the mouse', 'Kilitliyken imleç görünmez · ESC: menü': 'Cursor hidden while locked · ESC: menu',
   'Oyundan çıktın. Bu sekmeyi kapatabilirsin.': 'You quit the game. You can close this tab.', 'OYUNA GERİ DÖN': 'BACK TO GAME',
-  'SPIKE BIRAK': 'DROP SPIKE', 'SPIKE İSTE': 'REQUEST SPIKE', '🎤 KONUŞ': '🎤 TALK', '💬 SOHBET': '💬 CHAT', '⛶ TAM EKRAN': '⛶ FULLSCREEN',
+  'BOMBA BIRAK': 'DROP BOMB', 'BOMBA İSTE': 'REQUEST BOMB', '🎤 KONUŞ': '🎤 TALK', '💬 SOHBET': '💬 CHAT', '⛶ TAM EKRAN': '⛶ FULLSCREEN',
   // ayarlar
   'OYUN SESİ': 'GAME SOUND', 'KARAKTER SESLERİ': 'CHARACTER VOICES', 'SESLİ SOHBET': 'VOICE CHAT', 'DİĞER OYUNCULARI DUY': 'HEAR OTHER PLAYERS', 'SOHBET SESİ': 'VOICE CHAT VOLUME',
   'GRAFİK': 'GRAPHICS', 'KALİTE': 'QUALITY', 'DİL / LANGUAGE': 'LANGUAGE / DİL', 'KONTROLLER': 'CONTROLS', 'FARE HASSASİYETİ': 'MOUSE SENSITIVITY', 'SES': 'SOUND',
@@ -2881,26 +2881,26 @@ const EN_FRAG = {
   'TAKIM ARKADAŞININ CANINI ALDIN!': 'YOU HURT A TEAMMATE!', ' SENİ VURDU — TAKIM ATEŞİ': ' SHOT YOU — FRIENDLY FIRE', ' SENİ ÖLDÜRDÜ — TAKIM ATEŞİ': ' KILLED YOU — FRIENDLY FIRE',
   ' OYUNCUSUNUN KARTINI ALDI': " PICKED UP THE PLAYER'S CARD:", ' — REBOOT İSTASYONUNA GÖTÜR': ' — TAKE IT TO A REBOOT STATION', ' YENİDEN DOĞDU (REBOOT · ': ' RESPAWNED (REBOOT · ',
   'RAKİP ': 'ENEMY ', ' REBOOT İLE DÖNDÜ': ' CAME BACK VIA REBOOT', 'YENİDEN DOĞDUN': 'YOU RESPAWNED', 'Takım arkadaşın seni reboot etti — sadece tabanca ve kılıcın var': 'A teammate rebooted you — you only have a pistol and sword',
-  ' öldü': ' died', 'SON RAUNT!': 'FINAL ROUND!', "SALDIRI — Spike'ı A veya B bölgesine kur": 'ATTACK — Plant the Spike at site A or B', "SAVUNMA — Bölgeleri koru, Spike'ı imha et": 'DEFENSE — Hold the sites, defuse the Spike',
-  'RAUNT BAŞLADI — BARİYERLER KALKTI': 'ROUND STARTED — BARRIERS DOWN', 'RAUNDU KAZANDINIZ': 'ROUND WON', 'RAUNDU KAYBETTİNİZ': 'ROUND LOST', 'SPIKE KURULDU': 'SPIKE PLANTED',
-  ' BÖLGESİ — ': ' SITE — ', ' SANİYE': ' SECONDS', 'SATIN ALMA EVRESİ BİTTİ': 'BUY PHASE OVER', 'SATIN ALMA': 'BUY PHASE', 'SPIKE KURULU': 'SPIKE PLANTED', 'RAUNT SONU': 'ROUND OVER', 'MAÇ BİTTİ': 'MATCH OVER',
-  'Rakip takım elendi': 'Enemy team eliminated', 'Süre doldu': 'Time ran out', 'Spike patladı': 'Spike detonated', 'Spike imha edildi': 'Spike defused',
-  ' CANLI': ' ALIVE', 'KARANLIK ÖRTÜ': 'DARK SHROUD', '✂ KİT': '✂ KIT', 'YAKIN GÖRÜŞ': 'NEARSIGHT', 'AÇIĞA ÇIKTIN': 'REVEALED', 'ANKA KLONU': 'PHOENIX CLONE', 'AŞIRI YÜK': 'OVERLOAD',
+  ' öldü': ' died', 'SON RAUNT!': 'FINAL ROUND!', "SALDIRI — Bombayı A veya B bölgesine kur": 'ATTACK — Plant the bomb at site A or B', "SAVUNMA — Bölgeleri koru, bombayı imha et": 'DEFENSE — Hold the sites, defuse the bomb',
+  'RAUNT BAŞLADI — BARİYERLER KALKTI': 'ROUND STARTED — BARRIERS DOWN', 'RAUNDU KAZANDINIZ': 'ROUND WON', 'RAUNDU KAYBETTİNİZ': 'ROUND LOST', 'BOMBA KURULDU': 'BOMB PLANTED',
+  ' BÖLGESİ — ': ' SITE — ', ' SANİYE': ' SECONDS', 'SATIN ALMA EVRESİ BİTTİ': 'BUY PHASE OVER', 'SATIN ALMA': 'BUY PHASE', 'BOMBA KURULU': 'BOMB PLANTED', 'RAUNT SONU': 'ROUND OVER', 'MAÇ BİTTİ': 'MATCH OVER',
+  'Rakip takım elendi': 'Enemy team eliminated', 'Süre doldu': 'Time ran out', 'Bomba patladı': 'Bomb detonated', 'Bomba imha edildi': 'Bomb defused',
+  ' CANLI': ' ALIVE', 'KARANLIK ÖRTÜ': 'DARK SHROUD', '✂ KİT': '✂ KIT', 'YAKIN GÖRÜŞ': 'NEARSIGHT', 'AÇIĞA ÇIKTIN': 'REVEALED', 'KÜL KLONU': 'ASH CLONE', 'AŞIRI YÜK': 'OVERLOAD',
   '⚡ IŞIN': '⚡ BEAM', '⚔ HIZLI KOŞU': '⚔ FAST RUN', 'İZLENİYOR (RAKİP): ': 'SPECTATING (ENEMY): ', 'İZLENİYOR: ': 'SPECTATING: ', '[BOŞLUK] değiştir': '[SPACE] switch', 'Takımında hayatta kimse kalmadı': 'No one on your team is alive',
   'KARTIN ': 'YOUR CARD IS WITH ', ' OYUNCUSUNDA — REBOOT İSTASYONUNA GÖTÜRÜYOR': ' — TAKING IT TO A REBOOT STATION', 'KARTIN YERDE — BİR TAKIM ARKADAŞI ALIP REBOOT ETMELİ': 'YOUR CARD IS ON THE GROUND — A TEAMMATE MUST REBOOT YOU',
-  '[B] MAĞAZA · ': '[B] SHOP · ', '[F] BASILI TUT: SPIKE KUR': '[F] HOLD: PLANT SPIKE', 'SPIKE SENDE — A/B bölgesine götür · [G] bırak': 'YOU HAVE THE SPIKE — take it to A/B · [G] drop',
-  '[F] BASILI TUT: SPIKE İMHA ET': '[F] HOLD: DEFUSE SPIKE', ' · KİT: 1 SN': ' · KIT: 1 SEC', 'REBOOT İSTASYONU SOĞUYOR · ': 'REBOOT STATION COOLING · ', '[F] BASILI TUT: ': '[F] HOLD: ',
+  '[B] MAĞAZA · ': '[B] SHOP · ', '[F] BASILI TUT: BOMBA KUR': '[F] HOLD: PLANT BOMB', 'BOMBA SENDE — A/B bölgesine götür · [G] bırak': 'YOU HAVE THE BOMB — take it to A/B · [G] drop',
+  '[F] BASILI TUT: BOMBA İMHA ET': '[F] HOLD: DEFUSE BOMB', ' · KİT: 1 SN': ' · KIT: 1 SEC', 'REBOOT İSTASYONU SOĞUYOR · ': 'REBOOT STATION COOLING · ', '[F] BASILI TUT: ': '[F] HOLD: ',
   '🂠 KART: ': '🂠 CARD: ', " — A veya B'deki REBOOT istasyonuna götür": ' — take it to the REBOOT station at A or B', ' · [T] İSTE': ' · [T] REQUEST',
-  'SPIKE KURULUYOR': 'PLANTING SPIKE', 'SPIKE İMHA EDİLİYOR — KİTLİ!': 'SPIKE BEING DEFUSED — WITH KIT!', 'SPIKE İMHA EDİLİYOR!': 'SPIKE BEING DEFUSED!', 'SPIKE İMHA EDİLİYOR': 'DEFUSING SPIKE', 'REBOOT EDİLİYOR': 'REBOOTING',
+  'BOMBA KURULUYOR': 'PLANTING BOMB', 'BOMBA İMHA EDİLİYOR — KİTLİ!': 'BOMB BEING DEFUSED — WITH KIT!', 'BOMBA İMHA EDİLİYOR!': 'BOMB BEING DEFUSED!', 'BOMBA İMHA EDİLİYOR': 'DEFUSING BOMB', 'REBOOT EDİLİYOR': 'REBOOTING',
   ' · MİKROFON AÇIK': ' · MIC OPEN', '⟳ REBOOT ': '⟳ REBOOT ', 'SKOR TABLOSU': 'SCOREBOARD', '  (SEN)': '  (YOU)', 'AJAN': 'AGENT', 'OYUNCU': 'PLAYER', 'HASAR': 'DAMAGE', 'KREDİ': 'CREDITS', 'ULTİ': 'ULT',
   'TAKIM ATEŞİ AÇILDI': 'FRIENDLY FIRE ENABLED', 'TAKIM ATEŞİ KAPATILDI': 'FRIENDLY FIRE DISABLED', 'TAKIM ATEŞİ: ': 'FRIENDLY FIRE: ', 'TAKIM ATEŞİ': 'FRIENDLY FIRE', '  ·  tıkla': '  ·  click',
   ' (oda sahibi değiştirir)': ' (room owner decides)', 'TARAF DEĞİŞİMİ': 'SIDE SWAP', 'Ekonomi sıfırlandı · ulti puanları korunur': 'Economy reset · ult points kept',
-  'SPIKE DÜŞTÜ': 'SPIKE DROPPED', " SPIKE'I ALDI": ' PICKED UP THE SPIKE', " SPIKE'I BIRAKTI — ": ' DROPPED THE SPIKE — ', " SPIKE'I BIRAKTI": ' DROPPED THE SPIKE', 'SPIKE YERDE — MİNİ HARİTADA İŞARETLİ': 'SPIKE ON THE GROUND — MARKED ON THE MINIMAP',
-  " SPIKE'I ": ' GAVE THE SPIKE TO ', ' OYUNCUSUNA VERDİ': '', ' İÇİN AYRILDI': ' (RESERVED)', ' SPIKE İSTİYOR': ' WANTS THE SPIKE', '[G] ile bırak': 'drop with [G]', 'İSTEK ': 'REQUEST SENT TO ', ' OYUNCUSUNA GÖNDERİLDİ': '',
+  'BOMBA DÜŞTÜ': 'BOMB DROPPED', " BOMBAYI ALDI": ' PICKED UP THE BOMB', " BOMBAYI BIRAKTI — ": ' DROPPED THE BOMB — ', " BOMBAYI BIRAKTI": ' DROPPED THE BOMB', 'BOMBA YERDE — MİNİ HARİTADA İŞARETLİ': 'BOMB ON THE GROUND — MARKED ON THE MINIMAP',
+  " BOMBAYI ": ' GAVE THE BOMB TO ', ' OYUNCUSUNA VERDİ': '', ' İÇİN AYRILDI': ' (RESERVED)', ' BOMBA İSTİYOR': ' WANTS THE BOMB', '[G] ile bırak': 'drop with [G]', 'İSTEK ': 'REQUEST SENT TO ', ' OYUNCUSUNA GÖNDERİLDİ': '',
   'ULTİ KÜRESİ +1': 'ULT ORB +1', 'YAKININDA ÖLÜ TAKIM ARKADAŞI YOK': 'NO DEAD TEAMMATE NEARBY', ' YENİDEN CANLANDI': ' WAS REVIVED', 'ULTİ HAZIR DEĞİL (': 'ULT NOT READY (', 'ŞARJ YOK — MAĞAZADAN AL': 'NO CHARGES — BUY IN THE SHOP',
   ' AYRILDI — BOT DEVRALDI': ' LEFT — A BOT TOOK OVER', ' lobiye katıldı': ' joined the lobby', ' ayrıldı': ' left', 'Maçtan çıkıldı — ana menü': 'Left the match — main menu',
-  'TABANCALAR': 'PISTOLS', 'SİLAHLAR': 'WEAPONS', 'KALKAN': 'SHIELD', 'YETENEKLER — ': 'ABILITIES — ', 'TAKIM EKONOMİSİ': 'TEAM ECONOMY', 'SAHİPSİN': 'OWNED', 'ÜCRETSİZ': 'FREE', ' şarj': ' charges',
-  "Spike'ı 1 saniyede imha et · ölünce gider": 'Defuse the Spike in 1 second · lost on death', ' ulti puanı': ' ult points', ' · her raunt 1 bedava': ' · 1 free each round',
+  'TABANCALAR': 'PISTOLS', 'SİLAHLAR': 'WEAPONS', 'ZIRH': 'ARMOR', 'YETENEKLER — ': 'ABILITIES — ', 'TAKIM EKONOMİSİ': 'TEAM ECONOMY', 'SAHİPSİN': 'OWNED', 'ÜCRETSİZ': 'FREE', ' şarj': ' charges',
+  "Bombayı 1 saniyede imha et · ölünce gider": 'Defuse the bomb in 1 second · lost on death', ' ulti puanı': ' ult points', ' · her raunt 1 bedava': ' · 1 free each round',
   'HARİTA: ': 'MAP: ', 'İLK YARI: SALDIRAN': 'FIRST HALF: ATTACK', 'İLK YARI: SAVUNAN': 'FIRST HALF: DEFENSE', ' · Takım boyutu: ': ' · Team size: ', ' · Takım ateşi: ': ' · Friendly fire: ',
   'Harita: ': 'Map: ', ' · Bot doldurma: ': ' · Bot fill: ', ' · Zorluk: ': ' · Difficulty: ', 'Açık': 'On', 'Kapalı': 'Off', 'RASTGELE': 'RANDOM', 'Her maçta 6 haritadan biri rastgele seçilir.': 'One of the 6 maps is picked at random each match.',
   'Oyun duraklatıldı.': 'Game paused.', 'Çok oyunculu modda maç arkada devam ediyor!': 'In multiplayer the match keeps running in the background!',
@@ -2921,12 +2921,12 @@ const EN_FRAG = {
   'MİKROFON KULLANILAMIYOR — oyunu https adresinden ya da dosyadan aç': 'MICROPHONE UNAVAILABLE — open the game from an https address or as a file',
   'MİKROFON İZNİ İSTENİYOR…': 'ASKING FOR MICROPHONE PERMISSION…', "MİKROFON HAZIR — konuşmak için 0'a basılı tut, açık bırakmak için dokun": 'MICROPHONE READY — hold 0 to talk, tap to leave it open',
   'MİKROFON İZNİ VERİLMEDİ': 'MICROPHONE PERMISSION DENIED', 'SESLİ SOHBET YALNIZCA ÇOK OYUNCULU ODADA ÇALIŞIR': 'VOICE CHAT ONLY WORKS IN A MULTIPLAYER ROOM',
-  "MİKROFON AÇIK — kapatmak için 0'a tekrar dokun": 'MIC OPEN — tap 0 again to close it', 'SPIKE: ': 'SPIKE: ', 'RAUNT ': 'ROUND ', 'PING ': 'PING ',
+  "MİKROFON AÇIK — kapatmak için 0'a tekrar dokun": 'MIC OPEN — tap 0 again to close it', 'BOMBA: ': 'BOMB: ', 'RAUNT ': 'ROUND ', 'PING ': 'PING ',
   // yetenek adları ve açıklamaları
-  'Gölge Atılma': 'Shadow Dash', 'Hayalet Örtüsü': 'Ghost Veil', 'Karanlık Kesik': 'Dark Slash', 'Alev Topu': 'Fireball', 'Ateş Duvarı': 'Fire Wall', 'Anka Doğuşu': 'Phoenix Rebirth',
-  'Sis Küresi': 'Smoke Orb', 'Zehir Bulutu': 'Poison Cloud', 'Kabus Alanı': 'Nightmare Zone', 'Tuzak Mayını': 'Trap Mine', 'Mini Taret': 'Mini Turret', 'Mutlak Kilit': 'Total Lockdown',
+  'Gölge Atılma': 'Shadow Dash', 'Hayalet Örtüsü': 'Ghost Veil', 'Karanlık Kesik': 'Dark Slash', 'Alev Topu': 'Fireball', 'Ateş Duvarı': 'Fire Wall', 'Küllerden Doğuş': 'Rise From Ashes',
+  'Sis Küresi': 'Smoke Orb', 'Zehir Sisi': 'Venom Mist', 'Kabus Alanı': 'Nightmare Zone', 'Tuzak Mayını': 'Trap Mine', 'Mini Taret': 'Mini Turret', 'Mutlak Kilit': 'Absolute Lock',
   'Sonar Oku': 'Sonar Arrow', 'Şok Oku': 'Shock Arrow', 'Yörünge Lazeri': 'Orbital Laser', 'Zaman Küresi': 'Time Orb', 'Kuantum Sıçrama': 'Quantum Leap', 'Zaman Çöküşü': 'Time Collapse',
-  'Sarsıntı Dalgası': 'Quake Wave', 'Taş Siper': 'Stone Cover', 'Tektonik Yarık': 'Tectonic Rift', 'Şifa Küresi': 'Healing Orb', 'Buz Zemini': 'Ice Floor', 'Diriliş': 'Resurrection',
+  'Sarsıntı Dalgası': 'Quake Wave', 'Taş Siper': 'Stone Cover', 'Tektonik Yarık': 'Tectonic Rift', 'Derman Halkası': 'Mending Ring', 'Buz Zemini': 'Ice Floor', 'Yeniden Uyanış': 'Reawakening',
   'Akım Kayması': 'Current Slide', 'Zincir Yük': 'Chain Charge', 'Aşırı Yük': 'Overload', 'Sağırlık Küresi': 'Deafening Orb', 'Gölge Kurdu': 'Shadow Wolf', 'Karanlık Örtü': 'Dark Shroud',
   'Hareket ettiğin yöne doğru anında hızlı bir atılma yapar.': 'Instantly dash in the direction you are moving.', '3.5 sn görünmez olursun. Ateş etmek görünmezliği bozar.': 'Become invisible for 3.5 s. Firing breaks it.',
   'Duvarlardan geçen, haritanın öbür ucuna kadar giden ve değdiği her düşmanı tek vuruşta öldüren dev bir enerji bıçağı fırlatır.': 'Throws a giant energy blade that passes through walls, flies across the map and kills every enemy it touches.',
@@ -2976,7 +2976,7 @@ Object.assign(EN_EXACT, {
   '[BOŞLUK] ATLA': '[SPACE] SKIP', 'ATLAMAK İÇİN DOKUN': 'TAP TO SKIP', 'TAKIMLAR': 'TEAMS', '#': '#'
 });
 Object.assign(EN_FRAG, {
-  'SPIKE · 5v5 taktik maç': 'SPIKE · 5v5 tactical match', 'PARKUR · kılıçla engel yarışı (5 parkur)': 'PARKOUR · sword obstacle race (5 courses)', ' yarışçı': ' racers',
+  'KLASİK · 5v5 taktik bomba maçı': 'CLASSIC · 5v5 tactical bomb match', 'PARKUR · kılıçla engel yarışı (5 parkur)': 'PARKOUR · sword obstacle race (5 courses)', ' yarışçı': ' racers',
   'Kılıçla engel yarışı · 5 raunt, her raunt farklı uzun parkur · bitişe ilk varan raundu alır': 'Sword obstacle race · 5 rounds, a different long course every round · first to the finish wins the round',
   'Elinde yalnızca kılıç var: rakipleri it, barikatları kır, boşluklardan atla. Düşersen son kontrol noktasından devam edersin.': 'You only have a sword: push rivals, break barricades, jump over gaps. If you fall you continue from the last checkpoint.',
   'Mod: PARKUR · 5 parkur · takım yok, herkes kendi için yarışır · Yarışçı: ': 'Mode: PARKOUR · 5 courses · no teams, everyone races for themselves · Racers: ', ' (botlarla)': ' (with bots)', ' · Zorluk: ': ' · Difficulty: ',
@@ -2990,7 +2990,7 @@ Object.assign(EN_FRAG, {
   'PARKURDA YETENEK YOK — YALNIZCA KILIÇ': 'NO ABILITIES IN PARKOUR — SWORD ONLY', 'PARKURDA MAĞAZA YOK — YALNIZCA KILIÇ': 'NO SHOP IN PARKOUR — SWORD ONLY',
   'BARİKAT — sol tık ile kılıçla kır (sağ tık: güçlü darbe)': 'BARRICADE — left click to break it with your sword (right click: heavy hit)', 'BARİKAT — ATEŞ ile kılıçla kır': 'BARRICADE — break it with FIRE',
   'PARKUR · GENEL SIRALAMA': 'PARKOUR · OVERALL STANDINGS', 'PARKUR ŞAMPİYONU: ': 'PARKOUR CHAMPION: ', 'PARKUR ': 'PARKOUR ', 'KALAN ': 'LEFT ', ' OLDUN': ' PLACE', ' raunt': ' rounds', '. SEN': '. YOU',
-  'Spike burada kurulabilir': 'The Spike can be planted here', 'TAKIMIN · ': 'YOUR TEAM · ', 'RAKİP · ': 'ENEMY · ',
+  'Bomba burada kurulabilir': 'The bomb can be planted here', 'TAKIMIN · ': 'YOUR TEAM · ', 'RAKİP · ': 'ENEMY · ',
   'GÖK PİSTİ': 'SKY TRACK', 'SAKURA KÖPRÜLERİ': 'SAKURA BRIDGES', 'BUZ SIRTI': 'ICE RIDGE', 'LAV GEÇİDİ': 'LAVA PASS', 'YÖRÜNGE': 'ORBIT', 'NEON KULELER': 'NEON TOWERS', 'TAPINAK YOLU': 'TEMPLE PATH',
   'Bulutların üstünde, güneşli bir pist': 'A sunny track above the clouds', 'Kiraz çiçekleri arasında asma köprüler': 'Hanging bridges among cherry blossoms',
   'Kaygan görünen ama sağlam buz yolu': 'An ice road that looks slippery but holds', 'Altında lav, üstünde kızıl gökyüzü': 'Lava below, a red sky above',
@@ -3844,7 +3844,7 @@ const PUB = {
 window.addEventListener('pagehide', () => { if (PUB.code) { try { PUB.req('DELETE', 'pub/' + PUB.code, undefined, true).catch(() => { }); } catch (e) { } } });
 
 /* =====================================================================
-   03 · OYUN DURUMU, RAUNT/EKONOMİ, SPIKE, HAREKET, SİLAH, HASAR
+   03 · OYUN DURUMU, RAUNT/EKONOMİ, BOMBA, HAREKET, SİLAH, HASAR
    (Bu bölüm host/tek oyunculu modda otoritedir; istemci yalnızca
     hareket ve görsel tahmin için movePlayer/curW vb. kullanır.)
    ===================================================================== */
@@ -4329,7 +4329,7 @@ function killPlayer(t, att, src, hs) {
     t.hasSpike = false;
     const f = findFree(t.x, t.y, 6);
     S.spike.state = 'dropped'; S.spike.x = f.x; S.spike.y = f.y; S.spike.carrier = null;
-    emit({ k: 'msg', side: 'atk', small: 'SPIKE DÜŞTÜ' });
+    emit({ k: 'msg', side: 'atk', small: 'BOMBA DÜŞTÜ' });
   }
   if (S.spike.defuser === t.id) { S.spike.defuser = null; S.spike.prog = S.spike.half ? DEFUSE_TIME / 2 : 0; }
   emit({ k: 'kill', a: att ? att.id : null, v: t.id, w: src, hs: hs ? 1 : 0, tk: att && att !== t && att.team === t.team ? 1 : 0 });
@@ -4385,7 +4385,7 @@ function buyItem(p, item) {
   return true;
 }
 
-/* ---------- SPIKE ---------- */
+/* ---------- BOMBA ---------- */
 function updateSpike(dt) {
   const sp = S.spike;
   if (sp.state === 'carried') {
@@ -4394,7 +4394,7 @@ function updateSpike(dt) {
   } else if (sp.state === 'dropped' && (S.phase === 'live' || S.phase === 'buy')) {
     for (const p of S.players) if (p.alive && sideOf(p.team) === 'atk' && dist2(p.x, p.y, sp.x, sp.y) < 30 * 30 && !(sp.noPick && sp.noPick.id === p.id && S.time < sp.noPick.t) && !(sp.res && sp.res.id !== p.id && S.time < sp.res.t)) {
       p.hasSpike = true; sp.state = 'carried'; sp.carrier = p.id;
-      emit({ k: 'msg', side: 'atk', small: p.name + ' SPIKE\'I ALDI' }); break;
+      emit({ k: 'msg', side: 'atk', small: p.name + ' BOMBAYI ALDI' }); break;
     }
   }
   if (S.phase === 'live') {
@@ -4416,7 +4416,7 @@ function updateSpike(dt) {
     if (def) {
       if (sp.defuser !== def.id) {
         sp.defuser = def.id; sp.prog = sp.half ? DEFUSE_TIME / 2 : 0; S.defAlert = S.time;
-        emit({ k: 'msg', side: 'atk', small: def.kit ? 'SPIKE İMHA EDİLİYOR — KİTLİ!' : 'SPIKE İMHA EDİLİYOR!' });
+        emit({ k: 'msg', side: 'atk', small: def.kit ? 'BOMBA İMHA EDİLİYOR — KİTLİ!' : 'BOMBA İMHA EDİLİYOR!' });
         emitSnd('defstart', sp.x, sp.y);
         for (const b of S.players) if (b.ai && b.alive && sideOf(b.team) === 'atk') b.ai.lk = { x: sp.x, y: sp.y, t: S.time };
       }
@@ -4436,32 +4436,32 @@ function dropSpike(p) {
   const f = findFree(p.x + Math.cos(p.ang) * 34, p.y + Math.sin(p.ang) * 34, 6);
   p.hasSpike = false; p.plantT = 0;
   S.spike.state = 'dropped'; S.spike.x = f.x; S.spike.y = f.y; S.spike.carrier = null; S.spike.noPick = { id: p.id, t: S.time + 2 };
-  emit({ k: 'msg', side: 'atk', small: p.name + ' SPIKE\'I BIRAKTI' });
+  emit({ k: 'msg', side: 'atk', small: p.name + ' BOMBAYI BIRAKTI' });
   return true;
 }
-/* Takım arkadaşından Spike isteme: bot taşıyıcı yakındaysa verir, uzaktaysa bırakıp sana ayırır;
+/* Takım arkadaşından bomba isteme: bot taşıyıcı yakındaysa verir, uzaktaysa bırakıp sana ayırır;
    oyuncu taşıyıcıya bildirim gider */
 function requestSpike(p) {
   if (!p || !p.alive || sideOf(p.team) !== 'atk' || p.hasSpike || (S.phase !== 'live' && S.phase !== 'buy')) return;
   if (S.time < (p.reqT || 0)) return;
   p.reqT = S.time + 2.5;
   const sp = S.spike;
-  if (sp.state === 'dropped') { emit({ k: 'msg', to: p.id, small: 'SPIKE YERDE — MİNİ HARİTADA İŞARETLİ' }); return; }
+  if (sp.state === 'dropped') { emit({ k: 'msg', to: p.id, small: 'BOMBA YERDE — MİNİ HARİTADA İŞARETLİ' }); return; }
   const c = getP(sp.carrier);
   if (sp.state !== 'carried' || !c || !c.alive || c.team !== p.team) return;
   emit({ k: 'req', id: p.id, c: c.id });
   if (c.ctrl === 'bot') {
     if (dist(c.x, c.y, p.x, p.y) < 650 && losClear(c.x, c.y, p.x, p.y, true)) {
       c.hasSpike = false; c.plantT = 0; p.hasSpike = true; sp.carrier = p.id; sp.x = p.x; sp.y = p.y;
-      emit({ k: 'msg', side: 'atk', small: c.name + ' SPIKE\'I ' + p.name.toLocaleUpperCase('tr-TR') + ' OYUNCUSUNA VERDİ' });
+      emit({ k: 'msg', side: 'atk', small: c.name + ' BOMBAYI ' + p.name.toLocaleUpperCase('tr-TR') + ' OYUNCUSUNA VERDİ' });
       emitSnd('card', p.x, p.y);
     } else {
       dropSpike(c);
       sp.res = { id: p.id, t: S.time + 15 };
-      emit({ k: 'msg', side: 'atk', small: c.name + ' SPIKE\'I BIRAKTI — ' + p.name.toLocaleUpperCase('tr-TR') + ' İÇİN AYRILDI' });
+      emit({ k: 'msg', side: 'atk', small: c.name + ' BOMBAYI BIRAKTI — ' + p.name.toLocaleUpperCase('tr-TR') + ' İÇİN AYRILDI' });
     }
   } else {
-    emit({ k: 'msg', to: c.id, big: p.name + ' SPIKE İSTİYOR', small: '[G] ile bırak' });
+    emit({ k: 'msg', to: c.id, big: p.name + ' BOMBA İSTİYOR', small: '[G] ile bırak' });
     emit({ k: 'msg', to: p.id, small: 'İSTEK ' + c.name.toLocaleUpperCase('tr-TR') + ' OYUNCUSUNA GÖNDERİLDİ' });
   }
 }
@@ -5794,7 +5794,7 @@ function botGoal(p, ai) {
   }
   // SAVUNMA
   if (sp.state === 'planted') {
-    // AZİM: kurulu Spike'ı geri almak için birlikte gir, zaman daralınca ne olursa olsun imha et
+    // AZİM: kurulu bombayı geri almak için birlikte gir, zaman daralınca ne olursa olsun imha et
     const d = dist(p.x, p.y, sp.x, sp.y), need = (DEFUSE_TIME - (sp.half ? DEFUSE_TIME / 2 : 0)) / (p.kit ? DEFUSE_TIME / KIT_TIME : 1);
     const critical = sp.t < need + 2.5;
     if (d < 40) {
@@ -5843,7 +5843,7 @@ function rebootGoal(p, ai) {
   if (!S.cards || !S.cards.length || !MAPDATA.reboot || !MAPDATA.reboot.length) return null;
   if ((S.phase !== 'live' && S.phase !== 'planted') || ai.visNow) return null;
   const side = sideOf(p.team), sp = S.spike;
-  if (side === 'def' && sp.state === 'planted' && sp.t < 30) return null;   // önce Spike
+  if (side === 'def' && sp.state === 'planted' && sp.t < 30) return null;   // önce bomba
   if (p.hasSpike && S.phase === 'live') return null;                         // taşıyıcı kurulumdan sapmaz
   const mine = S.cards.filter(c => c.carrier === p.id);
   if (mine.length) {
@@ -7830,7 +7830,7 @@ function drawGun(wid, x, h, z, a, pitch, sc, o, owner, t) {
 }
 
 /* ---------- karakter modeli ---------- */
-/* ---------- C4 bombası (Spike) ----------
+/* ---------- C4 bombası ----------
    yerel eksen: +X uzunluk, +Y yukarı, +Z genişlik; taban y=0 */
 const C4C = { brick: [0.66, 0.6, 0.42], brick2: [0.6, 0.55, 0.38], tape: [0.16, 0.16, 0.17], box: [0.13, 0.14, 0.15], key: [0.55, 0.57, 0.6], red: [0.85, 0.12, 0.12], blue: [0.15, 0.35, 0.85], yel: [0.9, 0.78, 0.15] };
 function drawC4(x, h, z, ang, pitch, s, mode, t, alpha) {
@@ -8493,8 +8493,8 @@ const UI = { overlay: false, buyOpen: false, pauseOpen: false, board: false, scr
 const KEYS = {}, MOUSE = { x: 640, y: 360, down: false, right: false, fp: 0 };
 const LOOK = { yaw: 0, pitch: 0 };
 const FONT = '"Bahnschrift","DIN Alternate","Arial Narrow","Roboto Condensed","Segoe UI",Arial,sans-serif';
-const SRC_NAMES = { sword: 'Kılıç', blade: 'Karanlık Kesik', fire: 'Ateş Duvarı', poison: 'Zehir Bulutu', mine: 'Tuzak Mayını', turret: 'Mini Taret', shock: 'Şok Oku', orbital: 'Yörünge Lazeri', quake: 'Sarsıntı Dalgası', rift: 'Tektonik Yarık', chain: 'Zincir Yük', overload: 'Aşırı Yük', wolf: 'Gölge Kurdu', spike: 'SPIKE', nightmare: 'Kabus Alanı', tcollapse: 'Zaman Çöküşü', railgun: 'Railgun' };
-const REASONS = { elim: 'Rakip takım elendi', time: 'Süre doldu', spike: 'Spike patladı', defuse: 'Spike imha edildi' };
+const SRC_NAMES = { sword: 'Kılıç', blade: 'Karanlık Kesik', fire: 'Ateş Duvarı', poison: 'Zehir Sisi', mine: 'Tuzak Mayını', turret: 'Mini Taret', shock: 'Şok Oku', orbital: 'Yörünge Lazeri', quake: 'Sarsıntı Dalgası', rift: 'Tektonik Yarık', chain: 'Zincir Yük', overload: 'Aşırı Yük', wolf: 'Gölge Kurdu', spike: 'BOMBA', nightmare: 'Kabus Alanı', tcollapse: 'Zaman Çöküşü', railgun: 'Railgun' };
+const REASONS = { elim: 'Rakip takım elendi', time: 'Süre doldu', spike: 'Bomba patladı', defuse: 'Bomba imha edildi' };
 
 function initRender() {
   glcv = document.getElementById('gl'); cv = document.getElementById('hud'); ctx = cv.getContext('2d');
@@ -8665,7 +8665,7 @@ function handleEvent(ev) {
     case 'round': {
       const side = me ? sideOf(me.team) : 'atk';
       if (ev.n === MATCH_ROUNDS) setTimeout(() => showMsg(null, 'SON RAUNT!', PAL.gold), 900);
-      showMsg('RAUNT ' + ev.n + ' / ' + MATCH_ROUNDS, side === 'atk' ? 'SALDIRI — Spike\'ı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, Spike\'ı imha et', side === 'atk' ? PAL.red : PAL.teal, 3);
+      showMsg('RAUNT ' + ev.n + ' / ' + MATCH_ROUNDS, side === 'atk' ? 'SALDIRI — Bombayı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, bombayı imha et', side === 'atk' ? PAL.red : PAL.teal, 3);
       AU.play('round'); G.spec = null; UIS.deathBy = undefined; UIS.pings.length = 0;
       LOOK.yaw = side === 'atk' ? -Math.PI / 2 : Math.PI / 2; LOOK.pitch = 0;
       if (ev.n === 1 && G.running) cineStart('match'); // maç başı sinematik giriş
@@ -8679,7 +8679,7 @@ function handleEvent(ev) {
       break;
     }
     case 'plant':
-      showMsg('SPIKE KURULDU', (ev.site || '') + ' BÖLGESİ — ' + SPIKE_TIME + ' SANİYE', PAL.red, 3);
+      showMsg('BOMBA KURULDU', (ev.site || '') + ' BÖLGESİ — ' + SPIKE_TIME + ' SANİYE', PAL.red, 3);
       AU.play('plant', ev.x, ev.y); UIS.beepT = 0;
       break;
     case 'ult': {
@@ -8769,7 +8769,7 @@ function drawTopBar(me) {
     drawSpikeIcon(cx, y + 20, 13, blink);
     txt(Math.ceil(sp.t) + 's', cx + 34, y + 21, 14, PAL.red, 'center');
   }
-  const phaseName = S.phase === 'buy' ? 'SATIN ALMA' : S.phase === 'planted' ? 'SPIKE KURULU' : S.phase === 'end' ? 'RAUNT SONU' : S.phase === 'over' ? 'MAÇ BİTTİ' : 'RAUNT ' + S.round + '/' + MATCH_ROUNDS;
+  const phaseName = S.phase === 'buy' ? 'SATIN ALMA' : S.phase === 'planted' ? 'BOMBA KURULU' : S.phase === 'end' ? 'RAUNT SONU' : S.phase === 'over' ? 'MAÇ BİTTİ' : 'RAUNT ' + S.round + '/' + MATCH_ROUNDS;
   txt(phaseName, cx, y + 40, 11, S.phase === 'buy' ? PAL.gold : PAL.dim, 'center');
   ctx.fillStyle = 'rgba(30,227,207,0.92)'; ctx.fillRect(cx - 124, y, 60, 48);
   txt(String(myScore), cx - 94, y + 25, 30, '#062a27', 'center');
@@ -8928,7 +8928,7 @@ function drawBottom(me) {
   if (st.blind > 0) chips.push(['KÖR', st.blind]); if (st.deaf > 0) chips.push(['SAĞIR', st.deaf]); if (st.lock > 0) chips.push(['KİLİTLİ', st.lock]);
   if (st.concuss > 0) chips.push(['SARSILMIŞ', st.concuss]); if (st.knock > 0) chips.push(['HAVADA', st.knock]); if (st.near > 0) chips.push(['YAKIN GÖRÜŞ', st.near]);
   if (st.shroud > 0) chips.push(['KARANLIK', st.shroud]); if (st.reveal > 0) chips.push(['AÇIĞA ÇIKTIN', st.reveal]); if (me.zoneSlow < 1 || st.slow > 0) chips.push(['YAVAŞ', st.slow || 0]);
-  if (st.invis > 0) chips.push(['GÖRÜNMEZ', st.invis]); if (st.clone > 0) chips.push(['ANKA KLONU', st.clone]); if (st.ovl > 0) chips.push(['AŞIRI YÜK', st.ovl]); if (st.boost > 0) chips.push(['HIZ', st.boost]);
+  if (st.invis > 0) chips.push(['GÖRÜNMEZ', st.invis]); if (st.clone > 0) chips.push(['KÜL KLONU', st.clone]); if (st.ovl > 0) chips.push(['AŞIRI YÜK', st.ovl]); if (st.boost > 0) chips.push(['HIZ', st.boost]);
   let cxp = W / 2 - chips.length * 50;
   for (const c of chips) {
     panel(cxp, by - 26, 96, 20, 0.85);
@@ -8963,8 +8963,8 @@ function drawHints(me) {
   let h = null;
   const sp = S.spike;
   if (S.phase === 'buy' && me.alive) h = '[B] MAĞAZA · ' + Math.ceil(S.phaseT) + ' sn';
-  else if (me.alive && me.hasSpike && S.phase === 'live') h = siteAt(me.x, me.y) ? '[F] BASILI TUT: SPIKE KUR' : 'SPIKE SENDE — A/B bölgesine götür · [G] bırak';
-  else if (me.alive && S.phase === 'planted' && sideOf(me.team) === 'def' && dist(me.x, me.y, sp.x, sp.y) < 58) h = '[F] BASILI TUT: SPIKE İMHA ET' + (me.kit ? ' · KİT: 1 SN' : '');
+  else if (me.alive && me.hasSpike && S.phase === 'live') h = siteAt(me.x, me.y) ? '[F] BASILI TUT: BOMBA KUR' : 'BOMBA SENDE — A/B bölgesine götür · [G] bırak';
+  else if (me.alive && S.phase === 'planted' && sideOf(me.team) === 'def' && dist(me.x, me.y, sp.x, sp.y) < 58) h = '[F] BASILI TUT: BOMBA İMHA ET' + (me.kit ? ' · KİT: 1 SN' : '');
   const myCards = me.alive ? (S.cards || []).filter(c => c.carrier === me.id) : [];
   if (myCards.length && (S.phase === 'live' || S.phase === 'planted')) {
     let near = -1; (MAPDATA.reboot || []).forEach((r, i) => { if (dist(me.x, me.y, r.x, r.y) < REBOOT_R) near = i; });
@@ -8973,10 +8973,10 @@ function drawHints(me) {
     else if (!h) h = '🂠 KART: ' + names + ' — A veya B\'deki REBOOT istasyonuna götür';
   }
   if (!h && me.alive && sideOf(me.team) === 'atk' && !me.hasSpike && sp.state === 'carried' && (S.phase === 'live' || S.phase === 'buy')) {
-    const c = S.pmap[sp.carrier]; if (c && c.team === me.team && !IS_TOUCH && S.phase !== 'buy') h = 'SPIKE: ' + c.name + ' · [T] İSTE';
+    const c = S.pmap[sp.carrier]; if (c && c.team === me.team && !IS_TOUCH && S.phase !== 'buy') h = 'BOMBA: ' + c.name + ' · [T] İSTE';
   }
   if (h) { ctx.font = 'bold 14px ' + FONT; const tw = ctx.measureText(tl(h)).width + 30; panel(W / 2 - tw / 2, H - 140, tw, 26, 0.8); txt(h, W / 2, H - 127, 14, PAL.gold, 'center'); }
-  const prog = me.plantT > 0 ? [me.plantT / PLANT_TIME, 'SPIKE KURULUYOR'] : me.defT > 0 ? [me.defT / DEFUSE_TIME, 'SPIKE İMHA EDİLİYOR'] : me.rbT > 0 ? [me.rbT / REBOOT_TIME, 'REBOOT EDİLİYOR'] : null;
+  const prog = me.plantT > 0 ? [me.plantT / PLANT_TIME, 'BOMBA KURULUYOR'] : me.defT > 0 ? [me.defT / DEFUSE_TIME, 'BOMBA İMHA EDİLİYOR'] : me.rbT > 0 ? [me.rbT / REBOOT_TIME, 'REBOOT EDİLİYOR'] : null;
   if (prog) {
     const w = 320, x = W / 2 - w / 2, y = H / 2 + 70;
     panel(x - 4, y - 22, w + 8, 40, 0.88);
@@ -9131,10 +9131,10 @@ function drawMobileStats(me) {
   const st = me.st, chips = [];
   if (st.blind > 0) chips.push('KÖR'); if (st.deaf > 0) chips.push('SAĞIR'); if (st.lock > 0) chips.push('KİLİTLİ'); if (st.concuss > 0) chips.push('SARSILMIŞ');
   if (st.near > 0) chips.push('YAKIN GÖRÜŞ'); if (st.shroud > 0) chips.push('KARANLIK'); if (st.reveal > 0) chips.push('AÇIĞA ÇIKTIN'); if (st.invis > 0) chips.push('GÖRÜNMEZ');
-  if (st.clone > 0) chips.push('ANKA'); if (st.ovl > 0) chips.push('AŞIRI YÜK'); if (me.zoneSlow < 1 || st.slow > 0) chips.push('YAVAŞ');
+  if (st.clone > 0) chips.push('KÜL'); if (st.ovl > 0) chips.push('AŞIRI YÜK'); if (me.zoneSlow < 1 || st.slow > 0) chips.push('YAVAŞ');
   if (chips.length) txt(chips.join(' · '), x, y + 78, 11, PAL.gold);
 }
-/* Dünya işaretleri: takım arkadaşı isimleri, Spike konumu, hasar sayıları */
+/* Dünya işaretleri: takım arkadaşı isimleri, bomba konumu, hasar sayıları */
 function drawWorldMarkers(dt, me, v) {
   if (!GLX.ok) return;
   const mt = me ? me.team : 0;
@@ -9322,9 +9322,9 @@ function cineMatchShots() {
     { d: 2.3, p0: [cx - big * 0.42, hi * 1.05, cz + WH * 0.62], p1: [cx + big * 0.12, hi * 0.85, cz + WH * 0.58], l0: [cx, 0, cz - WH * 0.05], l1: [cx, 0, cz - WH * 0.1],
       title: m.name, sub: m.desc, col: PAL.white },
     { d: 1.8, p0: [A.x - 1100, 760, A.y + 820], p1: [A.x - 260, 460, A.y + 620], l0: [A.x, 20, A.y], l1: [A.x + 80, 20, A.y],
-      title: 'A BÖLGESİ', sub: 'Spike burada kurulabilir', col: PAL.gold },
+      title: 'A BÖLGESİ', sub: 'Bomba burada kurulabilir', col: PAL.gold },
     { d: 1.8, p0: [B.x + 1100, 760, B.y + 820], p1: [B.x + 260, 460, B.y + 620], l0: [B.x, 20, B.y], l1: [B.x - 80, 20, B.y],
-      title: 'B BÖLGESİ', sub: 'Spike burada kurulabilir', col: PAL.gold },
+      title: 'B BÖLGESİ', sub: 'Bomba burada kurulabilir', col: PAL.gold },
     { d: INTRO_TIME - 5.9, me: true, title: 'TAKIMLAR', col: PAL.teal }
   ];
 }
@@ -9394,7 +9394,7 @@ function drawCine(dt, me) {
     }
     { const g = ctx.createLinearGradient(0, H - bh - 90 * sm, 0, H - bh); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.7)'); ctx.fillStyle = g; ctx.fillRect(0, H - bh - 90 * sm, W, 90 * sm); }
     txt('RAUNT 1 / ' + MATCH_ROUNDS, W / 2, H - bh - 46 * sm, Math.round(30 * sm), PAL.white, 'center');
-    txt(me && sideOf(me.team) === 'atk' ? 'SALDIRI — Spike\'ı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, Spike\'ı imha et', W / 2, H - bh - 18 * sm, Math.round(14 * sm), me && sideOf(me.team) === 'atk' ? PAL.red : PAL.teal, 'center', 'normal');
+    txt(me && sideOf(me.team) === 'atk' ? 'SALDIRI — Bombayı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, bombayı imha et', W / 2, H - bh - 18 * sm, Math.round(14 * sm), me && sideOf(me.team) === 'atk' ? PAL.red : PAL.teal, 'center', 'normal');
   } else if (s.title) {
     const y = H - bh - 70 * sm;
     { const g = ctx.createLinearGradient(0, 0, W * 0.6, 0); g.addColorStop(0, 'rgba(0,0,0,0.55)'); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.fillRect(0, y - 50 * sm, W * 0.6, 100 * sm); }
@@ -10384,10 +10384,10 @@ function uiRenderBuy() {
   for (const id of ['classic', 'sheriff']) html += item(id, WEAPONS[id].name, wsub(WEAPONS[id]), WEAPONS[id].price, me.secondary === id);
   html += '</div></div><div class="cat"><h4>SİLAHLAR</h4><div class="row">';
   for (const id of ['spectre', 'vandal', 'phantom', 'railgun', 'operator']) html += item(id, WEAPONS[id].name, WEAPONS[id].type + ' · ' + wsub(WEAPONS[id]), WEAPONS[id].price, me.primary === id);
-  html += '</div></div><div class="cat"><h4>KALKAN</h4><div class="row">';
-  html += item('light', 'Hafif Kalkan', '+25 zırh', 400, me.armor >= 25);
-  html += item('heavy', 'Ağır Kalkan', '+50 zırh', 1000, me.armor >= 50);
-  if (sideOf(me.team) === 'def') html += item('kit', '✂ İmha Kiti', 'Spike\'ı 1 saniyede imha et · ölünce gider', KIT_PRICE, !!me.kit);
+  html += '</div></div><div class="cat"><h4>ZIRH</h4><div class="row">';
+  html += item('light', 'Hafif Zırh', '+25 zırh', 400, me.armor >= 25);
+  html += item('heavy', 'Ağır Zırh', '+50 zırh', 1000, me.armor >= 50);
+  if (sideOf(me.team) === 'def') html += item('kit', '✂ İmha Kiti', 'Bombayı 1 saniyede imha et · ölünce gider', KIT_PRICE, !!me.kit);
   html += '</div></div><div class="cat"><h4>YETENEKLER — ' + ag.name + '</h4><div class="row">';
   for (const k of ['q', 'e']) {
     const ab = ag[k];

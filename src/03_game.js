@@ -1,5 +1,5 @@
 /* =====================================================================
-   03 · OYUN DURUMU, RAUNT/EKONOMİ, SPIKE, HAREKET, SİLAH, HASAR
+   03 · OYUN DURUMU, RAUNT/EKONOMİ, BOMBA, HAREKET, SİLAH, HASAR
    (Bu bölüm host/tek oyunculu modda otoritedir; istemci yalnızca
     hareket ve görsel tahmin için movePlayer/curW vb. kullanır.)
    ===================================================================== */
@@ -484,7 +484,7 @@ function killPlayer(t, att, src, hs) {
     t.hasSpike = false;
     const f = findFree(t.x, t.y, 6);
     S.spike.state = 'dropped'; S.spike.x = f.x; S.spike.y = f.y; S.spike.carrier = null;
-    emit({ k: 'msg', side: 'atk', small: 'SPIKE DÜŞTÜ' });
+    emit({ k: 'msg', side: 'atk', small: 'BOMBA DÜŞTÜ' });
   }
   if (S.spike.defuser === t.id) { S.spike.defuser = null; S.spike.prog = S.spike.half ? DEFUSE_TIME / 2 : 0; }
   emit({ k: 'kill', a: att ? att.id : null, v: t.id, w: src, hs: hs ? 1 : 0, tk: att && att !== t && att.team === t.team ? 1 : 0 });
@@ -540,7 +540,7 @@ function buyItem(p, item) {
   return true;
 }
 
-/* ---------- SPIKE ---------- */
+/* ---------- BOMBA ---------- */
 function updateSpike(dt) {
   const sp = S.spike;
   if (sp.state === 'carried') {
@@ -549,7 +549,7 @@ function updateSpike(dt) {
   } else if (sp.state === 'dropped' && (S.phase === 'live' || S.phase === 'buy')) {
     for (const p of S.players) if (p.alive && sideOf(p.team) === 'atk' && dist2(p.x, p.y, sp.x, sp.y) < 30 * 30 && !(sp.noPick && sp.noPick.id === p.id && S.time < sp.noPick.t) && !(sp.res && sp.res.id !== p.id && S.time < sp.res.t)) {
       p.hasSpike = true; sp.state = 'carried'; sp.carrier = p.id;
-      emit({ k: 'msg', side: 'atk', small: p.name + ' SPIKE\'I ALDI' }); break;
+      emit({ k: 'msg', side: 'atk', small: p.name + ' BOMBAYI ALDI' }); break;
     }
   }
   if (S.phase === 'live') {
@@ -571,7 +571,7 @@ function updateSpike(dt) {
     if (def) {
       if (sp.defuser !== def.id) {
         sp.defuser = def.id; sp.prog = sp.half ? DEFUSE_TIME / 2 : 0; S.defAlert = S.time;
-        emit({ k: 'msg', side: 'atk', small: def.kit ? 'SPIKE İMHA EDİLİYOR — KİTLİ!' : 'SPIKE İMHA EDİLİYOR!' });
+        emit({ k: 'msg', side: 'atk', small: def.kit ? 'BOMBA İMHA EDİLİYOR — KİTLİ!' : 'BOMBA İMHA EDİLİYOR!' });
         emitSnd('defstart', sp.x, sp.y);
         for (const b of S.players) if (b.ai && b.alive && sideOf(b.team) === 'atk') b.ai.lk = { x: sp.x, y: sp.y, t: S.time };
       }
@@ -591,32 +591,32 @@ function dropSpike(p) {
   const f = findFree(p.x + Math.cos(p.ang) * 34, p.y + Math.sin(p.ang) * 34, 6);
   p.hasSpike = false; p.plantT = 0;
   S.spike.state = 'dropped'; S.spike.x = f.x; S.spike.y = f.y; S.spike.carrier = null; S.spike.noPick = { id: p.id, t: S.time + 2 };
-  emit({ k: 'msg', side: 'atk', small: p.name + ' SPIKE\'I BIRAKTI' });
+  emit({ k: 'msg', side: 'atk', small: p.name + ' BOMBAYI BIRAKTI' });
   return true;
 }
-/* Takım arkadaşından Spike isteme: bot taşıyıcı yakındaysa verir, uzaktaysa bırakıp sana ayırır;
+/* Takım arkadaşından bomba isteme: bot taşıyıcı yakındaysa verir, uzaktaysa bırakıp sana ayırır;
    oyuncu taşıyıcıya bildirim gider */
 function requestSpike(p) {
   if (!p || !p.alive || sideOf(p.team) !== 'atk' || p.hasSpike || (S.phase !== 'live' && S.phase !== 'buy')) return;
   if (S.time < (p.reqT || 0)) return;
   p.reqT = S.time + 2.5;
   const sp = S.spike;
-  if (sp.state === 'dropped') { emit({ k: 'msg', to: p.id, small: 'SPIKE YERDE — MİNİ HARİTADA İŞARETLİ' }); return; }
+  if (sp.state === 'dropped') { emit({ k: 'msg', to: p.id, small: 'BOMBA YERDE — MİNİ HARİTADA İŞARETLİ' }); return; }
   const c = getP(sp.carrier);
   if (sp.state !== 'carried' || !c || !c.alive || c.team !== p.team) return;
   emit({ k: 'req', id: p.id, c: c.id });
   if (c.ctrl === 'bot') {
     if (dist(c.x, c.y, p.x, p.y) < 650 && losClear(c.x, c.y, p.x, p.y, true)) {
       c.hasSpike = false; c.plantT = 0; p.hasSpike = true; sp.carrier = p.id; sp.x = p.x; sp.y = p.y;
-      emit({ k: 'msg', side: 'atk', small: c.name + ' SPIKE\'I ' + p.name.toLocaleUpperCase('tr-TR') + ' OYUNCUSUNA VERDİ' });
+      emit({ k: 'msg', side: 'atk', small: c.name + ' BOMBAYI ' + p.name.toLocaleUpperCase('tr-TR') + ' OYUNCUSUNA VERDİ' });
       emitSnd('card', p.x, p.y);
     } else {
       dropSpike(c);
       sp.res = { id: p.id, t: S.time + 15 };
-      emit({ k: 'msg', side: 'atk', small: c.name + ' SPIKE\'I BIRAKTI — ' + p.name.toLocaleUpperCase('tr-TR') + ' İÇİN AYRILDI' });
+      emit({ k: 'msg', side: 'atk', small: c.name + ' BOMBAYI BIRAKTI — ' + p.name.toLocaleUpperCase('tr-TR') + ' İÇİN AYRILDI' });
     }
   } else {
-    emit({ k: 'msg', to: c.id, big: p.name + ' SPIKE İSTİYOR', small: '[G] ile bırak' });
+    emit({ k: 'msg', to: c.id, big: p.name + ' BOMBA İSTİYOR', small: '[G] ile bırak' });
     emit({ k: 'msg', to: p.id, small: 'İSTEK ' + c.name.toLocaleUpperCase('tr-TR') + ' OYUNCUSUNA GÖNDERİLDİ' });
   }
 }

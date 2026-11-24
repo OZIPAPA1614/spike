@@ -308,8 +308,8 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
   <div class="tb xs" id="tbPause" data-act="pause">❚❚</div>
   <div class="tb xs" id="tbBoard" data-act="board">SKOR</div>
   <div class="tb xs" id="tbBuy" data-act="buy">MAĞAZA</div>
-  <div class="tb xs hidden" id="tbDrop" data-act="drop">SPIKE BIRAK</div>
-  <div class="tb xs hidden" id="tbReq" data-act="req">SPIKE İSTE</div>
+  <div class="tb xs hidden" id="tbDrop" data-act="drop">BOMBA BIRAK</div>
+  <div class="tb xs hidden" id="tbReq" data-act="req">BOMBA İSTE</div>
   <div class="tb" id="tbJump" data-act="jump">ZIPLA</div>
   <div class="tb xs" id="tbMic" data-act="mic">🎤 KONUŞ</div>
   <div class="tb xs" id="tbChat" data-act="chat">💬 SOHBET</div>
@@ -321,7 +321,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
 
 <div id="scr-menu" class="screen">
   <div class="menu-col">
-    <div class="tagline">TAKTİKSEL 5v5 · SPIKE · AJANLAR</div>
+    <div class="tagline">TAKTİKSEL 5v5 · BOMBA · AJANLAR</div>
     <button id="btnPlay" class="primary big">OYNA</button>
     <button id="btnStore" class="store big">💎 MAĞAZA</button>
     <button id="btnSettings" class="big">AYARLAR</button>
@@ -332,7 +332,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
 
 <div id="scr-play" class="screen hidden">
   <div class="menu-col">
-    <div class="tagline">TAKTİKSEL 5v5 · SPIKE · AJANLAR</div>
+    <div class="tagline">TAKTİKSEL 5v5 · BOMBA · AJANLAR</div>
     <h2 class="playh">OYNA</h2>
     <button id="btnSP" class="primary">TEK OYUNCULU · BOTLARA KARŞI</button>
     <button id="btnHost">ODA KUR (HOST)</button>
@@ -349,10 +349,10 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <h2>TEK OYUNCULU</h2>
     <div class="sub" id="spSub">Botlara karşı tam maç · 20 raunt · 10. rauntten sonra taraf değişir</div>
     <div class="grid2">
-      <div style="grid-column:1/3"><label>OYUN MODU</label><select id="spMode"><option value="spike">SPIKE · 5v5 taktik maç</option><option value="pk">PARKUR · kılıçla engel yarışı (5 parkur)</option></select></div>
+      <div style="grid-column:1/3"><label>OYUN MODU</label><select id="spMode"><option value="spike">KLASİK · 5v5 taktik bomba maçı</option><option value="pk">PARKUR · kılıçla engel yarışı (5 parkur)</option></select></div>
       <div><label id="spSizeL">TAKIM BOYUTU</label><select id="spSize"><option value="1">1v1</option><option value="2">2v2</option><option value="3">3v3</option><option value="4">4v4</option><option value="5" selected>5v5</option></select></div>
       <div><label>BOT ZORLUĞU</label><select id="spDiff"><option value="kolay">Kolay</option><option value="normal" selected>Normal</option><option value="zor">Zor</option></select></div>
-      <div id="spSideRow"><label>İLK YARI TARAFI</label><select id="spSide"><option value="atk">Saldıran (Spike sende)</option><option value="def">Savunan</option></select></div>
+      <div id="spSideRow"><label>İLK YARI TARAFI</label><select id="spSide"><option value="atk">Saldıran (Bomba sende)</option><option value="def">Savunan</option></select></div>
       <div id="spMapRow"><label>HARİTA</label><select id="spMap"></select></div>
       <div style="grid-column:1/3" class="note" id="spMapNote"></div>
     </div>
@@ -384,7 +384,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <div class="grid2">
       <div><label>TAKIM BOYUTU</label><select id="lbSize"><option value="1">1v1</option><option value="2">2v2</option><option value="3">3v3</option><option value="4">4v4</option><option value="5" selected>5v5</option></select></div>
       <div><label>BOT ZORLUĞU</label><select id="lbDiff"><option value="kolay">Kolay</option><option value="normal" selected>Normal</option><option value="zor">Zor</option></select></div>
-      <div style="grid-column:1/3"><label>OYUN MODU</label><select id="lbMode"><option value="spike">SPIKE · 5v5 taktik maç</option><option value="pk">PARKUR · kılıçla engel yarışı (5 parkur)</option></select></div>
+      <div style="grid-column:1/3"><label>OYUN MODU</label><select id="lbMode"><option value="spike">KLASİK · 5v5 taktik bomba maçı</option><option value="pk">PARKUR · kılıçla engel yarışı (5 parkur)</option></select></div>
       <div style="grid-column:1/3" id="lbMapRow"><label>HARİTA</label><select id="lbMap"></select></div>
       <div style="grid-column:1/3"><button id="lbFF" type="button" class="fftog">TAKIM ATEŞİ: AÇIK</button></div>
       <div style="grid-column:1/3"><label><input type="checkbox" id="lbFill" checked style="width:auto;margin-right:8px;vertical-align:middle">BOŞ SLOTLARI BOTLARLA DOLDUR</label></div>
@@ -437,8 +437,8 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
       <tr><td>FARE</td><td>Bakış (ekrana tıklayınca fare kilitlenir) · Sol tık: ateş · Sağ tık: Atmaca dürbünü</td></tr>
       <tr><td>Q · E · X</td><td>Yetenekler ve ulti — nişangahın gösterdiği yere/yöne kullanılır</td></tr>
       <tr><td>MOBİL</td><td>Sol yarı: sürükleyerek hareket (az itersen yürür) · Sağ yarı: kaydırarak bakış · ATEŞ'e basılı tutup kaydırınca hem ateş edip hem nişan alırsın · EĞİL düğmesi eğilmeyi açar/kapatır</td></tr>
-      <tr><td>F (basılı)</td><td>Spike kur (saldıran, A/B bölgesinde) · Spike imha et (savunan) · Reboot istasyonunda takım arkadaşını dirilt</td></tr>
-      <tr><td>G · T</td><td>Spike'ı yere bırak · Takım arkadaşından Spike iste (yakındaki bot hemen verir, uzaktaki bırakıp sana ayırır)</td></tr>
+      <tr><td>F (basılı)</td><td>Bomba kur (saldıran, A/B bölgesinde) · Bomba imha et (savunan) · Reboot istasyonunda takım arkadaşını dirilt</td></tr>
+      <tr><td>G · T</td><td>Bombayı yere bırak · Takım arkadaşından bomba iste (yakındaki bot hemen verir, uzaktaki bırakıp sana ayırır)</td></tr>
       <tr><td>R · 1 · 2 · 3 · Tekerlek</td><td>Şarjör değiştir · Ana silah · Tabanca · <b>Kılıç</b> (elde tutarken %22 daha hızlı koşarsın; sol tık hızlı kesik 50, sağ tık ağır darbe 75, sırttan iki katı) · Silah değiştir</td></tr>
       <tr><td>B</td><td>Mağaza (yalnızca 20 sn'lik satın alma evresinde)</td></tr>
       <tr><td>0</td><td>Sesli sohbet: basılı tut = konuş · kısa dokun = mikrofon açık kalsın (tekrar dokununca kapanır)</td></tr>
@@ -448,11 +448,11 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
       <tr><td>P · TAB · M</td><td>Duraklat / ayarlar · Skor tablosu · Ses aç/kapa</td></tr>
     </table>
     <h3>MAÇ</h3>
-    <p>İki takım: Saldıranlar ve Savunanlar. Maç <b>20 raunt</b> sürer; <b>10. rauntten sonra</b> taraflar değişir ve ekonomi sıfırlanır. 20 raunt sonunda daha çok raunt kazanan takım maçı alır (10–10 berabere). Saldıranlar Spike'ı A veya B bölgesine kurar; kurulan Spike (C4) haritaya göre 45–50 saniyede patlar; raunt 100 saniyedir (gerçek VALORANT süreleri). Savunanlar 7 saniyede imha eder (yarıda bırakılırsa 3.5 sn'den devam eder).</p>
+    <p>İki takım: Saldıranlar ve Savunanlar. Maç <b>20 raunt</b> sürer; <b>10. rauntten sonra</b> taraflar değişir ve ekonomi sıfırlanır. 20 raunt sonunda daha çok raunt kazanan takım maçı alır (10–10 berabere). Saldıranlar bombayı A veya B bölgesine kurar; kurulan bomba (C4) haritaya göre 45–50 saniyede patlar; raunt 100 saniyedir. Savunanlar 7 saniyede imha eder (yarıda bırakılırsa 3.5 sn'den devam eder).</p>
     <h3>TAKIM ATEŞİ</h3>
     <p>Mermiler ve kılıç takım arkadaşlarına da işler. Takım arkadaşını vurursan ekranın altında uyarı çıkar; takım arkadaşını öldürmek ödül vermez. Online odada <b>TAKIM ATEŞİ</b> düğmesine tek tıklayarak kapatabilirsin (lobide ya da maç sırasında ESC menüsünde; yalnızca odayı kuran değiştirir).</p>
     <h3>İMHA KİTİ</h3>
-    <p>Savunanlar mağazadan <b>İmha Kiti</b> alabilir (¤600). Kiti olan oyuncu Spike'ı <b>1 saniyede</b> imha eder. Kit ölünce gider; raundu sağ bitirirsen sende kalır.</p>
+    <p>Savunanlar mağazadan <b>İmha Kiti</b> alabilir (¤600). Kiti olan oyuncu bombayı <b>1 saniyede</b> imha eder. Kit ölünce gider; raundu sağ bitirirsen sende kalır.</p>
     <h3>HOPARLÖR MÜZİĞİ VE EMOTE</h3>
     <p>Doğuş alanlarındaki hoparlörlerden yankılı bir müzik çalar: satın almada başlar, raunt boyunca sürer, raunt bitince susar. Hoparlörden uzaklaştıkça kısılır, uzakta hiç duyulmaz. <b>F3</b> (Mac'te <b>fn+F3</b>) ile kamerayı değiştir: birinci şahıs → arkadan → önden. <b>Z</b> ile emote menüsünü aç, <b>1–6</b> ile seç (el salla, dans, sevin, tamam, gül, GG): karakterin hareketi yapar ve başının üstünde emoji çıkar. Seviyelerini <b>AYARLAR</b>'dan ayarlayabilir ya da kapatabilirsin.</p>
     <h3>SESLİ SOHBET VE YAZILI SOHBET</h3>
@@ -462,15 +462,15 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <h3>REBOOT (YENİDEN DOĞMA)</h3>
     <p>Ölen oyuncunun <b>reboot kartı</b> yere düşer. Bir takım arkadaşı kartın üstünden geçerek alır ve A ya da B bölgesindeki <b>reboot istasyonuna</b> götürüp <b>F</b>'yi 4 saniye basılı tutar; kartın sahibi istasyonun yanında 100 canla, sadece tabanca ve kılıçla yeniden doğar. Her istasyon kullanıldıktan sonra 15 saniye bekler. Kart taşıyan ölürse kartlar yere düşer.</p>
     <h3>EKONOMİ</h3>
-    <p>Başlangıç ¤800 · Öldürme ¤200 · Raunt galibiyeti ¤3000 · Mağlubiyet ¤1900/2400/2900 (seri) · Spike kurulursa saldıranlara ¤300. Hayatta kalırsan silah ve kalkanını korursun.</p>
+    <p>Başlangıç ¤800 · Öldürme ¤200 · Raunt galibiyeti ¤3000 · Mağlubiyet ¤1900/2400/2900 (seri) · Bomba kurulursa saldıranlara ¤300. Hayatta kalırsan silah ve zırhını korursun.</p>
     <h3>SAVAŞ</h3>
     <h3>FARKLI AĞLARDAN OYNAMAK</h3>
     <p>Oda kodu PeerJS eşleştirme sunucusu üzerinden bulunur, sonra oyun verisi doğrudan cihazlar arasında akar. Farklı ağlarda (mobil veri, başka ev, okul/iş ağı) doğrudan yol kurulamazsa <b>BAĞLANTI AYARLARI</b>'ndan ücretsiz bir TURN sunucusu ekle (ExpressTURN veya Metered'da ücretsiz hesap açıp verilen adres, kullanıcı adı ve şifreyi gir) ve <b>BAĞLANTIYI TEST ET</b> ile "Aktarma (TURN) ✓" gördüğünden emin ol. Host telefondaysa kodu paylaşırken oyunu arka planda uzun süre bırakmasın.</p>
     <h3>PARKUR MODU</h3>
     <p>OYNA → TEK OYUNCULU (ya da oda kurarken) <b>OYUN MODU: PARKUR</b>. 5 raunt; her raunt farklı, çok uzun ve ince bir pist. Bitişe ilk varan raundu alır, 5 raunt sonunda en çok raunt alan şampiyon olur. Elinde yalnızca <b>kılıç</b> var: <b>sol tık</b> hızlı darbe, <b>sağ tık</b> güçlü darbe. Kılıç rakibi öldürmez, <b>iter ve yavaşlatır</b> (boşluğa düşürebilirsin) ve <b>barikatları kırar</b>. <b>BOŞLUK</b> ile boşlukların ve blokların üstünden zıpla; mavi <b>pedler</b> seni havaya fırlatır, turuncu oklu <b>şeritler</b> hızlandırır, kırmızı-beyaz <b>dönen çubukların</b> üstünden zıpla. Düşersen son <b>kontrol noktasından</b> devam edersin. Her raunt öncesi pistin üstünden kısa bir kamera uçuşu ve 3-2-1 geri sayım var.</p>
     <h3>HARİTALAR</h3>
-    <p><b>Merkez</b> (klasik kapalı tesis), <b>Liman</b> (konteyner limanı, vinçler, su kanalı ve köprüler), <b>Çöl Harabesi</b> (kumtaşı kalıntılar, palmiyeler, piramitler), <b>Buzul Üssü</b> (karlı araştırma istasyonu, donmuş göl, dağlar), <b>Orman Tapınağı</b> (yeşil avlular, nehir, basamaklı tapınak) ve <b>Neon Şehir</b> (gece, gökdelenler, neon tabelalar). Haritaların boyutu gerçek VALORANT haritalarından esinlenmiştir (doğuştan bölgeye ~20–25 sn, A↔B dönüşü ~20 sn); geniş koridorlarla birbirine bağlı odalardan oluşur, A/B tarafları aynalıdır. Odalarda kuru kafalar, sandıklar, fıçılar, çuvallar, meşaleler gibi dekorlar vardır. Mini harita çevreni gösterir; TAB basılıyken tüm haritayı görürsün, bölge yönleri kenarda A/B okları olarak çıkar. Duvar ve zemin dokuları Poly Haven'ın ücretsiz (CC0) fotoğraf dokularıdır; bel hizasındaki alçak siperlerin arkasında eğilerek saklanabilirsin, ayakta durana ise üstünden ateş edilebilir.</p>
-    <p>Görüş konisi ve duvarlar düşmanları gizler; dumanlar görüşü keser. Kafaya isabet kritik hasardır; bacaklara isabet hasarı azaltır. Seri atışta namlu yukarı kalkar, aşağı çekerek kontrol et. Koşarken isabet düşer; seri atışta geri tepme yayılımı artırır. Ulti puanı: öldürme, ölme, Spike kurma/imha ve haritadaki turkuaz küreler.</p>
+    <p><b>Merkez</b> (klasik kapalı tesis), <b>Liman</b> (konteyner limanı, vinçler, su kanalı ve köprüler), <b>Çöl Harabesi</b> (kumtaşı kalıntılar, palmiyeler, piramitler), <b>Buzul Üssü</b> (karlı araştırma istasyonu, donmuş göl, dağlar), <b>Orman Tapınağı</b> (yeşil avlular, nehir, basamaklı tapınak) ve <b>Neon Şehir</b> (gece, gökdelenler, neon tabelalar). Haritalar, doğuştan bölgeye ~20–25 sn ve A↔B dönüşü ~20 sn sürecek büyüklüktedir; geniş koridorlarla birbirine bağlı odalardan oluşur, A/B tarafları aynalıdır. Odalarda kuru kafalar, sandıklar, fıçılar, çuvallar, meşaleler gibi dekorlar vardır. Mini harita çevreni gösterir; TAB basılıyken tüm haritayı görürsün, bölge yönleri kenarda A/B okları olarak çıkar. Duvar ve zemin dokuları Poly Haven'ın ücretsiz (CC0) fotoğraf dokularıdır; bel hizasındaki alçak siperlerin arkasında eğilerek saklanabilirsin, ayakta durana ise üstünden ateş edilebilir.</p>
+    <p>Görüş konisi ve duvarlar düşmanları gizler; dumanlar görüşü keser. Kafaya isabet kritik hasardır; bacaklara isabet hasarı azaltır. Seri atışta namlu yukarı kalkar, aşağı çekerek kontrol et. Koşarken isabet düşer; seri atışta geri tepme yayılımı artırır. Ulti puanı: öldürme, ölme, bomba kurma/imha ve haritadaki turkuaz küreler.</p>
     </div>
     <div id="helpEN" class="hidden" data-noi18n>
     <h2>CONTROLS &amp; RULES</h2>
@@ -482,8 +482,8 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
       <tr><td>MOUSE</td><td>Look (click the screen to lock the mouse) · Left click: fire · Right click: sniper scope</td></tr>
       <tr><td>Q · E · X</td><td>Abilities and ultimate — used where/toward your crosshair points</td></tr>
       <tr><td>MOBILE</td><td>Left half: drag to move · Right half: swipe to look · Hold FIRE and swipe to shoot and aim · CROUCH toggles crouching</td></tr>
-      <tr><td>F (hold)</td><td>Plant the Spike (attackers, at site A/B) · Defuse (defenders) · Revive a teammate at a reboot station</td></tr>
-      <tr><td>G · T</td><td>Drop the Spike · Request the Spike from a teammate</td></tr>
+      <tr><td>F (hold)</td><td>Plant the bomb (attackers, at site A/B) · Defuse (defenders) · Revive a teammate at a reboot station</td></tr>
+      <tr><td>G · T</td><td>Drop the bomb · Request the bomb from a teammate</td></tr>
       <tr><td>R · 1 · 2 · 3 · Wheel</td><td>Reload · Primary · Pistol · <b>Sword</b> (22% faster running; left click 50, right click heavy 75, double from behind) · Switch weapon</td></tr>
       <tr><td>B</td><td>Shop (only during the 20 s buy phase)</td></tr>
       <tr><td>0</td><td>Voice chat: hold = talk · short tap = keep the mic open (tap again to close)</td></tr>
@@ -493,11 +493,11 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
       <tr><td>P · TAB · M</td><td>Pause · Scoreboard · Sound on/off</td></tr>
     </table>
     <h3>MATCH</h3>
-    <p>Two teams: Attackers and Defenders. A match lasts <b>20 rounds</b>; sides swap <b>after round 10</b> and the economy resets. After 20 rounds the team with more round wins takes the match (10–10 is a draw). Attackers plant the Spike at site A or B; it detonates after 45–50 s depending on the map; a round lasts about 100 s. Defenders defuse in 7 s (resumes from 3.5 s if interrupted halfway).</p>
+    <p>Two teams: Attackers and Defenders. A match lasts <b>20 rounds</b>; sides swap <b>after round 10</b> and the economy resets. After 20 rounds the team with more round wins takes the match (10–10 is a draw). Attackers plant the bomb at site A or B; it detonates after 45–50 s depending on the map; a round lasts about 100 s. Defenders defuse in 7 s (resumes from 3.5 s if interrupted halfway).</p>
     <h3>FRIENDLY FIRE</h3>
     <p>Bullets and the sword also hurt teammates; a warning appears at the bottom of the screen. In an online room the host can turn it off with one click on the <b>FRIENDLY FIRE</b> button (in the lobby, or in the ESC menu during the match).</p>
     <h3>DEFUSE KIT</h3>
-    <p>Defenders can buy a <b>Defuse Kit</b> (¤600). With a kit you defuse the Spike in <b>1 second</b>. You lose it when you die; you keep it if you survive the round.</p>
+    <p>Defenders can buy a <b>Defuse Kit</b> (¤600). With a kit you defuse the bomb in <b>1 second</b>. You lose it when you die; you keep it if you survive the round.</p>
     <h3>SPEAKER MUSIC, EMOTES, CHAT</h3>
     <p>Music plays from the loudspeakers in the spawns: it starts in the buy phase, keeps playing through the round and stops when the round ends. It fades as you move away and is silent far from the speaker. Press <b>F3</b> (<b>fn+F3</b> on Mac) to switch the camera: first person → behind → in front. Press <b>Z</b> to open the emote menu and <b>1–6</b> to pick (wave, dance, cheer, thumbs up, laugh, GG): your character performs it with an emoji above the head. In an online room, hold <b>0</b> to talk: your voice fades with distance and is cut off at about 37 m; while in a spawn area only your team hears you. Speakers appear on the left with a microphone icon (also on the TAB board). Turn other players' voices off in <b>SETTINGS → VOICE CHAT</b>. Press <b>period (.)</b> to text chat.</p>
     <h3>HEALTH ORBS</h3>
@@ -505,7 +505,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <h3>REBOOT</h3>
     <p>A dead player's <b>reboot card</b> drops. A teammate picks it up, carries it to the <b>reboot station</b> at A or B and holds <b>F</b> for 4 s; the owner respawns next to it with 100 HP, a pistol and the sword. Each station then cools down for 15 s.</p>
     <h3>ECONOMY</h3>
-    <p>Start ¤800 · Kill ¤200 · Round win ¤3000 · Loss ¤1900/2400/2900 (streak) · Attackers get ¤300 if the Spike was planted. Survive to keep your weapon and shield.</p>
+    <p>Start ¤800 · Kill ¤200 · Round win ¤3000 · Loss ¤1900/2400/2900 (streak) · Attackers get ¤300 if the bomb was planted. Survive to keep your weapon and armor.</p>
     <h3>PARKOUR MODE</h3>
     <p>PLAY → SINGLE PLAYER (or when hosting a room) <b>GAME MODE: PARKOUR</b>. 5 rounds; each round is a different, very long and narrow course. First to the finish wins the round; whoever wins the most rounds after 5 is the champion. You only have a <b>sword</b>: <b>left click</b> quick hit, <b>right click</b> heavy hit. The sword doesn't kill — it <b>pushes and slows</b> rivals (you can knock them into the void) and <b>breaks barricades</b>. <b>SPACE</b> jumps over gaps and blocks; blue <b>pads</b> launch you, orange arrow <b>strips</b> speed you up, jump over the red-white <b>sweepers</b>. If you fall you continue from the last <b>checkpoint</b>. Before each round there is a short fly-over of the course and a 3-2-1 countdown.</p>
     <h3>PLAYING ACROSS NETWORKS</h3>

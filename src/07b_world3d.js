@@ -490,7 +490,7 @@ function drawGun(wid, x, h, z, a, pitch, sc, o, owner, t) {
 }
 
 /* ---------- karakter modeli ---------- */
-/* ---------- C4 bombası (Spike) ----------
+/* ---------- C4 bombası ----------
    yerel eksen: +X uzunluk, +Y yukarı, +Z genişlik; taban y=0 */
 const C4C = { brick: [0.66, 0.6, 0.42], brick2: [0.6, 0.55, 0.38], tape: [0.16, 0.16, 0.17], box: [0.13, 0.14, 0.15], key: [0.55, 0.57, 0.6], red: [0.85, 0.12, 0.12], blue: [0.15, 0.35, 0.85], yel: [0.9, 0.78, 0.15] };
 function drawC4(x, h, z, ang, pitch, s, mode, t, alpha) {
