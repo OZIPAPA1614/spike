@@ -60,6 +60,13 @@ function gauss() { return (Math.random() + Math.random() + Math.random() - 1.5) 
 
 /* ---------- HARİTA ---------- */
 const T_WALL = 0, T_FLOOR = 1, T_A = 2, T_B = 3, T_ATK = 4, T_DEF = 5, T_BOX = 6, T_WATER = 7, T_LOW = 8;
+/* PARKUR karoları (03b_parkur): boşluk, yükseklikli bloklar (zıplanarak çıkılır), kılıçla kırılan barikat,
+   zıplama pedi, hız şeridi, kontrol noktası ve bitiş zemini */
+const T_PIT = 9, T_H1 = 10, T_H2 = 11, T_H3 = 12, T_BREAK = 13, T_PAD = 14, T_BOOST = 15, T_CHECK = 16, T_FINISH = 17;
+const PK_TOP = { [T_H1]: 30, [T_H2]: 60, [T_H3]: 90 };  // blok üst yüzeyi (zıplama tepesi ≈ 42)
+const PK_STEP = 8;                                      // bu kadar alçaktaki kenara kendiliğinden çıkılır
+let PKZ = 0;                                            // çarpışma denetlenen oyuncunun yüksekliği (yalnızca parkur blokları için)
+let pkBroken = new Uint8Array(1);                       // kırılmış barikat karoları
 let grid = new Uint8Array(MW * MH);
 let tgrid = new Int32Array(MW * MH); // geçici duvar (TERRA) kimliği
 let wallAdj = new Uint8Array(MW * MH);
@@ -67,7 +74,7 @@ let MAPDATA = null;
 
 function setMapSize(w, h) {
   MW = w; MH = h; WW = MW * TILE; WH = MH * TILE;
-  grid = new Uint8Array(MW * MH); tgrid = new Int32Array(MW * MH); wallAdj = new Uint8Array(MW * MH);
+  grid = new Uint8Array(MW * MH); tgrid = new Int32Array(MW * MH); wallAdj = new Uint8Array(MW * MH); pkBroken = new Uint8Array(MW * MH);
   AS_g = new Float32Array(MW * MH); AS_came = new Int32Array(MW * MH); AS_closed = new Uint8Array(MW * MH);
 }
 function carve(x, y, w, h, t) { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) if (i >= 0 && j >= 0 && i < MW && j < MH) grid[j * MW + i] = (t === undefined ? T_FLOOR : t); }
@@ -86,6 +93,10 @@ function baseSolid(tx, ty) { const t = tileAt(tx, ty); return t === T_WALL || t 
 function solidT(tx, ty) {
   if (tx < 0 || ty < 0 || tx >= MW || ty >= MH) return true;
   const i = ty * MW + tx, t = grid[i];
+  if (t >= T_PIT) { // parkur: boşluk geçilir (düşülür), bloklar yalnızca üstlerinden alçaktaysan engeldir
+    if (t === T_BREAK) return !pkBroken[i];
+    const h = PK_TOP[t]; return h !== undefined && PKZ < h - PK_STEP;
+  }
   return t === T_WALL || t === T_BOX || t === T_LOW || t === T_WATER || tgrid[i] > 0;
 }
 /* Işın için: 0 geçirgen (zemin, su), 1 tam engel, 2 alçak siper (yüksekliğe bağlı) */

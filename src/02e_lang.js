@@ -137,6 +137,34 @@ Object.assign(EN_FRAG, {
   'Arkadaş sistemi için bir hesap gerekli.': 'The friends system needs an account.', 'HESAP AÇ / GİRİŞ YAP': 'SIGN UP / LOG IN', 'Oturum süresi doldu — tekrar giriş yap.': 'Session expired — please log in again.', 'Bir hata oluştu (': 'Something went wrong (', 'EMOTE · 1–6 seç · Z kapat': 'EMOTE · pick 1–6 · Z to close'
 });
 // büyük harfle yazılan adlar (ör. yetenek kutuları) için büyük harfli kopyalar
+/* yeni menü · sinematik giriş · PARKUR modu */
+Object.assign(EN_EXACT, {
+  'OYNA': 'PLAY', '💎 MAĞAZA': '💎 SHOP', 'OYUNCU': 'PLAYER', 'OYUN MODU': 'GAME MODE', 'YARIŞÇI SAYISI': 'RACERS', 'PARKURA BAŞLA': 'START PARKOUR',
+  'SIRALAMA': 'STANDINGS', 'HAZIR': 'READY', 'KOŞ!': 'RUN!', 'ŞAMPİYON': 'CHAMPION', 'İLERLEME': 'PROGRESS', 'SÜRE': 'TIME', 'RAUNT': 'ROUND',
+  'BİRİNCİ GELDİN!': 'YOU CAME FIRST!', 'RAUNDU KAZANDIN!': 'YOU WON THE ROUND!', 'RAUNT BİTTİ': 'ROUND OVER', 'A BÖLGESİ': 'SITE A', 'B BÖLGESİ': 'SITE B',
+  '[BOŞLUK] ATLA': '[SPACE] SKIP', 'ATLAMAK İÇİN DOKUN': 'TAP TO SKIP', 'TAKIMLAR': 'TEAMS', '#': '#'
+});
+Object.assign(EN_FRAG, {
+  'SPIKE · 5v5 taktik maç': 'SPIKE · 5v5 tactical match', 'PARKUR · kılıçla engel yarışı (5 parkur)': 'PARKOUR · sword obstacle race (5 courses)', ' yarışçı': ' racers',
+  'Kılıçla engel yarışı · 5 raunt, her raunt farklı uzun parkur · bitişe ilk varan raundu alır': 'Sword obstacle race · 5 rounds, a different long course every round · first to the finish wins the round',
+  'Elinde yalnızca kılıç var: rakipleri it, barikatları kır, boşluklardan atla. Düşersen son kontrol noktasından devam edersin.': 'You only have a sword: push rivals, break barricades, jump over gaps. If you fall you continue from the last checkpoint.',
+  'Mod: PARKUR · 5 parkur · takım yok, herkes kendi için yarışır · Yarışçı: ': 'Mode: PARKOUR · 5 courses · no teams, everyone races for themselves · Racers: ', ' (botlarla)': ' (with bots)', ' · Zorluk: ': ' · Difficulty: ',
+  'KONTROL NOKTASI': 'CHECKPOINT', 'DÜŞTÜN': 'YOU FELL', 'BAŞTAN DEVAM': 'BACK TO START', 'BİTİRDİN · ': 'FINISHED · ', ' BİTİRDİ · ': ' FINISHED · ',
+  'Süre doldu — en öndeydin': 'Time up — you were in front', 'Bitişe ilk sen vardın': 'You reached the finish first', ' RAUNDU KAZANDI': ' WON THE ROUND',
+  'Süre doldu — en öndeki kazandı': 'Time up — the leader won', 'Bitişe ilk o vardı': 'They reached the finish first', ' SENİ İTTİ!': ' PUSHED YOU!',
+  'DÖNEN ÇUBUK SENİ SAVURDU!': 'THE SWEEPER KNOCKED YOU AWAY!', 'KOŞ! — BARİYER KALKTI': 'RUN! — BARRIER DOWN',
+  'Bitişe ilk varan raundu alır · kılıçla itebilir, barikatları kırabilirsin': 'First to the finish wins the round · push with your sword, break barricades',
+  'Bitişe ilk varan raundu alır · düşersen kontrol noktasından devam': 'First to the finish wins the round · fall and you continue from the checkpoint',
+  'Bitişe ilk varan raundu alır': 'First to the finish wins the round',
+  'PARKURDA YETENEK YOK — YALNIZCA KILIÇ': 'NO ABILITIES IN PARKOUR — SWORD ONLY', 'PARKURDA MAĞAZA YOK — YALNIZCA KILIÇ': 'NO SHOP IN PARKOUR — SWORD ONLY',
+  'BARİKAT — sol tık ile kılıçla kır (sağ tık: güçlü darbe)': 'BARRICADE — left click to break it with your sword (right click: heavy hit)', 'BARİKAT — ATEŞ ile kılıçla kır': 'BARRICADE — break it with FIRE',
+  'PARKUR · GENEL SIRALAMA': 'PARKOUR · OVERALL STANDINGS', 'PARKUR ŞAMPİYONU: ': 'PARKOUR CHAMPION: ', 'PARKUR ': 'PARKOUR ', 'KALAN ': 'LEFT ', ' OLDUN': ' PLACE', ' raunt': ' rounds', '. SEN': '. YOU',
+  'Spike burada kurulabilir': 'The Spike can be planted here', 'TAKIMIN · ': 'YOUR TEAM · ', 'RAKİP · ': 'ENEMY · ',
+  'GÖK PİSTİ': 'SKY TRACK', 'SAKURA KÖPRÜLERİ': 'SAKURA BRIDGES', 'BUZ SIRTI': 'ICE RIDGE', 'LAV GEÇİDİ': 'LAVA PASS', 'YÖRÜNGE': 'ORBIT', 'NEON KULELER': 'NEON TOWERS', 'TAPINAK YOLU': 'TEMPLE PATH',
+  'Bulutların üstünde, güneşli bir pist': 'A sunny track above the clouds', 'Kiraz çiçekleri arasında asma köprüler': 'Hanging bridges among cherry blossoms',
+  'Kaygan görünen ama sağlam buz yolu': 'An ice road that looks slippery but holds', 'Altında lav, üstünde kızıl gökyüzü': 'Lava below, a red sky above',
+  'Dev gezegenin önünde, boşlukta bir pist': 'A track in the void before a giant planet', 'Gece şehrinin üstünde ışıklı yol': 'A glowing road above the night city', 'Ormanın üstünde taş patika': 'A stone path above the forest'
+});
 for (const k of Object.keys(EN_FRAG)) { if (k.length < 26 && /^[A-Za-zÇĞİÖŞÜçğıöşü ]+$/.test(k)) { const u = k.toLocaleUpperCase('tr-TR'); if (u !== k && !(u in EN_FRAG)) EN_FRAG[u] = EN_FRAG[k].toUpperCase(); } }
 const EN_RULES = [
   [/^\+(\d+) CAN$/, '+$1 HP'], [/^RAUNT (\d+)( \/ |\/)(\d+)$/, 'ROUND $1$2$3'], [/^(\d+) sn$/, '$1 s'], [/(\d+) sn\b/g, '$1 s'], [/ \(BOT\)$/, ' (BOT)']

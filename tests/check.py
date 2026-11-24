@@ -5,8 +5,9 @@ Kullanım (depo kökünden):  python3 tests/check.py [--quick]
   1) src/ derlenir ve yayındaki index.html ile karşılaştırılır (biri index.html'i elle değiştirdiyse yakalar)
   2) index.html tarayıcıda açılır: menüler, mağaza, ayarlar, dil
   3) Her haritada botlarla maç oynatılır (--quick değilse 2 haritada TAM maç)
-  4) Tek oyunculu arayüz akışı (ajan seçimi → oyun → çizim)
-  5) Çok oyunculu: yerel eşleştirme sunucusuyla host + istemci (oda, katılma, maç, hareket, sohbet, ses)
+  3b) PARKUR modu: botlarla 5 raunt (--quick: 1 raunt)
+  4) Tek oyunculu arayüz akışı (ajan seçimi → sinematik giriş → oyun → çizim) + PARKUR arayüz akışı
+  5) Çok oyunculu: yerel eşleştirme sunucusuyla host + istemci (oda, katılma, maç, hareket, sohbet, ses) + PARKUR eşitlemesi
   6) Herkese açık sunucu eşleşmesi (yerel Firebase taklidiyle)
 Çıkış kodu 0 = sorun yok. Her bulgu "FAIL:" ile başlar.
 """
@@ -93,7 +94,11 @@ try:
             if n < 5: fail(f'mağaza sekmesi {tab}: yalnızca {n} kart')
         M.click('#scr-store [data-back]'); M.wait_for_timeout(200)
         M.click('#btnSettings'); M.wait_for_timeout(200); M.evaluate("() => closeSettings && closeSettings()")
-        M.click('#btnFriends'); M.wait_for_timeout(200); M.click('#scr-friends [data-back]'); M.wait_for_timeout(200)
+        M.click('#btnSettings'); M.wait_for_timeout(200); M.click('#btnFriends'); M.wait_for_timeout(200); M.click('#scr-friends [data-back]'); M.wait_for_timeout(200)
+        M.click('#btnSettings'); M.wait_for_timeout(200); M.click('#btnHelp'); M.wait_for_timeout(200); M.click('#scr-help [data-back]'); M.wait_for_timeout(200)
+        M.click('#btnPlay'); M.wait_for_timeout(200)
+        if not M.is_visible('#btnSP') or not M.is_visible('#btnPub'): fail('OYNA ekranında oyun türleri görünmüyor')
+        M.click('#scr-play [data-back]'); M.wait_for_timeout(200)
         M.evaluate("() => setLang('en')"); M.wait_for_timeout(200); M.evaluate("() => setLang('tr')")
         ok('menü, mağaza, ayarlar, arkadaşlar, dil açıldı')
     except Exception as e: fail('menü gezintisi: ' + str(e)[:300])
@@ -121,6 +126,24 @@ try:
             if mi in full and r['phase'] != 'over': fail(f"harita {r['map']}: tam maç {sim} sn'de bitmedi ({r})")
             elif len(errs) == before: ok(f"harita {mi} {r['map']}: {'TAM maç ' + str(r['score']) if mi in full else str(r['round']) + '. raunda kadar'} hatasız")
         except Exception as e: fail(f'harita {mi}: ' + str(e)[:300])
+    # ---------- 3b) PARKUR: botlarla 5 raunt ----------
+    try:
+        M.evaluate("""() => { const A=['vex','ignis','mist','aegis','pulse'], B=['chrono','terra','vital','volt','phantom'], roster=[];
+            A.forEach((a,j)=>roster.push({id:j?'x'+j:'h',name:a,team:0,agent:a,bot:j>0})); B.forEach((a,j)=>roster.push({id:'y'+j,name:a,team:1,agent:a,bot:true}));
+            NET.mode='off'; G.myId='h'; launchGame(roster, {teamSize:5, fill:true, diff:'normal', map:0, mode:'pk', pkSeed: 777});
+            const me=S.pmap.h; me.ctrl='bot'; me.isBot=true; me.ai=pkNewAI(me); G.paused=true;
+            window.__pkr=[]; const o=pkEndRound; pkEndRound=(w,r)=>{ window.__pkr.push(r); o(w,r); }; }""")
+        want = 1 if QUICK else 5
+        sim, r = 0, None
+        while sim < 1500:
+            r = M.evaluate("() => { for (let i=0;i<3600;i++){ hostTick(SIM_DT); S.evq.length=0; if (S.phase==='over') break; } render(1/60); return {phase:S.phase, round:S.round, ends:window.__pkr.slice(), wins:S.players.reduce((a,p)=>a+(p.pkW||0),0), map:PKMAP&&PKMAP.name}; }")
+            sim += 60
+            if r['phase'] == 'over' or len(r['ends']) >= want: break
+        if len(r['ends']) < want: fail(f'PARKUR: {sim} sn\'de {want} raunt bitmedi ({r})')
+        elif r['ends'].count('fin') < max(1, want - 1): fail(f'PARKUR: botlar bitişe varamıyor (raunt sonları: {r["ends"]})')
+        elif not QUICK and r['phase'] != 'over': fail(f'PARKUR: 5 raunttan sonra maç bitmedi ({r})')
+        else: ok(f"PARKUR: botlarla {len(r['ends'])} raunt ({r['ends'].count('fin')} tanesi bitişe varılarak), harita {r['map']}")
+    except Exception as e: fail('PARKUR bot maçı: ' + str(e)[:300])
     report_errs(errs, 'menü + bot maçları')
     ctx.close()
 
@@ -129,9 +152,15 @@ try:
     ctx = b.new_context(viewport={'width': 960, 'height': 540})
     S1 = page(ctx, 'TEK', errs, 'Tekci')
     try:
-        S1.click('#btnSP'); S1.click('#btnSpGo'); S1.wait_for_timeout(300)
+        S1.click('#btnPlay'); S1.click('#btnSP'); S1.click('#btnSpGo'); S1.wait_for_timeout(300)
         S1.click('#selGrid .agent >> nth=0'); S1.click('#btnLock')
         if not until(S1, "() => !!(G.running && S)", 40): fail('tek oyunculu maç başlamadı')
+        ci = S1.evaluate("() => [CINE.on, S.phaseT]")
+        if not ci[0] or ci[1] <= 20: fail(f'sinematik giriş başlamadı ya da satın alma süresine eklenmedi: {ci}')
+        S1.keyboard.press('Space'); S1.wait_for_timeout(300)
+        ci = S1.evaluate("() => [CINE.on, S.phaseT]")
+        if ci[0] or ci[1] > 20.5: fail(f'sinematik giriş BOŞLUK ile atlanmadı: {ci}')
+        else: ok('sinematik giriş: başladı, satın alma süresi korundu, atlanabildi')
         S1.evaluate("() => { S.phase='live'; S.phaseT=60; }")
         S1.keyboard.down('KeyW'); S1.wait_for_timeout(800); S1.keyboard.up('KeyW')
         S1.keyboard.press('F3'); S1.wait_for_timeout(300); S1.keyboard.press('F3'); S1.wait_for_timeout(300); S1.keyboard.press('F3')
@@ -141,15 +170,37 @@ try:
     report_errs(errs, 'tek oyunculu')
     ctx.close()
 
+    # ---------- 4b) PARKUR arayüz akışı ----------
+    errs = []
+    ctx = b.new_context(viewport={'width': 960, 'height': 540})
+    P1 = page(ctx, 'PARKUR', errs, 'Parkurcu')
+    try:
+        P1.click('#btnPlay'); P1.click('#btnSP'); P1.select_option('#spMode', 'pk'); P1.click('#btnSpGo')
+        if not until(P1, "() => !!(G.running && S && PKMAP && S.cfg.mode==='pk')", 40): fail('PARKUR başlamadı')
+        P1.keyboard.press('Space')
+        if not until(P1, "() => S.phase==='live'", 60): fail('PARKUR geri sayımı bitmedi')
+        P1.evaluate("() => { LOOK.yaw = 0; window.__mz = 0; window.__x0 = S.pmap.h.x; setInterval(() => { window.__mz = Math.max(window.__mz, S.pmap.h.jz); }, 16); }")
+        P1.keyboard.down('KeyW'); P1.wait_for_timeout(900); P1.keyboard.press('Space'); P1.wait_for_timeout(900); P1.keyboard.up('KeyW')
+        mv = P1.evaluate("() => [S.pmap.h.x - window.__x0, window.__mz]")
+        if mv[0] < 150: fail(f'PARKUR: oyuncu ilerlemedi ({mv})')
+        elif mv[1] < 20: fail(f'PARKUR: zıplama çalışmadı ({mv})')
+        P1.evaluate("() => { const me=S.pmap.h; setPos(me, (PKMAP.finX-2)*TILE, (PKMAP.cy+0.5)*TILE); LOOK.yaw=0; }")
+        P1.keyboard.down('KeyW'); P1.wait_for_timeout(1500); P1.keyboard.up('KeyW')
+        if not until(P1, "() => S.phase==='end' && S.pk.winner==='h'", 20): fail('PARKUR: bitiş çizgisi raundu bitirmedi')
+        else: ok('PARKUR: mod seçimi, sinematik, geri sayım, koşu, zıplama, bitiş')
+    except Exception as e: fail('PARKUR arayüz akışı: ' + str(e)[:300])
+    report_errs(errs, 'parkur')
+    ctx.close()
+
     # ---------- 5) çok oyunculu ----------
     errs = []
     ctx = b.new_context(viewport={'width': 560, 'height': 340}, permissions=['microphone'])
     H = page(ctx, 'HOST', errs, 'HostKontrol'); C = page(ctx, 'İSTEMCİ', errs, 'MisafirKontrol')
     try:
-        H.click('#btnHost')
+        H.click('#btnPlay'); H.click('#btnHost')
         if not until(H, "() => UI.screen==='scr-lobby' && (document.getElementById('lbCode').textContent||'').replace(/-/g,'').length>=5", 60): fail('oda açılamadı')
         code = H.inner_text('#lbCode')
-        C.click('#btnJoin'); C.fill('#inCode', code); C.click('#btnConnect')
+        C.click('#btnPlay'); C.click('#btnJoin'); C.fill('#inCode', code); C.click('#btnConnect')
         if not until(C, "() => UI.screen==='scr-lobby'", 80): fail('istemci odaya katılamadı: ' + C.inner_text('#joinStatus')[:200])
         H.select_option('#lbSize', '1'); H.wait_for_timeout(600); H.click('#btnLobbyStart')
         until(C, "() => UI.screen==='scr-select'", 60)
@@ -178,15 +229,45 @@ try:
     report_errs(errs, 'çok oyunculu')
     ctx.close()
 
+    # ---------- 5b) çok oyunculu PARKUR: aynı harita, raunt geçişi, barikat eşitlemesi ----------
+    errs = []
+    ctx = b.new_context(viewport={'width': 560, 'height': 340})
+    H = page(ctx, 'PK-HOST', errs, 'PkHost'); C = page(ctx, 'PK-İSTEMCİ', errs, 'PkMisafir')
+    GH = "() => { let h=0; for (let i=0;i<grid.length;i++) h=(h*31+grid[i])|0; return [PKMAP && PKMAP.round, MW, MH, h]; }"
+    try:
+        H.click('#btnPlay'); H.click('#btnHost')
+        if not until(H, "() => UI.screen==='scr-lobby' && (document.getElementById('lbCode').textContent||'').replace(/-/g,'').length>=5", 60): fail('PARKUR odası açılamadı')
+        code = H.inner_text('#lbCode')
+        C.click('#btnPlay'); C.click('#btnJoin'); C.fill('#inCode', code); C.click('#btnConnect')
+        if not until(C, "() => UI.screen==='scr-lobby'", 80): fail('istemci PARKUR odasına katılamadı')
+        H.select_option('#lbMode', 'pk'); H.select_option('#lbSize', '2'); H.wait_for_timeout(600); H.click('#btnLobbyStart')
+        if not until(C, "() => !!(G.running && S && PKMAP && S.pmap.h)", 80): fail('PARKUR istemcide başlamadı')
+        H.evaluate("() => { cineStop(false); S.phase='live'; S.phaseT=200; S.pk.t0=S.time; }"); C.evaluate("() => { cineStop(false); if (UI.pauseOpen) togglePause(false); }")
+        H.wait_for_timeout(600)
+        if H.evaluate(GH) != C.evaluate(GH): fail(f'PARKUR: host ve istemcinin haritası farklı {H.evaluate(GH)} / {C.evaluate(GH)}')
+        x0 = H.evaluate("() => S.pmap.p1.x")
+        C.evaluate("() => { LOOK.yaw = 0; }"); C.keyboard.down('KeyW'); C.wait_for_timeout(900); C.keyboard.up('KeyW'); C.wait_for_timeout(500)
+        if H.evaluate("() => S.pmap.p1.x") - x0 < 40: fail('PARKUR: host istemcinin koşusunu görmüyor')
+        H.evaluate("() => { if (S.pk.bk.length) { S.pk.bk[0]=0; pkBroken[PKMAP.brk[0]]=1; } }"); H.wait_for_timeout(700)
+        if C.evaluate("() => !PKMAP.brk.length || pkBroken[PKMAP.brk[0]] === 1") is not True: fail('PARKUR: kırılan barikat istemciye gitmedi')
+        H.evaluate("() => { pkEndRound(S.pmap.h, 'fin'); S.phaseT = 0.05; }")
+        if not until(C, "() => PKMAP && PKMAP.round === 2 && S.round === 2", 60): fail('PARKUR: istemci 2. raunt haritasına geçmedi')
+        elif H.evaluate(GH) != C.evaluate(GH): fail('PARKUR: 2. rauntta host ve istemcinin haritası farklı')
+        elif C.evaluate("() => S.pmap.h.pkW") != 1: fail('PARKUR: raunt galibiyeti istemciye gitmedi')
+        else: ok('çok oyunculu PARKUR: aynı harita, koşu, barikat, raunt geçişi')
+    except Exception as e: fail('çok oyunculu PARKUR: ' + str(e)[:300])
+    report_errs(errs, 'çok oyunculu parkur')
+    ctx.close()
+
     # ---------- 6) herkese açık sunucu ----------
     errs = []
     ctx = b.new_context(viewport={'width': 520, 'height': 320})
     A = page(ctx, 'AÇIK-A', errs, 'AcikA'); B = page(ctx, 'AÇIK-B', errs, 'AcikB')
     try:
-        A.click('#btnPub')
+        A.click('#btnPlay'); A.click('#btnPub')
         if not until(A, "() => UI.screen==='scr-lobby' && PUB.on", 60): fail('açık sunucu kurulamadı')
         A.wait_for_timeout(800)
-        B.click('#btnPub')
+        B.click('#btnPlay'); B.click('#btnPub')
         if not until(B, "() => UI.screen==='scr-lobby' && NET.mode==='client'", 80): fail('ikinci oyuncu açık sunucuya katılamadı')
         elif A.evaluate("() => NET.lobby.players.filter(p=>!p.bot).length") < 2: fail('açık sunucuda host 2. oyuncuyu görmüyor')
         else: ok('herkese açık sunucu eşleşmesi')

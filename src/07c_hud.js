@@ -70,6 +70,7 @@ function traceCol(w) { return w && w.trace && w.trace[0] === '#' ? hexRGB(w.trac
 function handleEvent(ev) {
   if (!S) return;
   const me = S.pmap[G.myId];
+  if (PKMAP && pkOn() && pkEvent(ev, me)) return; // parkur olayları (07e)
   switch (ev.k) {
     case 'sh': {
       const w = WEAPONS[ev.w], own = ev.id === G.myId && ev.w !== 'turret';
@@ -184,6 +185,7 @@ function handleEvent(ev) {
       showMsg('RAUNT ' + ev.n + ' / ' + MATCH_ROUNDS, side === 'atk' ? 'SALDIRI — Spike\'ı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, Spike\'ı imha et', side === 'atk' ? PAL.red : PAL.teal, 3);
       AU.play('round'); G.spec = null; UIS.deathBy = undefined; UIS.pings.length = 0;
       LOOK.yaw = side === 'atk' ? -Math.PI / 2 : Math.PI / 2; LOOK.pitch = 0;
+      if (ev.n === 1 && G.running) cineStart('match'); // maç başı sinematik giriş
       break;
     }
     case 'go': showMsg(null, 'RAUNT BAŞLADI — BARİYERLER KALKTI', PAL.gold); AU.play('lockbeep'); break;
@@ -228,7 +230,7 @@ function render(dt) {
   finally { if (ex > 0) for (const pr of S.proj) { pr.x = pr._ox; pr.y = pr._oy; } }
   if (ctx.reset) ctx.reset(); // sızan save/clip durumları birikmesin (nişangâh kaybolma hatası)
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H); ctx.globalAlpha = 1;
-  drawHUD(dt, me, v);
+  if (CINE.on) { drawCine(dt, me); drawChat(dt, me); } else drawHUD(dt, me, v);
   spikeBeeps(dt); footstepSounds(dt, v);
 }
 function renderMenuBg(dt) {
@@ -526,6 +528,7 @@ function drawCenterMsgs(dt) {
 }
 
 function drawHUD(dt, me, v) {
+  if (PKMAP && pkOn()) { drawPkHUD(dt, me, v); return; }
   drawScreenFX(dt, me, v);
   drawWorldMarkers(dt, me, v);
   drawTopBar(me);

@@ -314,21 +314,10 @@ function mkTex(src, repeat) {
   _boundTex = null;
   return t;
 }
-/* ---------- fotoğraf doku paketi (01c, CC0) ---------- */
-const TEXIMG = {};
-let TEXPACK_READY = false;
-function loadTexPack() {
-  if (typeof TEXPACK_SRC === 'undefined') return;
-  const keys = Object.keys(TEXPACK_SRC); let left = keys.length;
-  for (const k of keys) {
-    const im = new Image();
-    im.onload = () => { TEXIMG[k] = im; if (--left === 0) texPackDone(); };
-    im.onerror = () => { if (--left === 0) texPackDone(); };
-    im.src = TEXPACK_SRC[k];
-  }
-}
-function texPackDone() { TEXPACK_READY = true; if (GLX.ok && CUR_MAP >= 0) buildThemeTextures(THEME); }
-/* Dekor doku atlası (4×4 hücre, 256 px): Poly Haven CC0 fotoğraflarından türetilir.
+/* ---------- üretilmiş doku paketi (01c_texgen: tamamen kodla üretilir) ---------- */
+const TEXIMG = { get: name => TEXGEN.get(name) };
+function loadTexPack() { /* dokular ilk kullanımda üretilir (01c_texgen) */ }
+/* Dekor doku atlası (4×4 hücre, 256 px): kodla üretilen malzeme dokularından türetilir.
    0 ahşap · 1 koyu metal · 2 altın · 3 kemik · 4 çuval bezi · 5 pas boyalı varil · 6 taş · 7 pişmiş toprak
    8 yaprak · 9 sunucu paneli · 10 beyaz · 11 siyah · 12 kırmızı boya · 13 kar · 14 kaktüs · 15 kauçuk */
 const PC = { wood: 0, metal: 1, gold: 2, bone: 3, burlap: 4, rust: 5, stone: 6, clay: 7, leaf: 8, panel: 9, white: 10, black: 11, red: 12, snow: 13, cactus: 14, rubber: 15 };
@@ -340,7 +329,7 @@ function buildPropAtlas() {
     ['rusty_metal_03', '#ff5040', '#b02a22'], ['snow_02', '#ffffff', '#f2f6fa'], ['leaves_forest_ground', '#4c9a40', '#3f7a35'], ['granular_concrete', '#404040', '#262626']];
   return canvasOf(1024, 1024, (c) => {
     spec.forEach(([img, tint, base], k) => {
-      const x = (k % 4) * 256, y = Math.floor(k / 4) * 256, im = img && TEXIMG[img];
+      const x = (k % 4) * 256, y = Math.floor(k / 4) * 256, im = img && TEXIMG.get(img);
       c.save(); c.beginPath(); c.rect(x, y, 256, 256); c.clip();
       if (im) {
         c.drawImage(im, x, y, 256, 256);
@@ -374,9 +363,9 @@ function buildWaterCanvas() {
   x2.putImageData(img, 0, 0);
   return c;
 }
-/* Fotoğrafı tuvale çiz, isteğe bağlı renk çarpanı ve parlaklık uygula */
+/* Üretilmiş malzeme dokusunu tuvale çiz, isteğe bağlı renk çarpanı ve parlaklık uygula */
 function photoCanvas(name, size, tint, fn) {
-  const im = TEXIMG[name]; if (!im) return null;
+  const im = TEXIMG.get(name); if (!im) return null;
   return canvasOf(size, size, (c, w, h) => {
     c.drawImage(im, 0, 0, w, h);
     if (tint) { c.globalCompositeOperation = 'multiply'; c.fillStyle = tint; c.fillRect(0, 0, w, h); c.globalCompositeOperation = 'source-over'; }
@@ -410,11 +399,11 @@ function buildThemeTextures(th) {
   GLX.tex.props = mkTex(buildPropAtlas(), false);
   if (!GLX.tex.water) GLX.tex.water = mkTex(buildWaterCanvas(), true);
   GLX.tex.low = mkTex(canvasOf(128, 128, th.low), true);
-  GLX.tex.floor = mkTex(buildFloorCanvas(th), false);
+  GLX.tex.floor = PKMAP ? mkTex(pkFloorCanvas(th), true) : mkTex(buildFloorCanvas(th), false); // parkur: tekrarlanan karo dokusu
 }
 /* Zemin: 2048×1024 tek doku — temaya göre karo/kum/kar/çim/asfalt; site harfleri, çizgiler, su */
 function buildFloorCanvas(th) {
-  const F = th.floor, map = MAPS[CUR_MAP] || MAPS[0];
+  const F = th.floor, map = mapDef();
   const mx = Math.min(4096, (GLX.gl && GLX.gl.getParameter(GLX.gl.MAX_TEXTURE_SIZE)) || 2048);
   const big = MW * 16 > 2048 && !(typeof IS_TOUCH !== 'undefined' && IS_TOUCH);
   const fw = big ? mx : 2048, fh = big ? Math.min(2048, Math.round(fw * MH / MW)) : 1024;

@@ -50,6 +50,7 @@ function emitSnd(s, x, y) { emit({ k: 'snd', s, x: r1(x), y: r1(y) }); }
 function emitFx(o) { o.k = 'fx'; emit(o); }
 
 function createGame(roster, cfg) {
+  if (cfg.mode === 'pk') { pkCreate(roster, cfg); return; } // PARKUR modu (03b)
   loadMap(cfg.map || 0);
   S = newState(cfg);
   for (const r of roster) { const p = makePlayer(r); S.players.push(p); S.pmap[p.id] = p; }
@@ -71,7 +72,7 @@ function startRound() {
     S.lossStreak = [0, 0];
     emit({ k: 'msg', big: 'TARAF DEĞİŞİMİ', small: 'Ekonomi sıfırlandı · ulti puanları korunur' });
   }
-  S.phase = 'buy'; S.phaseT = BUY_TIME; S.planted = false; S.lastResult = null;
+  S.phase = 'buy'; S.phaseT = BUY_TIME + (S.round === 1 ? INTRO_TIME : 0); S.planted = false; S.lastResult = null; // 1. raunt: sinematik giriş süresi eklenir
   S.proj.length = 0; S.areas.length = 0; S.deps.length = 0; S.beams.length = 0; S.corpses.length = 0;
   S.cards = []; S.rb = (MAPDATA.reboot || []).map(() => ({ cd: 0 }));
   clearTempWalls();
@@ -125,6 +126,7 @@ function endRound(win, reason) {
 
 /* ---------- ANA SİMÜLASYON ADIMI (host) ---------- */
 function hostTick(dt) {
+  if (PKMAP && pkOn()) { pkHostTick(dt); return; }
   S.time += dt;
   for (const p of S.players) if (p.ctrl === 'bot') botUpdate(p, dt);
   updateZones(dt);
@@ -198,7 +200,7 @@ function enemiesIn(team, x, y, r) { return S.players.filter(p => p.alive && p.te
 /* ---------- HAREKET (host + istemci tahmini) ---------- */
 function playerSpeed(p, inp) {
   const wid = curW(p), w = wid === 'sword' ? swordStats(p) : WEAPONS[wid];
-  let s = RUN * (w.spd || 1);
+  let s = RUN * (PKMAP ? PK_SPD : (w.spd || 1)); // parkurda herkes aynı hızda
   if (inp.walk) s *= 0.52;
   if (p.crouch) s *= 0.42;
   if (p.scoped) s *= 0.55;
@@ -209,31 +211,37 @@ function playerSpeed(p, inp) {
   if (p.st.slow > 0) s *= (1 - (p.slowAmt || 0.3));
   return s;
 }
-function barrierFor(p) { const t = sideOf(p.team) === 'atk' ? T_ATK : T_DEF; return (tx, ty) => tileAt(tx, ty) !== t; }
+function barrierFor(p) { const t = PKMAP ? T_ATK : sideOf(p.team) === 'atk' ? T_ATK : T_DEF; return (tx, ty) => tileAt(tx, ty) !== t; }
 function movePlayer(p, dt, inp) {
   if (!p.alive) { p.spd = 0; return; }
   let mx = inp.mvx || 0, my = inp.mvy || 0;
   const l = Math.hypot(mx, my); if (l > 1) { mx /= l; my /= l; }
   if (p.st.knock > 0 || inp.use || S.phase === 'over' || p.plantT > 0 || p.defT > 0) { mx = 0; my = 0; }
-  // zıplama: giriş sayacı değişince ve yerdeyken
+  // zıplama: giriş sayacı değişince ve yerdeyken (parkurda zemin, altındaki bloğun üstü olabilir)
+  const pk = !!PKMAP, g0 = pk ? pkGround(p.x, p.y) : 0;
   if ((inp.jc | 0) !== (p.lastJc | 0)) {
     p.lastJc = inp.jc | 0;
-    if (p.jz <= 0.01 && p.jvz <= 0 && canAct(p) && !inp.use && !(p.plantT > 0) && !(p.defT > 0) && S.phase !== 'over') {
+    const onG = pk ? (g0 > PK_VOID && p.jz <= g0 + 0.5 && p.jvz <= 0) : (p.jz <= 0.01 && p.jvz <= 0);
+    if (onG && canAct(p) && !inp.use && !(p.plantT > 0) && !(p.defT > 0) && S.phase !== 'over') {
       p.jvz = JUMP_V;
       if (p.ctrl === 'local' && typeof AU !== 'undefined') AU.play('jump', p.x, p.y, 0.8, true);
     }
   }
-  if (p.jz > 0 || p.jvz > 0) {
+  if (pk) pkVertical(p, dt, g0);
+  else if (p.jz > 0 || p.jvz > 0) {
     p.jz += p.jvz * dt - 0.5 * GRAV * dt * dt; p.jvz -= GRAV * dt; // kare hızından bağımsız (tam parabol)
     if (p.jz <= 0) { p.jz = 0; p.jvz = 0; if (p.ctrl === 'local' && typeof AU !== 'undefined') AU.play('land', p.x, p.y, 0.7, true); }
   }
-  const air = p.jz > 0.5;
+  const air = pk ? (p.jz > g0 + 0.5 || p.jvz > 0) : p.jz > 0.5;
   const sp = playerSpeed(p, inp), k = Math.min(1, dt * (air ? 3.5 : 18));
   p.vx += (mx * sp - p.vx) * k; p.vy += (my * sp - p.vy) * k;
   let vx = p.vx, vy = p.vy;
   if (p.imp && p.imp.t > 0) { vx = p.imp.vx; vy = p.imp.vy; p.imp.t -= dt; if (p.imp.t <= 0) p.imp = null; }
   const ox = p.x, oy = p.y;
+  PKZ = p.jz || 0;
   moveCircle(p, vx * dt, vy * dt, PR, S.phase === 'buy' ? barrierFor(p) : null);
+  PKZ = 0;
+  if (pk) pkAfterMove(p, dt);
   p.spd = Math.hypot(p.x - ox, p.y - oy) / dt;
 }
 /* Oyuncular üst üste binmesin: yumuşak itme (uzak istemciler kendi tarafında ayrışır) */
@@ -247,10 +255,12 @@ function separatePlayers() {
       if (d2 >= md * md || d2 < 1e-4) continue;
       const am = a.ctrl !== 'remote', bm = b.ctrl !== 'remote';
       if (!am && !bm) continue;
+      if (PKMAP && Math.abs((a.jz || 0) - (b.jz || 0)) > 40) continue; // parkur: farklı yükseklikteki oyuncular itişmez
       const d = Math.sqrt(d2), push = (md - d) * 0.5, ux = dx / d, uy = dy / d;
       const fa = am && bm ? 0.5 : am ? 1 : 0, fb = am && bm ? 0.5 : bm ? 1 : 0;
-      if (fa) { a.x -= ux * push * fa; a.y -= uy * push * fa; resolveCircle(a, PR, S.phase === 'buy' ? barrierFor(a) : null); }
-      if (fb) { b.x += ux * push * fb; b.y += uy * push * fb; resolveCircle(b, PR, S.phase === 'buy' ? barrierFor(b) : null); }
+      if (fa) { a.x -= ux * push * fa; a.y -= uy * push * fa; PKZ = a.jz || 0; resolveCircle(a, PR, S.phase === 'buy' ? barrierFor(a) : null); }
+      if (fb) { b.x += ux * push * fb; b.y += uy * push * fb; PKZ = b.jz || 0; resolveCircle(b, PR, S.phase === 'buy' ? barrierFor(b) : null); }
+      PKZ = 0;
     }
   }
 }
@@ -260,9 +270,10 @@ function separateOne(me) {
     if (o === me || !o.alive) continue;
     const dx = me.x - o.x, dy = me.y - o.y, d2 = dx * dx + dy * dy;
     if (d2 >= md * md || d2 < 1e-4) continue;
+    if (PKMAP && Math.abs((me.jz || 0) - (o.jz || 0)) > 40) continue;
     const d = Math.sqrt(d2), push = (md - d) * 0.35;
     me.x += dx / d * push; me.y += dy / d * push;
-    resolveCircle(me, PR, S.phase === 'buy' ? barrierFor(me) : null);
+    PKZ = me.jz || 0; resolveCircle(me, PR, S.phase === 'buy' ? barrierFor(me) : null); PKZ = 0;
   }
 }
 function setPos(p, x, y) { p.x = x; p.y = y; p.posVer++; p.vx = 0; p.vy = 0; p.imp = null; }
@@ -337,6 +348,7 @@ function fireWeapon(p, wid, w) {
 }
 /* Kılıç darbesi: önündeki koni içindeki en yakın oyuncu (takım arkadaşı da olabilir) */
 function swingSword(p, heavy) {
+  if (PKMAP) { pkSwing(p, heavy); return; } // parkur: iter / barikat kırar, hasar vermez
   const w = swordStats(p); // kılıç seviyesine göre hasar/hız/menzil
   p.fireCD = 1 / (heavy ? w.heavyRate : w.rate); p.lastShot = S.time;
   if (p.st.invis) delete p.st.invis;
@@ -426,6 +438,7 @@ function finishReload(p) {
   const take = Math.min(w.mag - am.mag, am.res); am.mag += take; am.res -= take; p.reloadT = 0;
 }
 function switchSlot(p, s) {
+  if (PKMAP) return; // parkur: yalnızca kılıç
   if (s === 1 && !p.primary) return;
   if (s !== 1 && s !== 2 && s !== 3) return;
   if (p.slot === s) return;
@@ -434,7 +447,7 @@ function switchSlot(p, s) {
 
 /* ---------- HASAR / ÖLÜM ---------- */
 function damage(t, amt, att, src, hs, quiet) {
-  if (!t || !t.alive || S.phase === 'buy' || S.phase === 'over') return;
+  if (!t || !t.alive || S.phase === 'buy' || S.phase === 'over' || PKMAP) return;
   amt = Math.round(amt); if (amt <= 0) return;
   let rem = amt;
   if (src === 'blade' || src === 'spike' || src === 'railgun') rem = 9999;
@@ -499,7 +512,7 @@ function explode(x, y, r, dmg, att, team, src) {
 
 /* ---------- SATIN ALMA ---------- */
 function buyItem(p, item) {
-  if (!S || S.phase !== 'buy' || !p || !p.alive) return false;
+  if (!S || S.phase !== 'buy' || !p || !p.alive || PKMAP) return false;
   const rb = p.roundBuys;
   if (WEAPONS[item]) {
     const w = WEAPONS[item];

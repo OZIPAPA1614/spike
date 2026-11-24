@@ -570,6 +570,7 @@ function mapTimers() {
 }
 function loadMap(i) {
   i = clamp(i | 0, 0, MAPS.length - 1);
+  PKMAP = null; PKNAV = null;
   const m = MAPS[i];
   setMapSize(m.w, m.h);
   grid.fill(T_WALL);

@@ -15,6 +15,7 @@ function addFx(f) { if (FX.length < 700) FX.push(f); }
 
 /* ---------- statik harita ---------- */
 function buildWorldMeshes() {
+  if (PKMAP) { buildPkWorld(); return; } // parkur pisti (07e)
   for (const id of AGENT_IDS) AGCOL[id] = hexRGB(AGENTS[id].color);
   let g = GB();
   gquad(g, [0, 0, 0], [WW, 0, 0], [WW, 0, WH], [0, 0, WH], [0, 1, 0], null, null, [0, 0, 1, 0, 1, 1, 0, 1]);
@@ -109,10 +110,10 @@ function buildWorldMeshes() {
 
 
 /* ---------- ODA DEKORLARI (kuru kafa, sandık, fıçı, çuval, meşale...) ----------
-   Duvar diplerine ve köşelere yerleştirilir; dokular CC0 fotoğraf atlasından (PC hücreleri).
+   Duvar diplerine ve köşelere yerleştirilir; dokular kodla üretilen malzeme atlasından (PC hücreleri).
    Görseldir: oyuncuların çok az içine girebileceği kadar duvara yaslanır, çarpışma yoktur. */
 function buildProps(ge) {
-  const g = GB(), R = mulberry(strHash(MAPS[CUR_MAP].id + ':dekor'));
+  const g = GB(), R = mulberry(strHash(mapDef().id + ':dekor'));
   const rr = (a, b) => a + R() * (b - a), W1 = [1, 1, 1], kind = THEME.decor || 'merkez';
   const DK = [0.09, 0.07, 0.06];
   let bx = 0, bz = 0, ba = 0;
@@ -306,7 +307,7 @@ function onMapLoaded() {
 /* Gökyüzü kubbesi: renk geçişi + güneş/ay + bulutlar + yıldızlar tek mesh */
 function buildSkyMesh() {
   const th = THEME, top = hexRGB(th.sky[0]), hor = hexRGB(th.sky[1]), src = GLX.prim.sphere, g = GB();
-  const R = mulberry(strHash(MAPS[CUR_MAP].id + 'sky'));
+  const R = mulberry(strHash(mapDef().id + 'sky'));
   for (let i = 0; i < src.length; i += 11) {
     const y = src[i + 1] * 2, t = Math.pow(clamp(y, 0, 1), 0.55), k = y < 0 ? 0.85 : 1;
     g.v.push(src[i], src[i + 1], src[i + 2], 0, 1, 0, lerp(hor[0], top[0], t) * k, lerp(hor[1], top[1], t) * k, lerp(hor[2], top[2], t) * k, 0, 0);
@@ -345,7 +346,7 @@ function wallDepthField() {
 }
 function buildDecor() {
   const g = GB(), ge = GB(), th = THEME, kind = th.decor, Hw = WALL_H;
-  const R = mulberry(strHash(MAPS[CUR_MAP].id + 'decor'));
+  const R = mulberry(strHash(mapDef().id + 'decor'));
   const rr = (a, b) => a + R() * (b - a);
   if (kind) {
     const D = wallDepthField();
@@ -393,7 +394,7 @@ function buildDecor() {
     } else if (kind === 'tapinak') {
       for (const [x, z] of spots(1, 3, 42)) tree(x, z, rr(0.9, 1.4), [0.36, 0.26, 0.17], [0.2, 0.45, 0.2]);
       // avludaki tapınağın basamaklı tepesi
-      const cb = MAPS[CUR_MAP].centerBlock || [MW / 2 - 4, MH / 2 - 4, 8, 8];
+      const cb = mapDef().centerBlock || [MW / 2 - 4, MH / 2 - 4, 8, 8];
       const tx0 = cb[0], tz0 = cb[1], tx1 = cb[0] + cb[2] - 1, tz1 = cb[1] + cb[3] - 1;
       if (tx1 > tx0) { const cx = (tx0 + tx1 + 1) / 2 * TILE, cz = (tz0 + tz1 + 1) / 2 * TILE, w0 = (tx1 - tx0 + 1) * TILE; for (let k = 0; k < 4; k++) gAppend(g, 'box', cx, Hw + 30 + k * 60, cz, 0, w0 * (1 - k * 0.2), 60, w0 * (1 - k * 0.2), [0.55, 0.57, 0.48].map(v => v * (1 - k * 0.04))); gAppend(ge, 'sphLo', cx, Hw + 290, cz, 0, 40, 40, 40, [0.3, 1, 0.6]); }
       for (let k = 0; k < 6; k++) gAppend(g, 'box', WW / 2, 150 + k * 140, WH + 1800, 0, 1600 - k * 240, 140, 1600 - k * 240, [0.5, 0.52, 0.44]);
@@ -731,6 +732,7 @@ function projHeight(pr) {
 }
 function drawWorldDynamic(v, me, t) {
   const mt = me ? me.team : 0;
+  if (PKMAP) drawPkDynamic(t, me);
   // geçici duvarlar
   for (const w of S.twalls) for (const i of w.tiles) {
     const x = (i % MW + 0.5) * TILE, z = (((i / MW) | 0) + 0.5) * TILE;
@@ -1064,7 +1066,9 @@ function render3D(dt, me, v) {
   const t = S ? S.time : UIS.menuT, asp = W / H;
   let ex, ey, ez, yaw, pitch;
   const scoped = me && me.alive && v === me && me.scoped;
-  if (S) {
+  const cc = S && CINE.on ? cineCam(dt) : null;
+  if (cc) { ex = cc.x; ey = cc.y; ez = cc.z; yaw = cc.yaw; pitch = cc.pitch; CAM.on = true; } // sinematik giriş kamerası
+  else if (S) {
     const lift = liftOf(v);
     VM.eye = VM.eye === undefined ? EYE : lerp(VM.eye, v.crouch ? EYE_C : EYE, Math.min(1, dt * 14));
     ex = v.x; ey = VM.eye + lift; ez = v.y;
@@ -1091,8 +1095,8 @@ function render3D(dt, me, v) {
   const fovY = clamp(2 * Math.atan(Math.tan(hfov / 2) / asp), 0.35, 1.45);
   // sis: yakın görüş / karanlık örtü
   const fogK = 1 + 0.8 * (MS - 1);
-  let fogFar = THEME.fog[1] * fogK, fogNear = THEME.fog[0] * fogK, fc = hexRGB(THEME.fogCol);
-  if (S && v && v.alive) {
+  let fogFar = THEME.fog[1] * fogK * (cc ? 1.7 : 1), fogNear = THEME.fog[0] * fogK * (cc ? 1.7 : 1), fc = hexRGB(THEME.fogCol);
+  if (S && v && v.alive && !cc) {
     if (v.st.near > 0) { fogNear = 30; fogFar = 210; fc = [0.02, 0.02, 0.04]; }
     else if (v.st.shroud > 0) { fogNear = 40; fogFar = 260; fc = [0.01, 0.01, 0.02]; }
   }
@@ -1122,6 +1126,8 @@ function render3D(dt, me, v) {
     for (const p of S.players) {
       if (!p.alive || (p === v && !CAM.on)) continue;
       const ally = p.team === mt;
+      if (cc) { if (p !== me || Math.hypot(p.x - cc.x, p.y - cc.z) > 190) drawCharacter(p, ally ? 'ally' : 'enemy', 1, false, t); continue; } // sinematikte herkes görünür (kameranın yaklaştığı kendi karakterin hariç)
+      if (PKMAP) { drawCharacter(p, p === me ? 'ally' : 'enemy', 1, false, t); continue; } // parkur: yarışçıların hepsi her zaman görünür
       if (ally) { drawCharacter(p, 'ally', p.st.invis > 0 ? 0.35 : 1, false, t); continue; }
       if (v && v !== me && v.team === p.team) { drawCharacter(p, 'enemy', p.st.invis > 0 ? 0.35 : 1, false, t); continue; } // rakibi izlerken onun takımı görünür
       const seen = v.alive ? visibleFPS(v, p) : losClear(v.x, v.y, p.x, p.y);

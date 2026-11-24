@@ -197,7 +197,7 @@ function uiInit() {
     FR.guest(n); try { localStorage.setItem('spk_guest', '1'); } catch (x) { }
     lockNick(); $('accOv').classList.add('hidden'); uiFriendsChanged();
   };
-  $('btnFriends').onclick = () => { uiShow('scr-friends'); uiRenderFriends(); };
+  $('btnFriends').onclick = () => { closeSettings(); uiShow('scr-friends'); uiRenderFriends(); };
   $('frPopYes').onclick = () => uiFriendPopAnswer(true);
   $('frPopNo').onclick = () => uiFriendPopAnswer(false);
   // lobi sohbeti ve bas-konuş
@@ -265,16 +265,18 @@ function uiInit() {
       info: m => { $('pubInfo').textContent = m; },
       joined: () => { uiShow('scr-lobby'); uiRenderLobby(); uiToast('Açık sunucuya katıldın!'); },
       hosted: () => { uiShow('scr-lobby'); uiRenderLobby(); uiToast('Yeni açık sunucu kuruldu — oyuncular bekleniyor'); },
-      fail: m => { uiShow('scr-menu'); $('netStatus').textContent = m; uiToast(m.length > 90 ? 'Açık sunucuya bağlanılamadı — ayrıntı menüde.' : m, true); }
+      fail: m => { uiShow('scr-play'); $('netStatus').textContent = m; uiToast(m.length > 90 ? 'Açık sunucuya bağlanılamadı — ayrıntı menüde.' : m, true); }
     });
   };
-  $('btnPubCancel').onclick = () => { PUB.cancel(); uiShow('scr-menu'); };
+  $('btnPubCancel').onclick = () => { PUB.cancel(); uiShow('scr-play'); };
   $('lbPubChk').onchange = () => { if (NET.mode !== 'host') return; if ($('lbPubChk').checked) PUB.start(); else PUB.stop(); broadcastLobby(); };
   setInterval(() => { if (UI.screen === 'scr-lobby') uiLobbyPub(); }, 500);
   $('btnJoin').onclick = () => { AU.init(); AU.resume(); uiShow('scr-join'); $('joinStatus').textContent = ''; setTimeout(() => $('inCode').focus(), 50); };
-  $('btnHelp').onclick = () => uiShow('scr-help');
-  $('btnExit').onclick = () => exitGame();
-  $('btnNetCfg').onclick = () => openNetCfg();
+  // ANA MENÜ: OYNA → oyun türleri · MAĞAZA → doğrudan mağaza · AYARLAR → ayarlar + diğer her şey
+  $('btnPlay').onclick = () => { AU.init(); AU.resume(); uiShow('scr-play'); };
+  $('btnHelp').onclick = () => { closeSettings(); uiShow('scr-help'); };
+  $('btnExit').onclick = () => { closeSettings(); exitGame(); };
+  $('btnNetCfg').onclick = () => { closeSettings(); openNetCfg(); };
   bindNetLinks(document);
   $('btnNetBack').onclick = () => uiShow(NETCFG_BACK);
   $('btnNetSave').onclick = () => { if (saveNetCfg()) { uiToast(turnUrls(turnLoad()).length ? 'TURN ayarları kaydedildi.' : 'Özel TURN kaldırıldı, varsayılanlar kullanılacak.'); uiShow(NETCFG_BACK); if (NETCFG_BACK === 'scr-lobby') uiNetStatus(); } };
@@ -297,17 +299,28 @@ function uiInit() {
   // harita seçimi
   let spMapV = -1; try { const v = parseInt(localStorage.getItem('spk_map'), 10); if (v >= -1 && v < MAPS.length) spMapV = v; } catch (e) { }
   mapOptions($('spMap'), true, spMapV); mapOptions($('lbMap'), true, 0);
-  const spNote = () => { const i = +$('spMap').value; $('spMapNote').textContent = i >= 0 ? MAPS[i].desc : 'Her maçta ' + MAPS.length + ' haritadan biri rastgele seçilir.'; };
+  const spNote = () => {
+    const pk = $('spMode').value === 'pk';
+    $('spSideRow').style.display = $('spMapRow').style.display = pk ? 'none' : '';
+    $('spSizeL').textContent = pk ? 'YARIŞÇI SAYISI' : 'TAKIM BOYUTU';
+    for (const o of $('spSize').options) o.textContent = pk ? (o.value * 2) + ' yarışçı' : o.value + 'v' + o.value;
+    $('spSub').textContent = pk ? 'Kılıçla engel yarışı · 5 raunt, her raunt farklı uzun parkur · bitişe ilk varan raundu alır' : 'Botlara karşı tam maç · 20 raunt · 10. rauntten sonra taraf değişir';
+    $('btnSpGo').textContent = pk ? 'PARKURA BAŞLA' : 'AJAN SEÇİMİ';
+    const i = +$('spMap').value;
+    $('spMapNote').textContent = pk ? 'Elinde yalnızca kılıç var: rakipleri it, barikatları kır, boşluklardan atla. Düşersen son kontrol noktasından devam edersin.' : i >= 0 ? MAPS[i].desc : 'Her maçta ' + MAPS.length + ' haritadan biri rastgele seçilir.';
+  };
+  try { const md = localStorage.getItem('spk_mode'); if (md === 'pk' || md === 'spike') $('spMode').value = md; } catch (e) { }
+  $('spMode').onchange = () => { try { localStorage.setItem('spk_mode', $('spMode').value); } catch (e) { } spNote(); };
   spNote();
   $('spMap').onchange = () => {
     const i = +$('spMap').value; spNote();
     try { localStorage.setItem('spk_map', i); } catch (e) { }
     if (i >= 0 && i !== CUR_MAP && !G.running) loadMap(i); // arka planda haritayı önizle
   };
-  for (const b of document.querySelectorAll('[data-back]')) b.onclick = () => { if (NET.mode !== 'off') netShutdown(); uiShow('scr-menu'); };
+  for (const b of document.querySelectorAll('[data-back]')) b.onclick = () => { if (NET.mode !== 'off') netShutdown(); uiShow(b.dataset.back || 'scr-menu'); };
   $('btnSpGo').onclick = () => {
     NET.mode = 'off'; G.myId = 'h';
-    const cfg = { teamSize: +$('spSize').value, fill: true, diff: $('spDiff').value, map: +$('spMap').value };
+    const cfg = { teamSize: +$('spSize').value, fill: true, diff: $('spDiff').value, map: +$('spMap').value, mode: $('spMode').value === 'pk' ? 'pk' : 'spike' };
     const team = $('spSide').value === 'atk' ? 0 : 1;
     selStart([{ id: 'h', name: playerName(), team, cos: SHOP.cos() }], cfg);
   };
@@ -327,10 +340,10 @@ function uiInit() {
     if (!L.cfg.fill && (!L.players.some(p => p.team === 0) || !L.players.some(p => p.team === 1))) uiToast('Bir takım boş — o takıma bot eklenecek.');
     selStart(L.players.filter(p => !p.bot), L.cfg);
   };
-  $('btnLobbyLeave').onclick = () => { netShutdown(); uiShow('scr-menu'); };
-  for (const id of ['lbSize', 'lbFill', 'lbDiff', 'lbMap']) $(id).onchange = () => {
+  $('btnLobbyLeave').onclick = () => { netShutdown(); uiShow('scr-play'); };
+  for (const id of ['lbSize', 'lbFill', 'lbDiff', 'lbMap', 'lbMode']) $(id).onchange = () => {
     if (NET.mode !== 'host') return;
-    NET.lobby.cfg = { teamSize: +$('lbSize').value, fill: $('lbFill').checked, diff: $('lbDiff').value, map: +$('lbMap').value, ff: NET.lobby.cfg.ff !== false };
+    NET.lobby.cfg = { teamSize: +$('lbSize').value, fill: $('lbFill').checked, diff: $('lbDiff').value, map: +$('lbMap').value, ff: NET.lobby.cfg.ff !== false, mode: $('lbMode').value === 'pk' ? 'pk' : 'spike' };
     broadcastLobby();
   };
   // TAKIM ATEŞİ: tek tıkla aç/kapa (lobide host, maçta host veya tek oyunculu)
@@ -353,7 +366,7 @@ function uiInit() {
   window.addEventListener('blur', () => { if (!VC.open) VC.setTalk(false); for (const k in KEYS) KEYS[k] = false; MOUSE.down = false; MOUSE.right = false; UI.board = false; });
   document.addEventListener('mousemove', e => {
     if (!isLocked()) { MOUSE.x = e.clientX; MOUSE.y = e.clientY; MOUSE.inside = true; }
-    if (!G.running || !S || IS_TOUCH || UI.overlay) return;
+    if (!G.running || !S || IS_TOUCH || UI.overlay || CINE.on) return;
     if (!isLocked() && !G.freeMouse) return;
     // bazı sistemlerde kilit açılıp kapanırken dev sıçramalar gelir: kırp
     const mx = clamp(e.movementX || 0, -260, 260), my = clamp(e.movementY || 0, -260, 260);
@@ -365,6 +378,7 @@ function uiInit() {
   glcv.addEventListener('mousedown', e => {
     AU.resume();
     if (!G.running || !S || IS_TOUCH) return;
+    if (CINE.on && e.button === 0) { cineStop(true); if (!isLocked()) lockPointer(true); return; } // tıklama sinematiği atlar
     if (!isLocked()) {
       lockPointer(true);                 // her tıklamada kilidi (yeniden) iste — doğrudan kullanıcı eylemi içinde
       if (!G.freeMouse) return;          // kilit bekleniyorsa bu tıklama sadece kilitler
@@ -411,10 +425,13 @@ function uiRenderLobby() {
   $('lbWait').style.display = host ? 'none' : '';
   uiNetStatus();
   const mv = L.cfg.map === undefined ? 0 : L.cfg.map;
-  $('lbSize').value = L.cfg.teamSize; $('lbFill').checked = L.cfg.fill; $('lbDiff').value = L.cfg.diff; $('lbMap').value = String(mv);
-  $('lbSize').disabled = $('lbFill').disabled = $('lbDiff').disabled = $('lbMap').disabled = $('lbFF').disabled = !host;
+  const pkm = L.cfg.mode === 'pk';
+  $('lbSize').value = L.cfg.teamSize; $('lbFill').checked = L.cfg.fill; $('lbDiff').value = L.cfg.diff; $('lbMap').value = String(mv); $('lbMode').value = pkm ? 'pk' : 'spike';
+  $('lbSize').disabled = $('lbFill').disabled = $('lbDiff').disabled = $('lbMap').disabled = $('lbFF').disabled = $('lbMode').disabled = !host;
+  $('lbMapRow').style.display = $('lbFF').parentNode.style.display = pkm ? 'none' : '';
   const ffv = L.cfg.ff !== false; $('lbFF').textContent = 'TAKIM ATEŞİ: ' + (ffv ? 'AÇIK' : 'KAPALI') + (host ? '  ·  tıkla' : ''); $('lbFF').classList.toggle('off', !ffv);
-  $('lbCfgText').textContent = 'Harita: ' + mapLabel(mv) + ' · Takım boyutu: ' + L.cfg.teamSize + 'v' + L.cfg.teamSize + ' · Bot doldurma: ' + (L.cfg.fill ? 'Açık' : 'Kapalı') + ' · Zorluk: ' + L.cfg.diff + ' · Takım ateşi: ' + (L.cfg.ff !== false ? 'Açık' : 'Kapalı');
+  if (pkm) $('lbCfgText').textContent = 'Mod: PARKUR · 5 parkur · takım yok, herkes kendi için yarışır · Yarışçı: ' + L.cfg.teamSize * 2 + (L.cfg.fill ? ' (botlarla)' : '') + ' · Zorluk: ' + L.cfg.diff;
+  else $('lbCfgText').textContent = 'Harita: ' + mapLabel(mv) + ' · Takım boyutu: ' + L.cfg.teamSize + 'v' + L.cfg.teamSize + ' · Bot doldurma: ' + (L.cfg.fill ? 'Açık' : 'Kapalı') + ' · Zorluk: ' + L.cfg.diff + ' · Takım ateşi: ' + (L.cfg.ff !== false ? 'Açık' : 'Kapalı');
   for (const team of [0, 1]) {
     const box = $('lbTeam' + team); box.innerHTML = '';
     const ps = L.players.filter(p => p.team === team);
@@ -462,6 +479,7 @@ function uiRenderLobbyChat() {
 /* ---------------- ARKADAŞLAR ---------------- */
 function uiFriendsChanged() {
   const b = $('btnFriends'); if (b) { const on = FR.onlineCount(), rq = FR.reqIn.length; b.innerHTML = esc('ARKADAŞLAR') + (on ? ' · ' + on + ' ' + esc('ÇEVRİMİÇİ') : '') + (rq ? '<b>' + rq + '</b>' : ''); }
+  const sb = $('btnSettings'); if (sb) { const rq = FR.reqIn.length; sb.innerHTML = esc('AYARLAR') + (rq ? '<b>' + rq + '</b>' : ''); }
   if (UI.screen === 'scr-friends') uiRenderFriends();
   if (UI.screen === 'scr-lobby' && NET.lobby) uiRenderLobby();
 }
@@ -579,7 +597,7 @@ function uiRenderSelect(sel) {
 function uiStartGame() {
   uiShow(null);
   closeBuy(); togglePause(false); $('end').classList.add('hidden');
-  G.running = true; G.paused = false; G.overShown = false; G.spec = null;
+  G.running = true; G.paused = false; G.overShown = false; G.spec = null; CINE.on = false; document.body.classList.remove('cine');
   FX.length = 0; UIS.feed.length = 0; UIS.msgs.length = 0; UIS.banner = null; UIS.ultFeed.length = 0; UIS.pings.length = 0; UIS.dmgNums.length = 0;
   LOCALFIRE.cd = 0; LOCALFIRE.lastFp = MOUSE.fp;
   AU.init(); AU.resume();
@@ -593,10 +611,14 @@ function uiStartGame() {
   if (IS_TOUCH) { enterFullscreen(); try { screen.orientation.lock('landscape').catch(() => { }); } catch (e) { } }
   else { G.freeMouse = false; G._needLock = undefined; lockPointer(false); }
   glcv.focus();
+  // host / tek oyunculu: ilk rauntun sinematik girişi (istemcide 'round' olayıyla başlar)
+  if (G.mode !== 'client' && S && S.round === 1 && S.phase === 'buy') { if (S.cfg && S.cfg.mode === 'pk') { if (PKMAP) cineStart('pk', pkCineShots()); } else cineStart('match'); }
+  document.body.classList.toggle('pk', !!(S && S.cfg && S.cfg.mode === 'pk'));
 }
 function uiBackToMenu(msg) {
   const wasOver = S && S.phase === 'over';
-  G.running = false; G.paused = false; S = null; toggleEmote(false);
+  G.running = false; G.paused = false; S = null; toggleEmote(false); cineStop(false);
+  document.body.classList.remove('pk'); if (PKMAP) loadMap(0); // parkurdan çıkınca menü arka planı normal haritaya döner
   if (CHAT.open) chatClose(false); UIS.chat.length = 0;
   document.body.classList.remove('ingame', 'ovl'); $('touch').classList.add('hidden');
   unlockPointer();
@@ -620,7 +642,7 @@ function doEmote(i) {
   const me = S && S.pmap[G.myId]; if (!me || !me.alive) return;
   if (G.mode === 'client') netSend(NET.conn, { t: 'act', a: 'emote', e: i }); else hostEmote(me, i);
 }
-function openSettings() { UI.setOpen = true; $('settings').classList.remove('hidden'); UI.overlay = true; MOUSE.down = false; if (window.uiSettingsRefresh) uiSettingsRefresh(); if (G.running) unlockPointer(); }
+function openSettings() { UI.setOpen = true; $('settings').classList.remove('hidden'); $('setMenuOnly').classList.toggle('hidden', !!G.running); UI.overlay = true; MOUSE.down = false; if (window.uiSettingsRefresh) uiSettingsRefresh(); if (G.running) unlockPointer(); }
 function closeSettings() { UI.setOpen = false; $('settings').classList.add('hidden'); UI.overlay = UI.pauseOpen || UI.buyOpen; }
 function togglePause(force, noRelock) {
   const open = force === undefined ? !UI.pauseOpen : force;
@@ -638,6 +660,7 @@ function toggleBuy() {
   if (UI.buyOpen) { closeBuy(); return; }
   const me = S && S.pmap[G.myId];
   if (!me || !me.alive) return;
+  if (PKMAP) { showMsg(null, 'PARKURDA MAĞAZA YOK — YALNIZCA KILIÇ', PAL.dim); return; }
   if (S.phase !== 'buy') { showMsg(null, 'SATIN ALMA EVRESİ BİTTİ', PAL.red); return; }
   UI.buyOpen = true; $('buy').classList.remove('hidden'); UI.overlay = true; MOUSE.down = false; G._buySig = null;
   unlockPointer(); syncCursor();
@@ -689,6 +712,7 @@ function uiRenderBuy() {
 }
 function castAbility(k) {
   const me = S && S.pmap[G.myId]; if (!me || !me.alive) return;
+  if (PKMAP) { showMsg(null, 'PARKURDA YETENEK YOK — YALNIZCA KILIÇ', PAL.dim); return; }
   const wm = aimPoint(me), ang = LOOK.yaw;
   const ag = AGENTS[me.agent];
   const avail = k === 'x' ? me.ult >= ag.x.pts : me.ch[k] > 0;
@@ -728,6 +752,7 @@ function onKeyDown(e) {
   // nokta: yazılı sohbet (Türkçe klavyede '.' tuşu)
   if ((e.key === '.' || e.code === 'NumpadDecimal') && !UI.overlay) { e.preventDefault(); KEYS[e.code] = false; chatOpen(); return; }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
+  if (CINE.on && !e.repeat && (e.code === 'Space' || e.code === 'Escape' || e.code === 'Enter')) { cineStop(true); return; }
   if (!isLocked() && !UI.overlay && !G.freeMouse && !IS_TOUCH && /^(Key[WASDQEXRCFGV]|Space|Digit\d|Shift(Left|Right))$/.test(e.code)) lockPointer(true);
   if (e.repeat) return;
   switch (e.code) {
@@ -751,7 +776,7 @@ function onKeyDown(e) {
   }
 }
 function buildLocalInput(me) {
-  const blocked = UI.overlay;
+  const blocked = UI.overlay || CINE.on;
   let f = 0, r = 0;
   if (!blocked) {
     if (KEYS.KeyW || KEYS.ArrowUp) f += 1; if (KEYS.KeyS || KEYS.ArrowDown) f -= 1;
@@ -805,6 +830,7 @@ function setupTouch() {
   };
   layer.addEventListener('pointerdown', e => {
     e.preventDefault(); AU.resume();
+    if (CINE.on) { cineStop(true); return; } // dokunma sinematiği atlar
     const el = e.target.closest('[data-act]');
     const P = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now() };
     if (el) { P.role = 'btn'; P.act = el.dataset.act; P.el = el; el.classList.add('on'); btnDown(P.act, el); }
@@ -877,7 +903,14 @@ function uiGameTick(dt) {
 function uiShowEnd() {
   const me = S.pmap[G.myId], mt = me ? me.team : 0, win = S.matchWinner === mt;
   closeBuy();
+  if (pkOn()) { // PARKUR: genel sıralama
+    const r = pkShowEnd(me), g = SHOP.award(r.win ? 'win' : 'lose', 0);
+    $('endGems').innerHTML = '+' + g + ' 💎 <span>GEMS KAZANDIN</span> · <span>Toplam</span> ' + SHOP.prof.gems;
+    $('end').classList.remove('hidden'); unlockPointer(); syncCursor(); AU.play(r.win ? 'win' : 'lose');
+    return;
+  }
   const draw = S.matchWinner === -1;
+  $('endScore').style.fontSize = '';
   $('endTitle').textContent = draw ? 'BERABERE' : win ? 'ZAFER' : 'BOZGUN';
   $('endTitle').className = draw ? '' : win ? 'win' : 'lose';
   $('endScore').textContent = S.score[mt] + ' — ' + S.score[1 - mt];

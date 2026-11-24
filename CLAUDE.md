@@ -14,7 +14,8 @@ The owner writes in Turkish: reply to them in Turkish and write commit messages 
 
 ## Checking
 - `python3 tests/check.py` — build consistency, menus/store, bot matches on every map (2 full matches),
-  single-player flow, local multiplayer (room, join, sync, chat, voice), public-server matchmaking.
+  PARKUR mode (5 bot rounds, UI flow, multiplayer map/round sync), cinematic intro, single-player flow,
+  local multiplayer (room, join, sync, chat, voice), public-server matchmaking.
   `--quick` skips the full matches. Needs Playwright + `/usr/bin/google-chrome`; no internet needed
   (local signalling server `tests/sigserver.py` and Firebase mock `tests/fbmock.py`).
 - Exit code 0 and `SONUÇ: SORUN YOK` = healthy. Every problem line starts with `FAIL:`.
