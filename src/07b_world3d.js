@@ -480,6 +480,14 @@ const GUNC = {};
 for (const k in GUNM) GUNC[k] = GUNM[k].map(p => [p[0], p[1], hexRGB(p[2])]);
 /* Silahı dünyada çiz: konum (x,h,z), yön (a,pitch), ölçek */
 function drawGun(wid, x, h, z, a, pitch, sc, o, owner, t) {
+  if (MDL.ready || mdlInit()) { // 3B silah modeli
+    const R = rotMat(a, pitch, 0, new Array(9));
+    drawGunModel(wid, x, h, z, R, sc, o && o.alpha !== undefined ? null : o, gunColsFor(wid, owner, t), o && o.alpha !== undefined ? o.alpha : 1);
+    return R;
+  }
+  return drawGunBox(wid, x, h, z, a, pitch, sc, o, owner, t);
+}
+function drawGunBox(wid, x, h, z, a, pitch, sc, o, owner, t) {
   const parts = owner ? gunPartsFor(wid, owner, t) : (GUNC[wid] || GUNC.classic), R = rotMat(a, pitch, 0, new Array(9));
   for (const [s, p, c, gl] of parts) {
     const off = xf(R, p[0] * sc, p[1] * sc, p[2] * sc);
@@ -517,7 +525,7 @@ function drawC4(x, h, z, ang, pitch, s, mode, t, alpha) {
   P(5, 11.5, 4, 0.8, 7, 0.8, C4C.box, null, 'cyl');
   P(-5, 9.6, -4, 1.8, 1.8, 1.8, blink ? [1, 0.25, 0.25] : [0.35, 0.08, 0.08], { em: blink ? [1, 0.15, 0.15] : ZERO3 }, 'sphere');
 }
-function drawCharacter(p, rel, alpha, xray, t) {
+function drawCharacterBox(p, rel, alpha, xray, t) {
   const em = p._emo && p._emo.t > 0 ? p._emo : null, ek = em ? EMOTES[em.e].k : null, et = em ? EMOTE_TIME - em.t : 0;
   const ag = AGCOL[p.agent] || COL.white, lift = (p.st.knock > 0 ? KNOCK_LIFT + Math.sin(t * 8) * 3 : 0) + (p.jz || 0) + (ek === 'dance' ? Math.abs(Math.sin(et * 9)) * 6 : ek === 'cheer' || ek === 'gg' ? Math.abs(Math.sin(et * 7)) * 9 : 0);
   const A = p.ang + (ek === 'dance' ? et * 6.5 : 0), R = rotMat(A, 0, p.st.knock > 0 ? Math.sin(t * 6) * 0.3 : ek === 'laugh' ? Math.sin(et * 28) * 0.07 : 0, new Array(9));
@@ -607,11 +615,101 @@ function drawCharacter(p, rel, alpha, xray, t) {
     if (p.hasBomb) { const bo = xf(R, -10.5, 36 + dy + lift, 0); drawC4(p.x + bo[0], bo[1], p.y + bo[2], A, Math.PI / 2, 0.8, 'carried', t, alpha); }
   }
 }
-function drawCorpse(c, ally) {
+function drawCorpseBox(c, ally) {
   const a = ((c.id.charCodeAt(c.id.length - 1) * 37) % 360) * Math.PI / 180, R = rotMat(a, 0, 0, new Array(9));
   const col = ally ? [0.25, 0.5, 0.5, 1] : [0.5, 0.22, 0.25, 1];
   const P = (fx, h, sz, sx, sy, szz, cc) => { const o = xf(R, fx, h, sz); QR('box', c.x + o[0], o[1], c.y + o[2], R, sx, sy, szz, cc); };
   P(0, 5, 0, 30, 10, 20, col); P(21, 6, 0, 12, 11, 12, [0.55, 0.45, 0.38, 1]); P(-24, 4, -5, 22, 7, 8, [0.15, 0.17, 0.2, 1]); P(-24, 4, 5, 22, 7, 8, [0.15, 0.17, 0.2, 1]);
+}
+
+/* ---------- karakter (3B model: 07g) ---------- */
+function _basisY(d) { // Y ekseni d yönünde dik taban (silindir/kol için)
+  const y = v3n(d), h = Math.abs(y[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0], x = v3n(v3c(h, y)), z = v3c(x, y);
+  return [x[0], x[1], x[2], y[0], y[1], y[2], z[0], z[1], z[2]];
+}
+function drawCharacter(p, rel, alpha, xray, t) {
+  if (!MDL.ready && !mdlInit()) return drawCharacterBox(p, rel, alpha, xray, t);
+  const ch = MDL.ch, B = ch.B, PV = ch.piv;
+  const em = p._emo && p._emo.t > 0 ? p._emo : null, ek = em ? EMOTES[em.e].k : null, et = em ? EMOTE_TIME - em.t : 0;
+  const ag = AGCOL[p.agent] || COL.white, lift = (p.st.knock > 0 ? KNOCK_LIFT + Math.sin(t * 8) * 3 : 0) + (p.jz || 0) + (ek === 'dance' ? Math.abs(Math.sin(et * 9)) * 6 : ek === 'cheer' || ek === 'gg' ? Math.abs(Math.sin(et * 7)) * 9 : 0);
+  const A = p.ang + (ek === 'dance' ? et * 6.5 : 0), R = rotMat(A, 0, p.st.knock > 0 ? Math.sin(t * 6) * 0.3 : ek === 'laugh' ? Math.sin(et * 28) * 0.07 : 0, new Array(9));
+  const rc = rel === 'ally' ? COL.teal : COL.red;
+  const o = xray ? { xray: true, lit: 0, em: [0.6, 0.05, 0.1] } : null;
+  // karakter skini (yoksa ajan renkleri)
+  const cs = charSkin(p, t), suitC = cs ? cs.suit : ag, suitK = cs ? 1 : 0.75, legC = cs ? cs.legs : COL.dark, legK = cs ? 1 : 1.2;
+  const visC = cs ? cs.visor : ag, packC = cs ? cs.pack : COL.dark, packK = cs ? 1 : 1.4;
+  const C4 = (c, k) => [c[0] * k, c[1] * k, c[2] * k, alpha];
+  const cols = { suit: C4(suitC, suitK), legs: C4(legC, legK), pack: C4(packC, packK), acc: C4(visC, 1) };
+  const wid = curW(p), pt = p.pitch || 0;
+  if (p._sw > 0) p._sw -= 1 / 60;
+  // animasyon katmanları
+  const low = mdlCharState(p, t), md = p._md;
+  md.cr = (md.cr || 0) + ((p.crouch ? 1 : 0) - (md.cr || 0)) * 0.25;
+  let up, pitch = 0;
+  if (em) up = ek === 'wave' ? [['wave', et % 1.66, 1]] : ek === 'cheer' || ek === 'gg' ? [['wave', 0.55, 1]] : [['idle', t % 1.66, 1]];
+  else if (wid === 'sword' || p.st.ovl > 0) up = p._sw > 0 ? [['slash', 0.2 + clamp(1 - p._sw / 0.32, 0, 1) * 0.5, 1]] : [['idleSword', t % 1.66, 1]];
+  else { up = [['aim', t % 1.66, 1]]; pitch = pt; }
+  const st = { low, up, pitch, crouch: md.cr, R, x: p.x, y: p.y, lift, cols, alpha, o, xray, accGlow: cs && cs.glow && !xray ? { em: [visC[0] * 0.7, visC[1] * 0.7, visC[2] * 0.7] } : null };
+  const W = mdlDrawChar(p, st);
+  if (!xray) {
+    // takım kol bantları (dost turkuaz / rakip kırmızı, parlak)
+    for (const [ua, sh, el] of [[B.UpperArmL, PV.shL, PV.elL], [B.UpperArmR, PV.shR, PV.elR]]) {
+      if (ua < 0 || !sh || !el) continue;
+      const a = mdlPt(W, ua, st, sh), b = mdlPt(W, ua, st, el), m = [a[0] + (b[0] - a[0]) * 0.55, a[1] + (b[1] - a[1]) * 0.55, a[2] + (b[2] - a[2]) * 0.55];
+      QR('cyl', m[0], m[1], m[2], _basisY([b[0] - a[0], b[1] - a[1], b[2] - a[2]]), 6.4, 2.0, 6.4, [rc[0], rc[1], rc[2], alpha], { em: [rc[0] * 0.55, rc[1] * 0.55, rc[2] * 0.55] });
+    }
+    // şapka / süs (başın üstüne)
+    if (cs && cs.hat) {
+      const top = mdlPt(W, B.Head, st, ch.headTop), hd = cs.helm, ac = cs.visor, Ry = rotMat(A, 0, 0, new Array(9));
+      const glo = (c, k) => ({ em: [c[0] * k, c[1] * k, c[2] * k] });
+      const part = (fx, y, sz, sx, sy, szz, col, extra) => { const off = xf(Ry, fx, y - 73, sz); QR('box', top[0] + off[0], top[1] + off[1], top[2] + off[2], Ry, sx, sy, szz, col, extra); };
+      const C = (c, k) => C4(c, k || 1);
+      switch (cs.hat) {
+        case 'cap': part(0, 74.5, 0, 12, 3, 12, C(hd)); part(6, 72.5, 0, 8, 1.5, 12, C(hd, 0.7)); break;
+        case 'ears': for (const s of [-1, 1]) { part(0, 76, 4.5 * s, 3, 5, 3, C(hd)); part(1.6, 75.5, 4.5 * s, 0.6, 3, 1.4, C(ac), glo(ac, 0.5)); } break;
+        case 'antenna': part(-1, 79, 3, 1, 10, 1, C([0.2, 0.2, 0.22, 1])); part(-1, 84.5, 3, 3, 3, 3, C(ac), glo(ac, 0.9)); break;
+        case 'mohawk': part(-1, 76, 0, 12, 6, 2.5, C(ac), glo(ac, 0.7)); break;
+        case 'horns': for (const s of [-1, 1]) { part(0, 76, 6 * s, 2.5, 6, 2.5, C([0.91, 0.88, 0.82, 1])); part(0, 80, 7.5 * s, 2, 3, 2, C([0.91, 0.88, 0.82, 1])); } break;
+        case 'crown': { const gd = [0.96, 0.77, 0.32, 1]; part(0, 74.2, 0, 13.5, 2.6, 13.5, C(gd), glo(gd, 0.35));
+          for (const a of [-5.2, 5.2]) for (const b of [-5.2, 5.2]) part(a, 77, b, 2.4, 3.2, 2.4, C(gd), glo(gd, 0.35)); break; }
+        case 'halo': Q('ring', top[0], top[1] + 10, top[2], t * 1.5, 0, 9, 1, 9, [ac[0], ac[1], ac[2], 0.95 * alpha], { add: true, lit: 0 }); break;
+        case 'band': part(0, 69, 0, 13.2, 2.2, 13.2, C(ac)); break;
+      }
+    }
+    // elde: aşırı yükleme küresi ya da silah
+    if (p.st.ovl > 0) {
+      const hp = mdlPt(W, B.WristR, st, PV.wrR);
+      Q('sphere', hp[0], hp[1], hp[2], 0, 0, 12, 12, 12, [1, 0.95, 0.4, 0.8 * alpha], { add: true, lit: 0, em: [1, 0.9, 0.2] });
+    } else if (!em || ek === 'thumb' || ek === 'laugh') {
+      let yawO = 0, pit = 0;
+      if (wid === 'sword') {
+        const k = p._sw > 0 ? clamp(1 - p._sw / 0.32, 0, 1) : -1;
+        if (k >= 0) { const e = k * k * (3 - 2 * k); yawO = 1.25 - 2.5 * e; pit = 0.75 - 1.05 * e; } else pit = 0.55;
+      }
+      const g = mdlPt(W, B.WristR, st, PV.wrR), Rg = rotMat(A + yawO, (wid === 'sword' ? 0 : pt * 0.85) + pit, 0, new Array(9)), fo = xf(Rg, 2.5, 0.5, 0);
+      if (!em) drawGunModel(wid, g[0] + fo[0], g[1] + fo[1], g[2] + fo[2], Rg, wid === 'sword' ? 0.9 : 0.95, null, gunColsFor(wid, p, t), alpha);
+    }
+    // durum göstergeleri
+    if (p.st.clone > 0) Q('cyl', p.x, 40 + lift, p.y, 0, 0, 44, 84, 44, [1, 0.55, 0.2, 0.18], { add: true, lit: 0 });
+    if (p.st.lock > 0) Q('ring', p.x, 2, p.y, t * 2, 0, 46, 1, 46, [1, 0.82, 0.4, 0.85], { add: true, lit: 0 });
+    if (p.zoneSlow < 1 || p.st.slow > 0) Q('ring', p.x, 1.5, p.y, 0, 0, 38, 1, 38, [0.6, 0.85, 1, 0.8], { add: true, lit: 0 });
+    if (p.st.reveal > 0 && rel === 'enemy') Q('ring', p.x, 2, p.y, 0, 0, 50 + Math.sin(t * 10) * 6, 1, 50, [1, 0.3, 0.35, 0.9], { add: true, lit: 0 });
+    if (p.st.concuss > 0) for (let i = 0; i < 3; i++) { const aa = t * 5 + i * 2.1; Q('sphere', p.x + Math.cos(aa) * 12, 82 + lift, p.y + Math.sin(aa) * 12, 0, 0, 4, 4, 4, [0.85, 0.65, 0.35, 1], { lit: 0, em: [0.4, 0.3, 0.1] }); }
+    if (p.st.boost > 0 && p.spd > 50) Q('cone', p.x - Math.cos(A) * 16, 30, p.y - Math.sin(A) * 16, A + Math.PI, -Math.PI / 2, 20, 30, 20, [1, 0.95, 0.3, 0.25], { add: true, lit: 0, roll: 0 });
+    const prog = p.plantT > 0 ? p.plantT / PLANT_TIME : p.defT > 0 ? p.defT / DEFUSE_TIME : 0;
+    if (prog > 0) Q('ring', p.x, 2, p.y, 0, 0, 40 + prog * 30, 1, 40 + prog * 30, [0.96, 0.77, 0.32, 0.9], { add: true, lit: 0 });
+    // sırtta taşınan bomba
+    if (p.hasBomb) { const c = mdlPt(W, B.Chest >= 0 ? B.Chest : B.Hips, st, ch.chestBack), bo = [0, 0, 0]; drawC4(c[0] + bo[0], c[1] + bo[1], c[2] + bo[2], A, Math.PI / 2, 0.8, 'carried', t, alpha); }
+  }
+}
+function drawCorpse(c, ally) {
+  if (!MDL.ready && !mdlInit()) return drawCorpseBox(c, ally);
+  const a = ((c.id.charCodeAt(c.id.length - 1) * 37) % 360) * Math.PI / 180, R = rotMat(a, 0, 0, new Array(9));
+  const key = c.id + ':' + (S ? S.round : 0) + ':' + Math.round(c.x) + ':' + Math.round(c.y), now = S ? S.time : 0;
+  let t0 = MDL.cT.get(key); if (t0 === undefined) { if (MDL.cT.size > 300) MDL.cT.clear(); t0 = now; MDL.cT.set(key, t0); }
+  const pl = S && S.pmap ? S.pmap[c.id] : null, ag = pl ? (AGCOL[pl.agent] || COL.white) : (ally ? COL.teal : COL.red), k = 0.6;
+  const cols = { suit: [ag[0] * k, ag[1] * k, ag[2] * k, 1], legs: [COL.dark[0] * 1.1, COL.dark[1] * 1.1, COL.dark[2] * 1.1, 1], pack: [COL.dark[0] * 1.3, COL.dark[1] * 1.3, COL.dark[2] * 1.3, 1], acc: [ag[0] * k, ag[1] * k, ag[2] * k, 1] };
+  mdlDrawChar(c, { low: [['death', clamp(now - t0, 0, 5), 1]], up: null, pitch: 0, crouch: 0, R, x: c.x, y: c.y, lift: 0, cols, alpha: 1, o: null });
 }
 
 /* ---------- birinci şahıs silah görünümü ---------- */
@@ -639,6 +737,7 @@ function drawViewmodel(p, dt, t) {
   if (wid === 'sword') { drawSwordVM(p, dt, t, gx, gy, gz, ag, vm); return; }
   const a = -Math.PI / 2 - 0.09, pitch = 0.03 + VM.kick * 0.2 - rl * 0.5;
   const R = rotMat(a, pitch, rl * 0.6, new Array(9));
+  if (MDL.ready || mdlInit()) { drawViewmodelModel(p, t, wid, R, gx, gy, gz, ag); return; }
   const sc = wid === 'operator' || wid === 'railgun' ? 0.42 : 0.48;
   for (const [s, o, c, gl] of gunPartsFor(wid, p, t)) {
     const off = xf(R, o[0] * sc, o[1] * sc, o[2] * sc);
@@ -656,6 +755,29 @@ function drawViewmodel(p, dt, t) {
   }
 }
 
+/* Birinci şahıs: 3B silah modeli + eldivenli eller ve kollar */
+const VM_GLOVE = [0.13, 0.14, 0.16, 1];
+function vmArm(hand, elbow, slc, r) {
+  const vm = { vm: true }, d = [elbow[0] - hand[0], elbow[1] - hand[1], elbow[2] - hand[2]], l = Math.hypot(d[0], d[1], d[2]), u = [d[0] / l, d[1] / l, d[2] / l], RB = _basisY(d);
+  // eldiven (yuvarlak), bilek manşeti, kol (taktik koyu kumaş, ajan renginden hafif ton)
+  QR('sphMd', hand[0], hand[1], hand[2], RB, r * 1.25, r * 1.5, r * 1.1, VM_GLOVE, vm);
+  const c = [hand[0] + u[0] * r * 1.1, hand[1] + u[1] * r * 1.1, hand[2] + u[2] * r * 1.1];
+  QR('cyl', c[0], c[1], c[2], RB, r * 1.15, r * 0.7, r * 1.15, [0.07, 0.08, 0.09, 1], vm);
+  const s0 = r * 1.4, m = [hand[0] + u[0] * (s0 + l) / 2, hand[1] + u[1] * (s0 + l) / 2, hand[2] + u[2] * (s0 + l) / 2];
+  const k = 0.32, base = [0.16, 0.17, 0.19];
+  QR('cyl', m[0], m[1], m[2], RB, r * 1.2, l - s0, r * 1.2, [base[0] + slc[0] * k, base[1] + slc[1] * k, base[2] + slc[2] * k, 1], vm);
+}
+function drawViewmodelModel(p, t, wid, R, gx, gy, gz, ag) {
+  const G = MDL.guns[wid] || MDL.guns.classic, sc = clamp(14 / G.len, 0.3, 0.5), vm = { vm: true };
+  drawGunModel(wid, gx, gy, gz, R, sc, vm, gunColsFor(wid, p, t));
+  const cs = charSkin(p, t), slc = cs ? cs.suit : ag, pistol = wid === 'classic' || wid === 'sheriff';
+  const P = (x, y, z) => { const o = xf(R, x * sc, y * sc, z * sc); return [gx + o[0], gy + o[1], gz + o[2]]; };
+  // sağ el kabzada, sol el ön kabzada (tabancada sağ elin altında)
+  const hr = P(-1.5, -4.5, 0.6), hl = pistol ? P(0.5, -6.5, -2.2) : P(G.box[1] * 0.42, -3.6, -0.6);
+  vmArm(hr, [hr[0] + 3.2, hr[1] - 6.5, hr[2] + 6], slc, 2.1);
+  vmArm(hl, [hl[0] - 2.5, hl[1] - 7, hl[2] + 6], slc, 2.0);
+  if (VM.flash > 0) { const m = P(G.box[1] * 1.04, 0.6, 0); Q('sphere', m[0], m[1], m[2], 0, 0, 5, 5, 5, [1, 0.85, 0.45, 0.95], { vm: true, add: true, lit: 0 }); }
+}
 /* Birinci şahıs kılıç: sağ elde, kabzadan tutulur. Hafif vuruş: sağ üstten sol alta çapraz kesik.
    Ağır vuruş: başın üstünden aşağı inen güçlü darbe. Anahtar karelerle (el konumu + kılıç yönü) çizilir. */
 const SWK = {
@@ -698,9 +820,10 @@ function drawSwordVM(p, dt, t, gx, gy, gz, ag, vm) {
   const P = swordPose(ph, VM.swingHeavy);
   // boşta: yürürken hafif sallanma (gx/gy yürüme salınımını taşır)
   const bob = sw > 0 ? 0 : 1, H = [P.h[0] + (gx - 6.6) * 0.6 * bob, P.h[1] + (gy + 6.4) * 0.6 * bob, P.h[2]];
-  const R = basisR(P.d, P.e), sc = 0.42, grip = -1.5;
+  const R = basisR(P.d, P.e), sc = 0.42, grip = -1.5, useM = MDL.ready || mdlInit();
   const at = lx => { const o = xf(R, (lx - grip) * sc, 0, 0); return [H[0] + o[0], H[1] + o[1], H[2] + o[2]]; };
-  for (const [s, o, c, gl] of gunPartsFor('sword', p)) {
+  if (useM) drawGunModel('sword', H[0], H[1], H[2], R, 0.4, vm, gunColsFor('sword', p, t));
+  else for (const [s, o, c, gl] of gunPartsFor('sword', p)) {
     const off = xf(R, (o[0] - grip) * sc, o[1] * sc, o[2] * sc);
     QR('box', H[0] + off[0], H[1] + off[1], H[2] + off[2], R, s[0] * sc, s[1] * sc, s[2] * sc, c, o[0] > 10 ? { vm: true, em: gl ? [c[0] * gl, c[1] * gl, c[2] * gl] : [0.08, 0.1, 0.12] } : vm);
   }
@@ -714,10 +837,11 @@ function drawSwordVM(p, dt, t, gx, gy, gz, ag, vm) {
   }
   // el (kabzayı saran yumruk) ve önkol: elden sağ alta, ekran dışına doğru
   const hb = at(-1.5);
+  const cs = charSkin(p, t), slc = cs ? cs.suit : ag;
+  if (useM) { vmArm(hb, [H[0] + 3.2, H[1] - 6.5, H[2] + 6], slc, 2.1); return; }
   QR('box', hb[0], hb[1], hb[2], R, 4.2, 4.4, 4.6, COL.skin, vm);
   const E = [H[0] + 4.2, H[1] - 6.5, H[2] + 7.5], fd = [E[0] - H[0], E[1] - H[1], E[2] - H[2]], fl = Math.hypot(fd[0], fd[1], fd[2]);
   const RF = basisR(fd, [0, 0, 1]), mid = [(H[0] + E[0]) / 2, (H[1] + E[1]) / 2, (H[2] + E[2]) / 2];
-  const cs = charSkin(p, t), slc = cs ? cs.suit : ag;
   QR('box', mid[0], mid[1], mid[2], RF, fl, 4.2, 4.2, [slc[0] * 0.7, slc[1] * 0.7, slc[2] * 0.7, 1], vm);
 }
 /* ---------- dinamik dünya nesneleri ---------- */

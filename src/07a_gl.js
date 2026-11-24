@@ -94,7 +94,9 @@ function glResize(w, h) {
   if (!GLX.ok) return;
   // ekranın gerçek piksel yoğunluğunda çiz (telefonda da keskin görüntü); kalite yalnızca üst sınırı belirler
   const q = (typeof SETTINGS !== 'undefined' && SETTINGS.gfx) || 'high', dpr = window.devicePixelRatio || 1;
-  GLX.dpr = Math.min(dpr, q === 'low' ? 1 : q === 'mid' ? 1.5 : 2) * DYN.s; // grafik kalitesi × otomatik ölçek
+  // bilgisayarda (yüksek kalite) 1x ekranlarda da 1,25 kat çizilip küçültülür: kenarlar daha temiz
+  const hi = IS_TOUCH ? Math.min(dpr, 2) : Math.min(Math.max(dpr, 1.25), 2);
+  GLX.dpr = (q === 'low' ? Math.min(dpr, 1) : q === 'mid' ? Math.min(dpr, 1.5) : hi) * DYN.s; // grafik kalitesi × otomatik ölçek
   GLX.cv.width = Math.round(w * GLX.dpr); GLX.cv.height = Math.round(h * GLX.dpr);
   GLX.cv.style.width = w + 'px'; GLX.cv.style.height = h + 'px';
 }
@@ -115,7 +117,7 @@ function dynRes(rawDt) {
   if (fps < 50) { DYN.good = 0; DYN.cap = Math.min(DYN.cap, DYN.s * 0.97); DYN.capT = now + 20000; ns = DYN.s * (fps < 35 ? 0.8 : 0.9); }
   else if (fps >= 57) { if (++DYN.good >= 4) { DYN.good = 0; ns = Math.min(DYN.cap, DYN.s * 1.08, 1); } }
   else DYN.good = 0;
-  ns = clamp(ns, DYN.min, 1);
+  ns = clamp(ns, IS_TOUCH ? DYN.min : Math.max(DYN.min, 0.8), 1);
   if (Math.abs(ns - DYN.s) > 0.01) { DYN.s = ns; glResize(window.innerWidth, window.innerHeight); }
 }
 
@@ -492,6 +494,16 @@ function QR(mesh, x, y, z, R, sx, sy, sz, col, o) {
   it.det = (o && o.det) || null; it.detS = (o && o.detS) || 0; it.detO = (o && o.detO) || null;
   const tr = col[3] < 0.999 || it.add || it.xray;
   if (tr) { it.dist = (x - GLX.cam[0]) ** 2 + (y - GLX.cam[1]) ** 2 + (z - GLX.cam[2]) ** 2; GLX.tq.push(it); } else GLX.oq.push(it);
+  return it;
+}
+/* QM: hazır 4x4 model matrisiyle (iskeletli karakter parçaları) */
+function QM(mesh, M, col, o) {
+  const it = poolItem(), m = it.M, R = it.R;
+  for (let i = 0; i < 16; i++) m[i] = M[i];
+  for (let c = 0; c < 3; c++) { const x = M[c * 4], y = M[c * 4 + 1], z = M[c * 4 + 2], l = 1 / (Math.hypot(x, y, z) || 1); R[c * 3] = x * l; R[c * 3 + 1] = y * l; R[c * 3 + 2] = z * l; }
+  it.mesh = mesh; it.col = col; it.em = (o && o.em) || ZERO3; it.lit = (o && o.lit === 0) ? 0 : 1; it.tex = (o && o.tex) || null;
+  it.add = !!(o && o.add); it.xray = !!(o && o.xray); it.vm = !!(o && o.vm); it.sky = false; it.det = null; it.detS = 0; it.detO = null;
+  if (col[3] < 0.999 || it.add || it.xray) { it.dist = (M[12] - GLX.cam[0]) ** 2 + (M[13] - GLX.cam[1]) ** 2 + (M[14] - GLX.cam[2]) ** 2; GLX.tq.push(it); } else GLX.oq.push(it);
   return it;
 }
 const _R = new Array(9);
