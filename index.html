@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="NOVA"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>NOVA — Taktik FPS</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23281266'/%3E%3Cpath d='M32 7 Q36 28 57 32 Q36 36 32 57 Q28 36 7 32 Q28 28 32 7Z' fill='%23ffc21c' stroke='%23140a33' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0c10'/%3E%3Cpath d='M32 8 L37 27 L56 32 L37 37 L32 56 L27 37 L8 32 L27 27Z' fill='%23ff4655'/%3E%3C/svg%3E">
 <style>
 :root{--navy:#0f1923;--navy2:#16232f;--navy3:#1f2e3c;--red:#ff4655;--teal:#1ee3cf;--white:#ece8e1;--gold:#f5c451;--dim:#8b978f;
 --font:"Bahnschrift","DIN Alternate","Arial Narrow","Roboto Condensed","Segoe UI",Arial,sans-serif}
@@ -33,35 +33,33 @@ body.ingame.needlock,body.ingame.needlock *{cursor:default!important}
 #bye .logoSvg{width:min(360px,70vw);height:auto}
 .brand .logoSvg{width:clamp(200px,27vw,400px);height:auto;display:block;margin:0 -10px 0 auto;filter:drop-shadow(0 8px 18px rgba(0,0,0,.45))}
 /* ---- AÇILIŞ: OZN studios → NOVA yükleme ekranı ---- */
-#splash{position:fixed;inset:0;z-index:300;display:none;overflow:hidden;background:#0b0716;user-select:none;-webkit-user-select:none;cursor:pointer}
+#splash{position:fixed;inset:0;z-index:300;display:none;overflow:hidden;background:#050608;user-select:none;-webkit-user-select:none;cursor:pointer}
 #splash.on{display:block} #splash.out{opacity:0;transition:opacity .45s ease}
-#spStudio{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:3.5vw;background:radial-gradient(circle at 50% 50%,#2a1356 0,#0b0716 72%);transition:opacity .35s}
-#spStudio .oznSvg{width:min(44vw,64vh);height:auto;animation:spPop .9s cubic-bezier(.2,1.55,.4,1) both}
-.spWith{display:flex;align-items:center;gap:3vw;color:#fff;opacity:0;animation:spIn .6s .6s both}
-.spWith i{display:block;width:2px;height:min(20vh,130px);background:rgba(255,255,255,.35)}
+#spStudio{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:3.5vw;background:radial-gradient(circle at 50% 50%,#151a22 0,#050608 70%);transition:opacity .35s}
+#spStudio .oznSvg{width:min(40vw,58vh);height:auto;animation:spFade 1s ease-out both}
+.spWith{display:flex;align-items:center;gap:3vw;color:#e8e4dc;opacity:0;animation:spIn .7s .7s both}
+.spWith i{display:block;width:1px;height:min(20vh,130px);background:rgba(255,255,255,.22)}
 .spWith span{display:flex;flex-direction:column;line-height:1}
-.spWith small{font-size:min(2.2vw,3vh);letter-spacing:.3em;color:rgba(255,255,255,.6);margin-bottom:.6em}
+.spWith small{font-size:min(2.2vw,3vh);letter-spacing:.3em;color:rgba(255,255,255,.45);margin-bottom:.6em}
 .spWith b{font-size:min(7vw,10vh);font-weight:600;letter-spacing:.01em}
-#spLoad{position:absolute;inset:0;opacity:0;transition:opacity .4s;background:radial-gradient(circle at 50% 40%,#5a33d6 0,#2a1173 42%,#0d0626 100%)}
+#spLoad{position:absolute;inset:0;opacity:0;transition:opacity .5s;background:radial-gradient(ellipse at 50% 40%,#1b212b 0,#0b0e13 48%,#030405 100%)}
+#spLoad:after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px);pointer-events:none}
 #splash.ld #spLoad{opacity:1} #splash.ld #spStudio{opacity:0}
-.spRays{position:absolute;left:50%;top:40%;width:260vmax;height:260vmax;margin:-130vmax 0 0 -130vmax;background:repeating-conic-gradient(rgba(255,255,255,.075) 0 8deg,rgba(255,255,255,0) 8deg 16deg);animation:spSpin 50s linear infinite}
-.spStar{position:absolute;color:#fff6c8;text-shadow:0 0 12px #ffd23c;animation:spTw 2.4s ease-in-out infinite}
+.spRays{position:absolute;left:50%;top:40%;width:260vmax;height:260vmax;margin:-130vmax 0 0 -130vmax;background:repeating-conic-gradient(rgba(255,70,85,.035) 0 6deg,rgba(255,255,255,0) 6deg 18deg);animation:spSpin 90s linear infinite;-webkit-mask:radial-gradient(circle,#000 0,transparent 32%);mask:radial-gradient(circle,#000 0,transparent 32%)}
 .spLogo{position:absolute;left:50%;top:39%;width:min(80vw,112vh);transform:translate(-50%,-50%)}
 .spLogo svg{width:100%;height:auto;display:block;filter:drop-shadow(0 14px 22px rgba(10,4,30,.6))}
-#splash.ld .spLogo svg{animation:spPop .8s cubic-bezier(.2,1.6,.4,1) both,spFloat 3s 1s ease-in-out infinite}
-.spSub{position:absolute;left:50%;top:calc(39% + min(19vw,26vh));transform:translateX(-50%);color:#fff;font-weight:800;letter-spacing:.35em;font-size:min(2vw,2.8vh);text-shadow:0 3px 0 #12091f;white-space:nowrap}
+#splash.ld .spLogo svg{animation:spFade .9s ease-out both,spGlow 3.2s 1s ease-in-out infinite}
+.spSub{position:absolute;left:50%;top:calc(39% + min(19vw,26vh));transform:translateX(-50%);color:#8d97a6;font-weight:700;letter-spacing:.5em;font-size:min(1.8vw,2.5vh);white-space:nowrap}
 .spBarW{position:absolute;left:50%;bottom:15vh;transform:translateX(-50%);width:min(560px,70vw)}
-.spBar{height:clamp(18px,4vh,28px);border:4px solid #12091f;border-radius:18px;background:#2b1a5c;overflow:hidden;box-shadow:0 5px 0 #0a0518,inset 0 3px 0 rgba(255,255,255,.12)}
-.spBar i{display:block;height:100%;width:0;border-radius:12px;background:repeating-linear-gradient(135deg,#ffd83a 0 14px,#ffb21c 14px 28px);background-size:40px 40px;box-shadow:inset 0 4px 0 rgba(255,255,255,.45);animation:spStripe .8s linear infinite}
-#spPct{display:block;margin-top:9px;text-align:center;color:#fff;font-weight:900;letter-spacing:.16em;font-size:clamp(12px,2.4vh,16px);text-shadow:0 2px 0 #12091f}
-#spTip{display:block;margin-top:6px;text-align:center;color:#e6ddff;font-size:clamp(11px,2.1vh,14px);letter-spacing:.04em}
-.spFoot{position:absolute;left:0;right:0;bottom:2.4vh;text-align:center;color:rgba(255,255,255,.72);font-size:clamp(10px,1.9vh,12px);letter-spacing:.16em}
-@keyframes spPop{0%{transform:scale(.2) rotate(-10deg);opacity:0}55%{opacity:1}100%{transform:scale(1) rotate(0)}}
+.spBar{height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden}
+.spBar i{display:block;height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,#a8202d,#ff4655);box-shadow:0 0 12px rgba(255,70,85,.7)}
+#spPct{display:block;margin-top:12px;text-align:center;color:#e8e4dc;font-weight:700;letter-spacing:.32em;font-size:clamp(11px,2vh,13px)}
+#spTip{display:block;margin-top:8px;text-align:center;color:#7d8796;font-size:clamp(11px,2.1vh,14px);letter-spacing:.04em}
+.spFoot{position:absolute;left:0;right:0;bottom:2.4vh;text-align:center;color:rgba(255,255,255,.38);font-size:clamp(10px,1.9vh,12px);letter-spacing:.16em}
+@keyframes spFade{from{opacity:0;transform:scale(.94);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes spGlow{0%,100%{filter:drop-shadow(0 0 0 rgba(255,70,85,0))}50%{filter:drop-shadow(0 0 18px rgba(255,70,85,.35))}}
 @keyframes spIn{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
 @keyframes spSpin{to{transform:rotate(360deg)}}
-@keyframes spFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.6vh)}}
-@keyframes spStripe{to{background-position:40px 0}}
-@keyframes spTw{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1.15)}}
 button.exit{border-color:rgba(255,70,85,.45);color:#ff8a94}
 button.exit:hover{background:rgba(255,70,85,.15)}
 #touch{position:fixed;inset:0;z-index:5;touch-action:none;-webkit-touch-callout:none}
@@ -666,39 +664,28 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
-    <linearGradient id="gNova" x1="0" y1="40" x2="0" y2="185" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff7b0"/><stop offset=".42" stop-color="#ffc61f"/><stop offset="1" stop-color="#ff5a1f"/></linearGradient>
-    <radialGradient id="gNovaGlow"><stop offset="0" stop-color="#fff3a0" stop-opacity=".95"/><stop offset=".35" stop-color="#ffb21c" stop-opacity=".45"/><stop offset="1" stop-color="#ff5a1f" stop-opacity="0"/></radialGradient>
-    <linearGradient id="gOzn" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff5470"/><stop offset=".55" stop-color="#c53cff"/><stop offset="1" stop-color="#6a3dff"/></linearGradient>
+    <linearGradient id="gNova" x1="0" y1="40" x2="0" y2="185" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#c6ced9"/><stop offset="1" stop-color="#5f6a7a"/></linearGradient>
+    <radialGradient id="gNovaGlow"><stop offset="0" stop-color="#ff4655" stop-opacity=".5"/><stop offset=".4" stop-color="#ff4655" stop-opacity=".12"/><stop offset="1" stop-color="#ff4655" stop-opacity="0"/></radialGradient>
+    <linearGradient id="gOzn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#171c25"/><stop offset="1" stop-color="#0a0c10"/></linearGradient>
     <!-- NOVA harfleri (orta çizgileri; kalın çizgiyle "şişkin" harf olur) -->
     <g id="novaL"><path d="M62 172 L62 52 L142 172 L142 52"/><circle cx="257" cy="112" r="56"/><path d="M350 52 L400 172 L450 52"/><path d="M482 172 L532 52 L582 172 M503 128 L561 128"/></g>
     <g id="oznL"><circle cx="108" cy="92" r="34"/><path d="M174 60 L238 60 L174 124 L238 124"/><path d="M272 124 L272 60 L330 124 L330 60"/></g>
-    <!-- NOVA logosu: tombul, kalın konturlu, hafif eğik; O harfinin içinde patlayan yıldız (nova) -->
+    <!-- NOVA logosu: keskin, pahlı köşeli metal harfler; O harfinin içinde kırmızı yıldız (nova) -->
     <symbol id="novaLogo" viewBox="0 0 640 230">
-      <g transform="rotate(-4 320 115)">
-        <circle cx="257" cy="112" r="118" fill="url(#gNovaGlow)"/>
-        <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <g transform="translate(0 14)" stroke="#0a0518" stroke-width="62"><use href="#novaL"/></g>
-          <g stroke="#1d0f45" stroke-width="62"><use href="#novaL"/></g>
-          <g stroke="url(#gNova)" stroke-width="38"><use href="#novaL"/></g>
-          <g transform="translate(-3 -10)" stroke="#ffffff" stroke-opacity=".55" stroke-width="7"><use href="#novaL"/></g>
-        </g>
-        <path d="M257 74 Q262 106 295 112 Q262 118 257 150 Q252 118 219 112 Q252 106 257 74Z" fill="#fffbe6" stroke="#1d0f45" stroke-width="6" stroke-linejoin="round"/>
-        <path d="M598 30 Q600 42 612 44 Q600 46 598 58 Q596 46 584 44 Q596 42 598 30Z" fill="#fff3a0"/>
-        <path d="M30 40 Q31.5 49 41 50 Q31.5 51 30 60 Q28.5 51 19 50 Q28.5 49 30 40Z" fill="#fff3a0"/>
+      <circle cx="257" cy="112" r="104" fill="url(#gNovaGlow)"/>
+      <g fill="none" stroke-linecap="square" stroke-linejoin="bevel">
+        <g transform="translate(0 7)" stroke="#000000" stroke-opacity=".6" stroke-width="30"><use href="#novaL"/></g>
+        <g stroke="url(#gNova)" stroke-width="28"><use href="#novaL"/></g>
       </g>
+      <path d="M257 80 L264.5 104.5 L289 112 L264.5 119.5 L257 144 L249.5 119.5 L225 112 L249.5 104.5Z" fill="#ff4655"/>
+      <rect x="48" y="206" width="160" height="3" fill="#ff4655"/><rect x="432" y="206" width="160" height="3" fill="#ff4655"/>
     </symbol>
     <!-- OZN studios logosu -->
     <symbol id="oznLogo" viewBox="0 0 400 215">
-      <g transform="rotate(-3 200 95)">
-        <rect x="24" y="32" width="352" height="132" rx="40" fill="#08040f"/>
-        <rect x="24" y="22" width="352" height="132" rx="40" fill="url(#gOzn)" stroke="#12091f" stroke-width="10"/>
-        <rect x="44" y="34" width="312" height="22" rx="11" fill="#ffffff" fill-opacity=".16"/>
-        <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <g stroke="#12091f" stroke-width="40"><use href="#oznL"/></g>
-          <g stroke="#ffffff" stroke-width="22"><use href="#oznL"/></g>
-        </g>
-      </g>
-      <text x="200" y="205" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="30" font-weight="900" letter-spacing="13" fill="#ffffff">STUDIOS</text>
+      <rect x="24" y="22" width="352" height="132" rx="6" fill="url(#gOzn)" stroke="#2a313d" stroke-width="2"/>
+      <rect x="24" y="22" width="6" height="132" fill="#ff4655"/>
+      <g fill="none" stroke-linecap="square" stroke-linejoin="bevel" stroke="#e8e4dc" stroke-width="18"><use href="#oznL"/></g>
+      <text x="200" y="203" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="26" font-weight="700" letter-spacing="16" fill="#8d97a6">STUDIOS</text>
     </symbol>
   </defs>
 </svg>
@@ -709,8 +696,6 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
   </div>
   <div id="spLoad">
     <div class="spRays"></div>
-    <b class="spStar" style="left:12%;top:18%;font-size:26px">✦</b><b class="spStar" style="left:84%;top:14%;font-size:18px;animation-delay:.8s">✦</b>
-    <b class="spStar" style="left:76%;top:62%;font-size:22px;animation-delay:1.4s">✦</b><b class="spStar" style="left:18%;top:66%;font-size:16px;animation-delay:.4s">✦</b>
     <div class="spLogo"><svg viewBox="0 0 640 230" role="img" aria-label="NOVA"><use href="#novaLogo" width="640" height="230"/></svg></div>
     <div class="spSub">TAKTİK FPS · PARKUR</div>
     <div class="spBarW"><div class="spBar"><i id="spFill"></i></div><span id="spPct">YÜKLENİYOR</span><span id="spTip"></span></div>
