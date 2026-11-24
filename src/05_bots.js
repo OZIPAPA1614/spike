@@ -152,6 +152,7 @@ function threatSite(team) {
 function botGoal(p, ai) {
   const side = sideOf(p.team), sp = S.bomb, plan = S.plan;
   if (ai.retreatT > S.time && ai.cover) return { x: ai.cover.x, y: ai.cover.y, key: 'cv' + (ai.cover.x | 0), look: ai.lk };
+  if (arOn()) return arGoal(p, ai); // arena modları (03c)
   if (ai.reviveGoal) {
     const c = S.corpses.find(c => c.id === ai.reviveGoal);
     if (c && p.ult >= AGENTS.vital.x.pts) return { x: c.x, y: c.y, key: 'rv' + c.id };
@@ -388,6 +389,7 @@ function moveToward(p, inp, x, y) {
 /* ---------- SATIN ALMA ---------- */
 function botBuy(p, dt) {
   const ai = p.ai; if (ai.buyDone) return;
+  if (arOn()) { ai.buyDone = true; return; }
   ai.buyT -= dt; if (ai.buyT > 0) return;
   ai.buyDone = true;
   const pistol = S.round === 1 || S.round === HALF_ROUNDS + 1;

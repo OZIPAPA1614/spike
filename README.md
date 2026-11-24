@@ -8,6 +8,9 @@ Tarayıcıda oynanan 3D taktik FPS (5v5, ajanlar, bomba kur/imha et).
 - Hesaplar, arkadaş listesi, sesli ve yazılı sohbet
 - 11 harita, gems mağazası, kılıç seviyeleri, 20 silah + 20 karakter skini
 - **PARKUR modu:** yalnızca kılıçla engel yarışı · 5 raunt, her raunt farklı ve çok uzun, ince bir pist · bitişe ilk varan raundu alır
+- **SİLAH YARIŞI:** her öldürmede sıradaki silah, kılıçla öldüren takım kazanır
+- **SÜPERNOVA:** yer değiştiren enerji bölgesini tutan takım puan toplar, 100 puan kazanır
+- Karakter ve silahlar 3B model (Quaternius / Kenney, CC0)
 - Maç başında sinematik giriş (harita üstünden kamera uçuşu, atlanabilir)
 - Duvar ve zemin dokuları Poly Haven CC0 fotoğrafları (`src/01c_texpack.js`)
 

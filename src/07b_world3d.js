@@ -857,6 +857,7 @@ function projHeight(pr) {
 function drawWorldDynamic(v, me, t) {
   const mt = me ? me.team : 0;
   if (PKMAP) drawPkDynamic(t, me);
+  if (arOn()) arDrawWorld(me, t);
   // geçici duvarlar
   for (const w of S.twalls) for (const i of w.tiles) {
     const x = (i % MW + 0.5) * TILE, z = (((i / MW) | 0) + 0.5) * TILE;

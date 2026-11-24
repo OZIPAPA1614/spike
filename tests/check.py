@@ -6,6 +6,7 @@ Kullanım (depo kökünden):  python3 tests/check.py [--quick]
   2) index.html tarayıcıda açılır: menüler, mağaza, ayarlar, dil
   3) Her haritada botlarla maç oynatılır (--quick değilse 2 haritada TAM maç)
   3b) PARKUR modu: botlarla 5 raunt (--quick: 1 raunt)
+  3c) SİLAH YARIŞI ve SÜPERNOVA: botlarla maç (--quick: 4 dk)
   4) Tek oyunculu arayüz akışı (ajan seçimi → sinematik giriş → oyun → çizim) + PARKUR arayüz akışı
   5) Çok oyunculu: yerel eşleştirme sunucusuyla host + istemci (oda, katılma, maç, hareket, sohbet, ses) + PARKUR eşitlemesi
   6) Herkese açık sunucu eşleşmesi (yerel Firebase taklidiyle)
@@ -159,6 +160,27 @@ try:
         elif not QUICK and r['phase'] != 'over': fail(f'PARKUR: 5 raunttan sonra maç bitmedi ({r})')
         else: ok(f"PARKUR: botlarla {len(r['ends'])} raunt ({r['ends'].count('fin')} tanesi bitişe varılarak), harita {r['map']}")
     except Exception as e: fail('PARKUR bot maçı: ' + str(e)[:300])
+    # ---------- 3c) SİLAH YARIŞI ve SÜPERNOVA: botlarla maç ----------
+    for mode, name in (('gg', 'SİLAH YARIŞI'), ('sn', 'SÜPERNOVA')):
+        before = len(errs)
+        try:
+            M.evaluate("""(mode) => { const A=['vex','ignis','mist','aegis','pulse'], B=['chrono','terra','vital','volt','phantom'], roster=[];
+                A.forEach((a,j)=>roster.push({id:j?'x'+j:'h',name:a,team:0,agent:a,bot:j>0})); B.forEach((a,j)=>roster.push({id:'y'+j,name:a,team:1,agent:a,bot:true}));
+                NET.mode='off'; G.myId='h'; launchGame(roster, {teamSize:5, fill:true, diff:'normal', map:0, mode});
+                const me=S.pmap.h; me.ctrl='bot'; me.isBot=true; me.ai=newAI(me); G.paused=true; }""", mode)
+            limit = 240 if QUICK else 900
+            sim, r = 0, None
+            while sim < limit:
+                r = M.evaluate("() => { for (let i=0;i<3600;i++){ hostTick(SIM_DT); S.evq.length=0; if (S.phase==='over') break; } render(1/60); const A=S.arena; return {phase:S.phase, sc:A?A.sc.map(Math.round):null, lv:Math.max(...S.players.map(p=>p.ggL|0)), kills:S.players.reduce((a,p)=>a+p.kills,0), bomb:S.players.some(p=>p.hasBomb)}; }")
+                sim += 60
+                if r['phase'] == 'over': break
+            if r['bomb']: fail(f'{name}: bomba taşıyan oyuncu var')
+            elif r['kills'] < 5: fail(f'{name}: botlar savaşmıyor ({r})')
+            elif mode == 'gg' and r['lv'] < 2: fail(f'{name}: silah seviyesi ilerlemiyor ({r})')
+            elif mode == 'sn' and max(r['sc']) < 10: fail(f'{name}: bölge puanı birikmiyor ({r})')
+            elif not QUICK and r['phase'] != 'over': fail(f"{name}: maç {sim} sn'de bitmedi ({r})")
+            elif len(errs) == before: ok(f"{name}: botlarla {'TAM maç' if r['phase'] == 'over' else str(sim) + ' sn'} · {r['kills']} öldürme · " + (f"en yüksek seviye {r['lv'] + 1}/8" if mode == 'gg' else f"puan {r['sc']}"))
+        except Exception as e: fail(f'{name} bot maçı: ' + str(e)[:300])
     report_errs(errs, 'menü + bot maçları')
     ctx.close()
 

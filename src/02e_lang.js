@@ -173,6 +173,22 @@ Object.assign(EN_FRAG, {
   'Kaygan görünen ama sağlam buz yolu': 'An ice road that looks slippery but holds', 'Altında lav, üstünde kızıl gökyüzü': 'Lava below, a red sky above',
   'Dev gezegenin önünde, boşlukta bir pist': 'A track in the void before a giant planet', 'Gece şehrinin üstünde ışıklı yol': 'A glowing road above the night city', 'Ormanın üstünde taş patika': 'A stone path above the forest'
 });
+/* SİLAH YARIŞI / SÜPERNOVA modları */
+Object.assign(EN_FRAG, {
+  'SİLAH YARIŞI · her öldürmede yeni silah': 'GUN GAME · new weapon every kill', 'SÜPERNOVA · bölgeyi tut, puan topla': 'SUPERNOVA · hold the zone, score points',
+  'SİLAH YARIŞI · her öldürmede sıradaki silah · son silah kılıç: kılıçla ilk öldüren takım kazanır': 'GUN GAME · next weapon on every kill · the last weapon is the sword: first team to get a sword kill wins',
+  'SÜPERNOVA · parlayan bölge yer değiştirir · bölgeyi tutan takım puan toplar · 100 puan kazanır': 'SUPERNOVA · the glowing zone moves around · the team holding it scores · 100 points wins',
+  'Her öldürmede sıradaki silah · kılıçla öldüren kazanır': 'Next weapon on every kill · a sword kill wins', 'Parlayan bölgeyi tut · 100 puana ilk ulaşan kazanır': 'Hold the glowing zone · first to 100 points wins',
+  'Her öldürmede yeni silah · kılıçla öldüren takım kazanır': 'New weapon on every kill · the team that gets a sword kill wins', 'Parlayan bölgeyi tut · 100 puana ilk ulaşan takım kazanır': 'Hold the glowing zone · first team to 100 points wins',
+  'Bölgede kalan takım puan toplar · bölge yer değiştirir': 'The team in the zone scores · the zone moves', 'Her öldürmede sıradaki silah · son silah kılıç': 'Next weapon on every kill · the last one is the sword',
+  'SİLAH YARIŞI': 'GUN GAME', 'SÜPERNOVA BÖLGESİ': 'SUPERNOVA ZONE', 'SÜPERNOVA': 'SUPERNOVA', 'HAZIRLAN': 'GET READY', 'TAKIMIN': 'YOUR TEAM', 'RAKİP': 'ENEMY',
+  'BÖLGE BOŞ': 'ZONE EMPTY', 'BÖLGE ÇEKİŞMELİ': 'ZONE CONTESTED', 'BÖLGE SİZDE': 'YOUR ZONE', 'BÖLGE RAKİPTE': 'ENEMY ZONE', ' · yer değişimine ': ' · moves in ',
+  'KILIÇLA ÖLDÜR VE KAZAN': 'GET A SWORD KILL TO WIN', 'BÖLGE YER DEĞİŞTİRDİ': 'THE ZONE MOVED', 'Yeni süpernova bölgesine koş': 'Run to the new supernova zone',
+  'YENİDEN DOĞUŞ: ': 'RESPAWN: ', 'MAÇI KAZANDINIZ': 'YOU WON THE MATCH', 'MAÇI KAYBETTİNİZ': 'YOU LOST THE MATCH', 'Süpernova bölgesini tuttu': 'Held the supernova zone',
+  ' kılıçla bitirdi': ' finished with the sword', ' SON SİLAHTA: KILIÇ!': ' IS ON THE LAST WEAPON: SWORD!', ' kılıçla bir seviye geri düştü': ' dropped a level to a sword kill',
+  'BAŞLADI — BARİYERLER KALKTI': 'GO — BARRIERS ARE DOWN', ' MODUNDA MAĞAZA YOK': ' HAS NO STORE', ' MODUNDA YETENEK YOK': ' HAS NO ABILITIES', 'SİLAH ': 'WEAPON ',
+  'takımı ': 'team reached ', ' puana ulaştı': ' points'
+});
 for (const k of Object.keys(EN_FRAG)) { if (k.length < 26 && /^[A-Za-zÇĞİÖŞÜçğıöşü ]+$/.test(k)) { const u = k.toLocaleUpperCase('tr-TR'); if (u !== k && !(u in EN_FRAG)) EN_FRAG[u] = EN_FRAG[k].toUpperCase(); } }
 const EN_RULES = [
   [/^\+(\d+) CAN$/, '+$1 HP'], [/^RAUNT (\d+)( \/ |\/)(\d+)$/, 'ROUND $1$2$3'], [/^(\d+) sn$/, '$1 s'], [/(\d+) sn\b/g, '$1 s'], [/ \(BOT\)$/, ' (BOT)']

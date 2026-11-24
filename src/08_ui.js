@@ -304,12 +304,13 @@ function uiInit() {
     $('spSideRow').style.display = $('spMapRow').style.display = pk ? 'none' : '';
     $('spSizeL').textContent = pk ? 'YARIŞÇI SAYISI' : 'TAKIM BOYUTU';
     for (const o of $('spSize').options) o.textContent = pk ? (o.value * 2) + ' yarışçı' : o.value + 'v' + o.value;
-    $('spSub').textContent = pk ? 'Kılıçla engel yarışı · 5 raunt, her raunt farklı uzun parkur · bitişe ilk varan raundu alır' : 'Botlara karşı tam maç · 20 raunt · 10. rauntten sonra taraf değişir';
+    const am = $('spMode').value;
+    $('spSub').textContent = pk ? 'Kılıçla engel yarışı · 5 raunt, her raunt farklı uzun parkur · bitişe ilk varan raundu alır' : am === 'gg' ? 'SİLAH YARIŞI · her öldürmede sıradaki silah · son silah kılıç: kılıçla ilk öldüren takım kazanır' : am === 'sn' ? 'SÜPERNOVA · parlayan bölge yer değiştirir · bölgeyi tutan takım puan toplar · 100 puan kazanır' : 'Botlara karşı tam maç · 20 raunt · 10. rauntten sonra taraf değişir';
     $('btnSpGo').textContent = pk ? 'PARKURA BAŞLA' : 'AJAN SEÇİMİ';
     const i = +$('spMap').value;
     $('spMapNote').textContent = pk ? 'Elinde yalnızca kılıç var: rakipleri it, barikatları kır, boşluklardan atla. Düşersen son kontrol noktasından devam edersin.' : i >= 0 ? MAPS[i].desc : 'Her maçta ' + MAPS.length + ' haritadan biri rastgele seçilir.';
   };
-  try { const md = localStorage.getItem('spk_mode'); if (md === 'pk' || md === 'bomb') $('spMode').value = md; } catch (e) { }
+  try { const md = localStorage.getItem('spk_mode'); if (md === 'pk' || md === 'bomb' || md === 'gg' || md === 'sn') $('spMode').value = md; } catch (e) { }
   $('spMode').onchange = () => { try { localStorage.setItem('spk_mode', $('spMode').value); } catch (e) { } spNote(); };
   spNote();
   $('spMap').onchange = () => {
@@ -320,7 +321,7 @@ function uiInit() {
   for (const b of document.querySelectorAll('[data-back]')) b.onclick = () => { if (NET.mode !== 'off') netShutdown(); uiShow(b.dataset.back || 'scr-menu'); };
   $('btnSpGo').onclick = () => {
     NET.mode = 'off'; G.myId = 'h';
-    const cfg = { teamSize: +$('spSize').value, fill: true, diff: $('spDiff').value, map: +$('spMap').value, mode: $('spMode').value === 'pk' ? 'pk' : 'bomb' };
+    const cfg = { teamSize: +$('spSize').value, fill: true, diff: $('spDiff').value, map: +$('spMap').value, mode: modeOf($('spMode').value) };
     const team = $('spSide').value === 'atk' ? 0 : 1;
     selStart([{ id: 'h', name: playerName(), team, cos: SHOP.cos() }], cfg);
   };
@@ -343,7 +344,7 @@ function uiInit() {
   $('btnLobbyLeave').onclick = () => { netShutdown(); uiShow('scr-play'); };
   for (const id of ['lbSize', 'lbFill', 'lbDiff', 'lbMap', 'lbMode']) $(id).onchange = () => {
     if (NET.mode !== 'host') return;
-    NET.lobby.cfg = { teamSize: +$('lbSize').value, fill: $('lbFill').checked, diff: $('lbDiff').value, map: +$('lbMap').value, ff: NET.lobby.cfg.ff !== false, mode: $('lbMode').value === 'pk' ? 'pk' : 'bomb' };
+    NET.lobby.cfg = { teamSize: +$('lbSize').value, fill: $('lbFill').checked, diff: $('lbDiff').value, map: +$('lbMap').value, ff: NET.lobby.cfg.ff !== false, mode: modeOf($('lbMode').value) };
     broadcastLobby();
   };
   // TAKIM ATEŞİ: tek tıkla aç/kapa (lobide host, maçta host veya tek oyunculu)
@@ -426,12 +427,12 @@ function uiRenderLobby() {
   uiNetStatus();
   const mv = L.cfg.map === undefined ? 0 : L.cfg.map;
   const pkm = L.cfg.mode === 'pk';
-  $('lbSize').value = L.cfg.teamSize; $('lbFill').checked = L.cfg.fill; $('lbDiff').value = L.cfg.diff; $('lbMap').value = String(mv); $('lbMode').value = pkm ? 'pk' : 'bomb';
+  $('lbSize').value = L.cfg.teamSize; $('lbFill').checked = L.cfg.fill; $('lbDiff').value = L.cfg.diff; $('lbMap').value = String(mv); $('lbMode').value = modeOf(L.cfg.mode);
   $('lbSize').disabled = $('lbFill').disabled = $('lbDiff').disabled = $('lbMap').disabled = $('lbFF').disabled = $('lbMode').disabled = !host;
   $('lbMapRow').style.display = $('lbFF').parentNode.style.display = pkm ? 'none' : '';
   const ffv = L.cfg.ff !== false; $('lbFF').textContent = 'TAKIM ATEŞİ: ' + (ffv ? 'AÇIK' : 'KAPALI') + (host ? '  ·  tıkla' : ''); $('lbFF').classList.toggle('off', !ffv);
   if (pkm) $('lbCfgText').textContent = 'Mod: PARKUR · 5 parkur · takım yok, herkes kendi için yarışır · Yarışçı: ' + L.cfg.teamSize * 2 + (L.cfg.fill ? ' (botlarla)' : '') + ' · Zorluk: ' + L.cfg.diff;
-  else $('lbCfgText').textContent = 'Harita: ' + mapLabel(mv) + ' · Takım boyutu: ' + L.cfg.teamSize + 'v' + L.cfg.teamSize + ' · Bot doldurma: ' + (L.cfg.fill ? 'Açık' : 'Kapalı') + ' · Zorluk: ' + L.cfg.diff + ' · Takım ateşi: ' + (L.cfg.ff !== false ? 'Açık' : 'Kapalı');
+  else $('lbCfgText').textContent = (L.cfg.mode === 'gg' ? 'Mod: SİLAH YARIŞI · ' : L.cfg.mode === 'sn' ? 'Mod: SÜPERNOVA · ' : '') + 'Harita: ' + mapLabel(mv) + ' · Takım boyutu: ' + L.cfg.teamSize + 'v' + L.cfg.teamSize + ' · Bot doldurma: ' + (L.cfg.fill ? 'Açık' : 'Kapalı') + ' · Zorluk: ' + L.cfg.diff + ' · Takım ateşi: ' + (L.cfg.ff !== false ? 'Açık' : 'Kapalı');
   for (const team of [0, 1]) {
     const box = $('lbTeam' + team); box.innerHTML = '';
     const ps = L.players.filter(p => p.team === team);
@@ -661,6 +662,7 @@ function toggleBuy() {
   const me = S && S.pmap[G.myId];
   if (!me || !me.alive) return;
   if (PKMAP) { showMsg(null, 'PARKURDA MAĞAZA YOK — YALNIZCA KILIÇ', PAL.dim); return; }
+  if (arOn()) { showMsg(null, AR_NAMES[arMode()] + ' MODUNDA MAĞAZA YOK', PAL.dim); return; }
   if (S.phase !== 'buy') { showMsg(null, 'SATIN ALMA EVRESİ BİTTİ', PAL.red); return; }
   UI.buyOpen = true; $('buy').classList.remove('hidden'); UI.overlay = true; MOUSE.down = false; G._buySig = null;
   unlockPointer(); syncCursor();
@@ -713,6 +715,7 @@ function uiRenderBuy() {
 function castAbility(k) {
   const me = S && S.pmap[G.myId]; if (!me || !me.alive) return;
   if (PKMAP) { showMsg(null, 'PARKURDA YETENEK YOK — YALNIZCA KILIÇ', PAL.dim); return; }
+  if (arOn()) { showMsg(null, AR_NAMES[arMode()] + ' MODUNDA YETENEK YOK', PAL.dim); return; }
   const wm = aimPoint(me), ang = LOOK.yaw;
   const ag = AGENTS[me.agent];
   const avail = k === 'x' ? me.ult >= ag.x.pts : me.ch[k] > 0;
@@ -900,6 +903,7 @@ function uiGameTick(dt) {
     if (G._overT > 2) { G._overT = 0; G.overShown = true; uiShowEnd(); }
   }
 }
+function modeOf(v) { return v === 'pk' || v === 'gg' || v === 'sn' ? v : 'bomb'; }
 function uiShowEnd() {
   const me = S.pmap[G.myId], mt = me ? me.team : 0, win = S.matchWinner === mt;
   closeBuy();

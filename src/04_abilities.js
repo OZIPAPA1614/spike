@@ -242,7 +242,7 @@ const ABIL = {
 };
 
 function useAbility(p, k, tgt) {
-  if (!p || !S || !p.alive || !canAct(p) || PKMAP) return false; // parkurda yetenek yok
+  if (!p || !S || !p.alive || !canAct(p) || PKMAP || arOn()) return false; // parkurda ve arena modlarında yetenek yok
   if (S.phase !== 'live' && S.phase !== 'planted') return false;
   if (p.plantT > 0 || p.defT > 0) return false;
   const ag = AGENTS[p.agent];

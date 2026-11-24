@@ -15,6 +15,14 @@ function cineMatchShots() {
   const cx = WW / 2, cz = WH / 2, big = Math.max(WW, WH);
   const A = tc(...MAPDATA.sites.A.center), B = tc(...MAPDATA.sites.B.center), m = MAPS[CUR_MAP];
   const hi = clamp(big * 0.3, 1400, 2600);
+  if (typeof arOn === 'function' && arOn()) {
+    const sn = arMode() === 'sn', Z = sn && S.arena && S.arena.z ? { x: S.arena.z.x, y: S.arena.z.y } : { x: cx, y: cz };
+    return [
+      { d: 2.6, p0: [cx - big * 0.42, hi * 1.05, cz + WH * 0.62], p1: [cx + big * 0.12, hi * 0.85, cz + WH * 0.58], l0: [cx, 0, cz - WH * 0.05], l1: [cx, 0, cz - WH * 0.1], title: m.name, sub: AR_NAMES[arMode()], col: PAL.white },
+      { d: 2.4, p0: [Z.x - 1100, 820, Z.y + 900], p1: [Z.x - 320, 480, Z.y + 640], l0: [Z.x, 40, Z.y], l1: [Z.x + 60, 40, Z.y], title: sn ? 'SÜPERNOVA BÖLGESİ' : 'SİLAH YARIŞI', sub: sn ? 'Bölgede kalan takım puan toplar · bölge yer değiştirir' : 'Her öldürmede sıradaki silah · son silah kılıç', col: PAL.gold },
+      { d: INTRO_TIME - 5, me: true, title: 'TAKIMLAR', col: PAL.teal }
+    ];
+  }
   return [
     { d: 2.3, p0: [cx - big * 0.42, hi * 1.05, cz + WH * 0.62], p1: [cx + big * 0.12, hi * 0.85, cz + WH * 0.58], l0: [cx, 0, cz - WH * 0.05], l1: [cx, 0, cz - WH * 0.1],
       title: m.name, sub: m.desc, col: PAL.white },
@@ -86,12 +94,17 @@ function drawCine(dt, me) {
     const mt = me ? me.team : 0;
     for (const side of [0, 1]) {
       const team = side ? 1 - mt : mt, ps = S.players.filter(p => p.team === team), x = side ? W - 40 * sm : 40 * sm, al = side ? 'right' : 'left', col = side ? PAL.red : PAL.teal;
-      txt((side ? 'RAKİP · ' : 'TAKIMIN · ') + (sideOf(team) === 'atk' ? 'SALDIRAN' : 'SAVUNAN'), x, bh + 34 * sm, Math.round(15 * sm), col, al);
+      txt((side ? 'RAKİP' : 'TAKIMIN') + (arOn() ? '' : ' · ' + (sideOf(team) === 'atk' ? 'SALDIRAN' : 'SAVUNAN')), x, bh + 34 * sm, Math.round(15 * sm), col, al);
       ps.forEach((p, i) => txt(p.name + ' · ' + AGENTS[p.agent].name, x, bh + (62 + i * 24) * sm, Math.round(14 * sm), p.id === G.myId ? PAL.gold : PAL.white, al, 'normal'));
     }
     { const g = ctx.createLinearGradient(0, H - bh - 90 * sm, 0, H - bh); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.7)'); ctx.fillStyle = g; ctx.fillRect(0, H - bh - 90 * sm, W, 90 * sm); }
-    txt('RAUNT 1 / ' + MATCH_ROUNDS, W / 2, H - bh - 46 * sm, Math.round(30 * sm), PAL.white, 'center');
-    txt(me && sideOf(me.team) === 'atk' ? 'SALDIRI — Bombayı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, bombayı imha et', W / 2, H - bh - 18 * sm, Math.round(14 * sm), me && sideOf(me.team) === 'atk' ? PAL.red : PAL.teal, 'center', 'normal');
+    if (arOn()) {
+      txt(AR_NAMES[arMode()], W / 2, H - bh - 46 * sm, Math.round(30 * sm), PAL.gold, 'center');
+      txt(arMode() === 'gg' ? 'Her öldürmede yeni silah · kılıçla öldüren takım kazanır' : 'Parlayan bölgeyi tut · 100 puana ilk ulaşan takım kazanır', W / 2, H - bh - 18 * sm, Math.round(14 * sm), PAL.white, 'center', 'normal');
+    } else {
+      txt('RAUNT 1 / ' + MATCH_ROUNDS, W / 2, H - bh - 46 * sm, Math.round(30 * sm), PAL.white, 'center');
+      txt(me && sideOf(me.team) === 'atk' ? 'SALDIRI — Bombayı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, bombayı imha et', W / 2, H - bh - 18 * sm, Math.round(14 * sm), me && sideOf(me.team) === 'atk' ? PAL.red : PAL.teal, 'center', 'normal');
+    }
   } else if (s.title) {
     const y = H - bh - 70 * sm;
     { const g = ctx.createLinearGradient(0, 0, W * 0.6, 0); g.addColorStop(0, 'rgba(0,0,0,0.55)'); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.fillRect(0, y - 50 * sm, W * 0.6, 100 * sm); }

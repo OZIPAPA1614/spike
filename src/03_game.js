@@ -103,6 +103,7 @@ function startRound() {
     const c = pick(atks); c.hasBomb = true;
     S.bomb.state = 'carried'; S.bomb.carrier = c.id; S.bomb.x = c.x; S.bomb.y = c.y;
   }
+  if (arOn()) arSetup(); // SİLAH YARIŞI / SÜPERNOVA (03c): bombasız, yeniden doğmalı tek raunt
   S.plan = makeRoundPlan();
   emit({ k: 'round', n: S.round });
 }
@@ -127,6 +128,7 @@ function endRound(win, reason) {
 /* ---------- ANA SİMÜLASYON ADIMI (host) ---------- */
 function hostTick(dt) {
   if (PKMAP && pkOn()) { pkHostTick(dt); return; }
+  if (arOn()) { arHostTick(dt); return; } // arena modları (03c)
   S.time += dt;
   for (const p of S.players) if (p.ctrl === 'bot') botUpdate(p, dt);
   updateZones(dt);
@@ -439,6 +441,7 @@ function finishReload(p) {
 }
 function switchSlot(p, s) {
   if (PKMAP) return; // parkur: yalnızca kılıç
+  if (arMode() === 'gg' && s !== 3 && !(s === 1 ? p.primary : p.secondary)) return; // silah yarışı: yalnızca seviyedeki silah + kılıç
   if (s === 1 && !p.primary) return;
   if (s !== 1 && s !== 2 && s !== 3) return;
   if (p.slot === s) return;
@@ -448,6 +451,7 @@ function switchSlot(p, s) {
 /* ---------- HASAR / ÖLÜM ---------- */
 function damage(t, amt, att, src, hs, quiet) {
   if (!t || !t.alive || S.phase === 'buy' || S.phase === 'over' || PKMAP) return;
+  if (t.prot && S.time < t.prot) return; // arena: yeniden doğuş koruması
   amt = Math.round(amt); if (amt <= 0) return;
   let rem = amt;
   if (src === 'blade' || src === 'bomb' || src === 'railgun') rem = 9999;
@@ -488,6 +492,7 @@ function killPlayer(t, att, src, hs) {
   }
   if (S.bomb.defuser === t.id) { S.bomb.defuser = null; S.bomb.prog = S.bomb.half ? DEFUSE_TIME / 2 : 0; }
   emit({ k: 'kill', a: att ? att.id : null, v: t.id, w: src, hs: hs ? 1 : 0, tk: att && att !== t && att.team === t.team ? 1 : 0 });
+  if (arOn()) arOnKill(t, att, src);
 }
 function doRebirth(t) {
   const rb = t.rebirth, f = findFree(rb.x, rb.y, PR);
@@ -512,7 +517,7 @@ function explode(x, y, r, dmg, att, team, src) {
 
 /* ---------- SATIN ALMA ---------- */
 function buyItem(p, item) {
-  if (!S || S.phase !== 'buy' || !p || !p.alive || PKMAP) return false;
+  if (!S || S.phase !== 'buy' || !p || !p.alive || PKMAP || arOn()) return false;
   const rb = p.roundBuys;
   if (WEAPONS[item]) {
     const w = WEAPONS[item];

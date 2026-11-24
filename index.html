@@ -382,7 +382,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <h2>TEK OYUNCULU</h2>
     <div class="sub" id="spSub">Botlara karşı tam maç · 20 raunt · 10. rauntten sonra taraf değişir</div>
     <div class="grid2">
-      <div style="grid-column:1/3"><label>OYUN MODU</label><select id="spMode"><option value="bomb">KLASİK · 5v5 taktik bomba maçı</option><option value="pk">PARKUR · kılıçla engel yarışı (5 parkur)</option></select></div>
+      <div style="grid-column:1/3"><label>OYUN MODU</label><select id="spMode"><option value="bomb">KLASİK · 5v5 taktik bomba maçı</option><option value="gg">SİLAH YARIŞI · her öldürmede yeni silah</option><option value="sn">SÜPERNOVA · bölgeyi tut, puan topla</option><option value="pk">PARKUR · kılıçla engel yarışı (5 parkur)</option></select></div>
       <div><label id="spSizeL">TAKIM BOYUTU</label><select id="spSize"><option value="1">1v1</option><option value="2">2v2</option><option value="3">3v3</option><option value="4">4v4</option><option value="5" selected>5v5</option></select></div>
       <div><label>BOT ZORLUĞU</label><select id="spDiff"><option value="kolay">Kolay</option><option value="normal" selected>Normal</option><option value="zor">Zor</option></select></div>
       <div id="spSideRow"><label>İLK YARI TARAFI</label><select id="spSide"><option value="atk">Saldıran (Bomba sende)</option><option value="def">Savunan</option></select></div>
@@ -417,7 +417,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <div class="grid2">
       <div><label>TAKIM BOYUTU</label><select id="lbSize"><option value="1">1v1</option><option value="2">2v2</option><option value="3">3v3</option><option value="4">4v4</option><option value="5" selected>5v5</option></select></div>
       <div><label>BOT ZORLUĞU</label><select id="lbDiff"><option value="kolay">Kolay</option><option value="normal" selected>Normal</option><option value="zor">Zor</option></select></div>
-      <div style="grid-column:1/3"><label>OYUN MODU</label><select id="lbMode"><option value="bomb">KLASİK · 5v5 taktik bomba maçı</option><option value="pk">PARKUR · kılıçla engel yarışı (5 parkur)</option></select></div>
+      <div style="grid-column:1/3"><label>OYUN MODU</label><select id="lbMode"><option value="bomb">KLASİK · 5v5 taktik bomba maçı</option><option value="gg">SİLAH YARIŞI · her öldürmede yeni silah</option><option value="sn">SÜPERNOVA · bölgeyi tut, puan topla</option><option value="pk">PARKUR · kılıçla engel yarışı (5 parkur)</option></select></div>
       <div style="grid-column:1/3" id="lbMapRow"><label>HARİTA</label><select id="lbMap"></select></div>
       <div style="grid-column:1/3"><button id="lbFF" type="button" class="fftog">TAKIM ATEŞİ: AÇIK</button></div>
       <div style="grid-column:1/3"><label><input type="checkbox" id="lbFill" checked style="width:auto;margin-right:8px;vertical-align:middle">BOŞ SLOTLARI BOTLARLA DOLDUR</label></div>
@@ -501,6 +501,10 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <p>Oda kodu PeerJS eşleştirme sunucusu üzerinden bulunur, sonra oyun verisi doğrudan cihazlar arasında akar. Farklı ağlarda (mobil veri, başka ev, okul/iş ağı) doğrudan yol kurulamazsa <b>BAĞLANTI AYARLARI</b>'ndan ücretsiz bir TURN sunucusu ekle (ExpressTURN veya Metered'da ücretsiz hesap açıp verilen adres, kullanıcı adı ve şifreyi gir) ve <b>BAĞLANTIYI TEST ET</b> ile "Aktarma (TURN) ✓" gördüğünden emin ol. Host telefondaysa kodu paylaşırken oyunu arka planda uzun süre bırakmasın.</p>
     <h3>PARKUR MODU</h3>
     <p>OYNA → TEK OYUNCULU (ya da oda kurarken) <b>OYUN MODU: PARKUR</b>. 5 raunt; her raunt farklı, çok uzun ve ince bir pist. Bitişe ilk varan raundu alır, 5 raunt sonunda en çok raunt alan şampiyon olur. Elinde yalnızca <b>kılıç</b> var: <b>sol tık</b> hızlı darbe, <b>sağ tık</b> güçlü darbe. Kılıç rakibi öldürmez, <b>iter ve yavaşlatır</b> (boşluğa düşürebilirsin) ve <b>barikatları kırar</b>. <b>BOŞLUK</b> ile boşlukların ve blokların üstünden zıpla; mavi <b>pedler</b> seni havaya fırlatır, turuncu oklu <b>şeritler</b> hızlandırır, kırmızı-beyaz <b>dönen çubukların</b> üstünden zıpla. Düşersen son <b>kontrol noktasından</b> devam edersin. Her raunt öncesi pistin üstünden kısa bir kamera uçuşu ve 3-2-1 geri sayım var.</p>
+    <h3>SİLAH YARIŞI</h3>
+    <p>OYNA → TEK OYUNCULU (ya da oda kurarken) <b>OYUN MODU: SİLAH YARIŞI</b>. Takımlar tek uzun rauntta savaşır, ölen birkaç saniyede yeniden doğar. Herkes hafif makineliyle başlar; her öldürmede sıradaki silaha geçersin: Arı → Kartal → Baykuş → Atmaca → Railgun → Akrep → Serçe → <b>Kılıç</b>. Kılıçla ilk öldüren oyuncunun takımı kazanır. Kılıçla öldürülen bir seviye geri düşer. Mağaza ve yetenek yoktur; süre dolarsa en yüksek seviyedeki takım kazanır.</p>
+    <h3>SÜPERNOVA</h3>
+    <p><b>OYUN MODU: SÜPERNOVA</b>. Haritada parlayan bir enerji bölgesi vardır ve belirli aralıklarla yer değiştirir (mini haritada ve gökyüzüne uzanan ışık sütununda görünür). Bölgede yalnızca senin takımın varsa saniye başına puan toplarsınız; iki takım da içerdeyse bölge çekişmelidir ve kimse puan almaz. <b>100 puana</b> ilk ulaşan takım kazanır. Herkes Kartal ve Serçe ile doğar, ölünce birkaç saniyede yeniden doğar; mağaza ve yetenek yoktur.</p>
     <h3>HARİTALAR</h3>
     <p><b>Merkez</b> (klasik kapalı tesis), <b>Liman</b> (konteyner limanı, vinçler, su kanalı ve köprüler), <b>Çöl Harabesi</b> (kumtaşı kalıntılar, palmiyeler, piramitler), <b>Buzul Üssü</b> (karlı araştırma istasyonu, donmuş göl, dağlar), <b>Orman Tapınağı</b> (yeşil avlular, nehir, basamaklı tapınak) ve <b>Neon Şehir</b> (gece, gökdelenler, neon tabelalar). Haritalar, doğuştan bölgeye ~20–25 sn ve A↔B dönüşü ~20 sn sürecek büyüklüktedir; geniş koridorlarla birbirine bağlı odalardan oluşur, A/B tarafları aynalıdır. Odalarda kuru kafalar, sandıklar, fıçılar, çuvallar, meşaleler gibi dekorlar vardır. Mini harita çevreni gösterir; TAB basılıyken tüm haritayı görürsün, bölge yönleri kenarda A/B okları olarak çıkar. Duvar ve zemin dokuları Poly Haven'ın ücretsiz (CC0) fotoğraf dokularıdır; bel hizasındaki alçak siperlerin arkasında eğilerek saklanabilirsin, ayakta durana ise üstünden ateş edilebilir.</p>
     <p>Görüş konisi ve duvarlar düşmanları gizler; dumanlar görüşü keser. Kafaya isabet kritik hasardır; bacaklara isabet hasarı azaltır. Seri atışta namlu yukarı kalkar, aşağı çekerek kontrol et. Koşarken isabet düşer; seri atışta geri tepme yayılımı artırır. Ulti puanı: öldürme, ölme, bomba kurma/imha ve haritadaki turkuaz küreler.</p>
@@ -541,6 +545,10 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <p>Start ¤800 · Kill ¤200 · Round win ¤3000 · Loss ¤1900/2400/2900 (streak) · Attackers get ¤300 if the bomb was planted. Survive to keep your weapon and armor.</p>
     <h3>PARKOUR MODE</h3>
     <p>PLAY → SINGLE PLAYER (or when hosting a room) <b>GAME MODE: PARKOUR</b>. 5 rounds; each round is a different, very long and narrow course. First to the finish wins the round; whoever wins the most rounds after 5 is the champion. You only have a <b>sword</b>: <b>left click</b> quick hit, <b>right click</b> heavy hit. The sword doesn't kill — it <b>pushes and slows</b> rivals (you can knock them into the void) and <b>breaks barricades</b>. <b>SPACE</b> jumps over gaps and blocks; blue <b>pads</b> launch you, orange arrow <b>strips</b> speed you up, jump over the red-white <b>sweepers</b>. If you fall you continue from the last <b>checkpoint</b>. Before each round there is a short fly-over of the course and a 3-2-1 countdown.</p>
+    <h3>GUN GAME</h3>
+    <p>PLAY → SINGLE PLAYER (or when hosting a room) <b>GAME MODE: GUN GAME</b>. Teams fight in one long round and players respawn after a few seconds. Everyone starts with the SMG and moves to the next weapon with every kill: Arı → Kartal → Baykuş → Atmaca → Railgun → Akrep → Serçe → <b>Sword</b>. The first player to get a sword kill wins for their team. Getting killed by a sword drops you a level. No store and no abilities; if time runs out, the team with the highest level wins.</p>
+    <h3>SUPERNOVA</h3>
+    <p><b>GAME MODE: SUPERNOVA</b>. A glowing energy zone sits somewhere on the map and moves every so often (shown on the minimap and by a beam of light into the sky). If only your team is inside, you score points every second; if both teams are inside, the zone is contested and nobody scores. The first team to <b>100 points</b> wins. Everyone spawns with Kartal and Serçe and respawns after a few seconds; no store and no abilities.</p>
     <h3>PLAYING ACROSS NETWORKS</h3>
     <p>The room code is found via the PeerJS matchmaking server, then game data flows directly between devices. If players on different networks can't connect, add a free TURN server in <b>CONNECTION SETTINGS</b> (e.g. ExpressTURN or Metered) and use <b>TEST CONNECTION</b>.</p>
     </div>
@@ -2855,6 +2863,22 @@ Object.assign(EN_FRAG, {
   'Kaygan görünen ama sağlam buz yolu': 'An ice road that looks slippery but holds', 'Altında lav, üstünde kızıl gökyüzü': 'Lava below, a red sky above',
   'Dev gezegenin önünde, boşlukta bir pist': 'A track in the void before a giant planet', 'Gece şehrinin üstünde ışıklı yol': 'A glowing road above the night city', 'Ormanın üstünde taş patika': 'A stone path above the forest'
 });
+/* SİLAH YARIŞI / SÜPERNOVA modları */
+Object.assign(EN_FRAG, {
+  'SİLAH YARIŞI · her öldürmede yeni silah': 'GUN GAME · new weapon every kill', 'SÜPERNOVA · bölgeyi tut, puan topla': 'SUPERNOVA · hold the zone, score points',
+  'SİLAH YARIŞI · her öldürmede sıradaki silah · son silah kılıç: kılıçla ilk öldüren takım kazanır': 'GUN GAME · next weapon on every kill · the last weapon is the sword: first team to get a sword kill wins',
+  'SÜPERNOVA · parlayan bölge yer değiştirir · bölgeyi tutan takım puan toplar · 100 puan kazanır': 'SUPERNOVA · the glowing zone moves around · the team holding it scores · 100 points wins',
+  'Her öldürmede sıradaki silah · kılıçla öldüren kazanır': 'Next weapon on every kill · a sword kill wins', 'Parlayan bölgeyi tut · 100 puana ilk ulaşan kazanır': 'Hold the glowing zone · first to 100 points wins',
+  'Her öldürmede yeni silah · kılıçla öldüren takım kazanır': 'New weapon on every kill · the team that gets a sword kill wins', 'Parlayan bölgeyi tut · 100 puana ilk ulaşan takım kazanır': 'Hold the glowing zone · first team to 100 points wins',
+  'Bölgede kalan takım puan toplar · bölge yer değiştirir': 'The team in the zone scores · the zone moves', 'Her öldürmede sıradaki silah · son silah kılıç': 'Next weapon on every kill · the last one is the sword',
+  'SİLAH YARIŞI': 'GUN GAME', 'SÜPERNOVA BÖLGESİ': 'SUPERNOVA ZONE', 'SÜPERNOVA': 'SUPERNOVA', 'HAZIRLAN': 'GET READY', 'TAKIMIN': 'YOUR TEAM', 'RAKİP': 'ENEMY',
+  'BÖLGE BOŞ': 'ZONE EMPTY', 'BÖLGE ÇEKİŞMELİ': 'ZONE CONTESTED', 'BÖLGE SİZDE': 'YOUR ZONE', 'BÖLGE RAKİPTE': 'ENEMY ZONE', ' · yer değişimine ': ' · moves in ',
+  'KILIÇLA ÖLDÜR VE KAZAN': 'GET A SWORD KILL TO WIN', 'BÖLGE YER DEĞİŞTİRDİ': 'THE ZONE MOVED', 'Yeni süpernova bölgesine koş': 'Run to the new supernova zone',
+  'YENİDEN DOĞUŞ: ': 'RESPAWN: ', 'MAÇI KAZANDINIZ': 'YOU WON THE MATCH', 'MAÇI KAYBETTİNİZ': 'YOU LOST THE MATCH', 'Süpernova bölgesini tuttu': 'Held the supernova zone',
+  ' kılıçla bitirdi': ' finished with the sword', ' SON SİLAHTA: KILIÇ!': ' IS ON THE LAST WEAPON: SWORD!', ' kılıçla bir seviye geri düştü': ' dropped a level to a sword kill',
+  'BAŞLADI — BARİYERLER KALKTI': 'GO — BARRIERS ARE DOWN', ' MODUNDA MAĞAZA YOK': ' HAS NO STORE', ' MODUNDA YETENEK YOK': ' HAS NO ABILITIES', 'SİLAH ': 'WEAPON ',
+  'takımı ': 'team reached ', ' puana ulaştı': ' points'
+});
 for (const k of Object.keys(EN_FRAG)) { if (k.length < 26 && /^[A-Za-zÇĞİÖŞÜçğıöşü ]+$/.test(k)) { const u = k.toLocaleUpperCase('tr-TR'); if (u !== k && !(u in EN_FRAG)) EN_FRAG[u] = EN_FRAG[k].toUpperCase(); } }
 const EN_RULES = [
   [/^\+(\d+) CAN$/, '+$1 HP'], [/^RAUNT (\d+)( \/ |\/)(\d+)$/, 'ROUND $1$2$3'], [/^(\d+) sn$/, '$1 s'], [/(\d+) sn\b/g, '$1 s'], [/ \(BOT\)$/, ' (BOT)']
@@ -3807,6 +3831,7 @@ function startRound() {
     const c = pick(atks); c.hasBomb = true;
     S.bomb.state = 'carried'; S.bomb.carrier = c.id; S.bomb.x = c.x; S.bomb.y = c.y;
   }
+  if (arOn()) arSetup(); // SİLAH YARIŞI / SÜPERNOVA (03c): bombasız, yeniden doğmalı tek raunt
   S.plan = makeRoundPlan();
   emit({ k: 'round', n: S.round });
 }
@@ -3831,6 +3856,7 @@ function endRound(win, reason) {
 /* ---------- ANA SİMÜLASYON ADIMI (host) ---------- */
 function hostTick(dt) {
   if (PKMAP && pkOn()) { pkHostTick(dt); return; }
+  if (arOn()) { arHostTick(dt); return; } // arena modları (03c)
   S.time += dt;
   for (const p of S.players) if (p.ctrl === 'bot') botUpdate(p, dt);
   updateZones(dt);
@@ -4143,6 +4169,7 @@ function finishReload(p) {
 }
 function switchSlot(p, s) {
   if (PKMAP) return; // parkur: yalnızca kılıç
+  if (arMode() === 'gg' && s !== 3 && !(s === 1 ? p.primary : p.secondary)) return; // silah yarışı: yalnızca seviyedeki silah + kılıç
   if (s === 1 && !p.primary) return;
   if (s !== 1 && s !== 2 && s !== 3) return;
   if (p.slot === s) return;
@@ -4152,6 +4179,7 @@ function switchSlot(p, s) {
 /* ---------- HASAR / ÖLÜM ---------- */
 function damage(t, amt, att, src, hs, quiet) {
   if (!t || !t.alive || S.phase === 'buy' || S.phase === 'over' || PKMAP) return;
+  if (t.prot && S.time < t.prot) return; // arena: yeniden doğuş koruması
   amt = Math.round(amt); if (amt <= 0) return;
   let rem = amt;
   if (src === 'blade' || src === 'bomb' || src === 'railgun') rem = 9999;
@@ -4192,6 +4220,7 @@ function killPlayer(t, att, src, hs) {
   }
   if (S.bomb.defuser === t.id) { S.bomb.defuser = null; S.bomb.prog = S.bomb.half ? DEFUSE_TIME / 2 : 0; }
   emit({ k: 'kill', a: att ? att.id : null, v: t.id, w: src, hs: hs ? 1 : 0, tk: att && att !== t && att.team === t.team ? 1 : 0 });
+  if (arOn()) arOnKill(t, att, src);
 }
 function doRebirth(t) {
   const rb = t.rebirth, f = findFree(rb.x, rb.y, PR);
@@ -4216,7 +4245,7 @@ function explode(x, y, r, dmg, att, team, src) {
 
 /* ---------- SATIN ALMA ---------- */
 function buyItem(p, item) {
-  if (!S || S.phase !== 'buy' || !p || !p.alive || PKMAP) return false;
+  if (!S || S.phase !== 'buy' || !p || !p.alive || PKMAP || arOn()) return false;
   const rb = p.roundBuys;
   if (WEAPONS[item]) {
     const w = WEAPONS[item];
@@ -4907,6 +4936,229 @@ function pkBotUpdate(p, dt) {
 }
 
 /* =====================================================================
+   03c · ARENA MODLARI (normal haritalarda, takımlı, yeniden doğmalı)
+        SİLAH YARIŞI ('gg'): her öldürmede sıradaki silaha geçilir; son silah
+          kılıçtır, kılıçla ilk öldüren oyuncunun takımı kazanır. Kılıçla
+          öldürülen bir seviye geri düşer.
+        SÜPERNOVA ('sn'): haritada parlayan enerji bölgesi belirli aralıklarla
+          yer değiştirir; bölgede tek başına bulunan takım puan toplar,
+          100 puana ilk ulaşan kazanır. Bölge çekişmeliyse kimse puan almaz.
+        Ortak: bomba / mağaza / yetenek yok, ölünce birkaç saniyede yeniden
+        doğulur (kısa doğuş koruması), süre dolarsa önde olan kazanır.
+   ===================================================================== */
+const GG_ORDER = ['spectre', 'vandal', 'phantom', 'operator', 'railgun', 'sheriff', 'classic', 'sword'];
+const AR_TIME = 480, AR_COUNT = 5, SN_WIN = 100, SN_RATE = 0.65, SN_MOVE = 40, SN_R = 3.4 * TILE, AR_PROT = 1.8;
+const AR_RESPAWN = { gg: 2.5, sn: 4 };
+function arMode() { return S && S.cfg && (S.cfg.mode === 'gg' || S.cfg.mode === 'sn') ? S.cfg.mode : null; }
+function arOn() { return !!arMode(); }
+const AR_NAMES = { gg: 'SİLAH YARIŞI', sn: 'SÜPERNOVA' };
+/* SÜPERNOVA bölge adayları: iki bölge merkezi, harita ortası ve aralarındaki noktalar */
+function snSpots() {
+  if (MAPDATA._snSpots) return MAPDATA._snSpots;
+  const A = tc(...MAPDATA.sites.A.center), B = tc(...MAPDATA.sites.B.center), a = tc(...MAPDATA.atkCenter), d = tc(...MAPDATA.defCenter);
+  const mid = { x: (a.x + d.x) / 2, y: (a.y + d.y) / 2 };
+  const raw = [A, B, mid, { x: (A.x + mid.x) / 2, y: (A.y + mid.y) / 2 }, { x: (B.x + mid.x) / 2, y: (B.y + mid.y) / 2 }, { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 }];
+  const out = [];
+  for (const p of raw) { const f = findFree(p.x, p.y, PR); if (!out.some(o => dist(o.x, o.y, f.x, f.y) < TILE * 3)) out.push({ x: r1(f.x), y: r1(f.y) }); }
+  return (MAPDATA._snSpots = out);
+}
+/* Silah yarışı: seviyeye göre elde tutulan silah */
+function ggEquip(p) {
+  const wid = GG_ORDER[clamp(p.ggL | 0, 0, GG_ORDER.length - 1)], w = WEAPONS[wid];
+  p.reloadT = 0; p.switchT = 0.35; p.scoped = false; p.pend = false;
+  if (wid === 'sword') { p.primary = null; p.secondary = null; p.slot = 3; return; }
+  if (w.slot === 1) { p.primary = wid; p.secondary = null; p.slot = 1; } else { p.primary = null; p.secondary = wid; p.slot = 2; }
+  p.ammo = {}; p.ammo[wid] = { mag: w.mag, res: w.mag * 30 };
+}
+function arLoadout(p) {
+  if (arMode() === 'gg') { ggEquip(p); return; }
+  p.primary = 'vandal'; p.secondary = 'classic'; p.slot = 1; p.armor = 50;
+  p.ammo = { vandal: { mag: WEAPONS.vandal.mag, res: 250 }, classic: { mag: WEAPONS.classic.mag, res: 120 } };
+}
+/* startRound sonunda (arena): bombasız tek uzun raunt */
+function arSetup() {
+  const m = arMode();
+  S.phase = 'buy'; S.phaseT = AR_COUNT + INTRO_TIME;
+  S.bomb = { state: 'none', carrier: null, x: 0, y: 0, t: 0, site: null, defuser: null, prog: 0, half: false };
+  S.cards = null; S.rb = [];
+  S.cfg.ff = false; // yeniden doğmalı modlarda takım ateşi kapalı
+  S.arena = { m, sc: [0, 0], z: null, zi: -1, zt: SN_MOVE, own: -1, win: null, lead: null };
+  for (const p of S.players) {
+    p.hasBomb = false; p.kit = false; p.ch = { q: 0, e: 0 }; p.ult = 0;
+    if (m === 'gg') p.ggL = 0;
+    arLoadout(p); p.respawnAt = 0; p.prot = 0;
+  }
+  if (m === 'sn') snMoveZone(true);
+}
+function snMoveZone(first) {
+  const A = S.arena, sp = snSpots();
+  let i = first ? (sp.length > 2 ? 2 : 0) : randi(0, sp.length - 1);
+  if (!first && sp.length > 1) while (i === A.zi) i = randi(0, sp.length - 1);
+  A.zi = i; A.z = { x: sp[i].x, y: sp[i].y, r: SN_R }; A.zt = SN_MOVE;
+  if (!first) { emit({ k: 'msg', big: 'BÖLGE YER DEĞİŞTİRDİ', small: 'Yeni süpernova bölgesine koş' }); emitSnd('ult', A.z.x, A.z.y); }
+}
+/* doğuş: takımın doğuş noktalarından, düşmanlardan en uzak olanı */
+function arRespawn(p) {
+  const side = sideOf(p.team), list = MAPDATA.spawns[side];
+  let best = null, bd = -1;
+  for (const s of shuffle(list.slice()).slice(0, 6)) {
+    const c = tc(s[0], s[1]); let nd = 1e9;
+    for (const o of S.players) if (o.alive && o.team !== p.team) nd = Math.min(nd, dist(o.x, o.y, c.x, c.y));
+    if (nd > bd) { bd = nd; best = c; }
+  }
+  const f = findFree(best.x, best.y, PR);
+  p.alive = true; p.hp = 100; p.armor = 0; p.st = {}; p.imp = null; p.vx = 0; p.vy = 0; p.jz = 0; p.jvz = 0; p.crouch = false; p.dotAcc = {};
+  p.fireCD = 0; p.bloom = 0; p.zoneSlow = 1; p.zoneFire = 1; p.rebirth = null; p.respawnAt = 0; p.prot = S.time + AR_PROT;
+  setPos(p, f.x, f.y);
+  p.ang = Math.atan2(MAPDATA.sites.A.center[1] * TILE - f.y, MAPDATA.sites.A.center[0] * TILE - f.x); p.input = blankInput(); p.input.ang = p.ang; p.input.fp = p.lastFp; p.input.jc = p.lastJc;
+  arLoadout(p);
+  S.corpses = S.corpses.filter(c => c.id !== p.id);
+  if (p.ctrl === 'bot') { const ai = newAI(p); ai.buyDone = true; p.ai = ai; }
+  emitFx({ t: 'rebirth', x: r1(f.x), y: r1(f.y), x2: r1(f.x), y2: r1(f.y) });
+}
+/* killPlayer sonunda */
+function arOnKill(t, att, src) {
+  const m = arMode();
+  t.respawnAt = S.time + AR_RESPAWN[m];
+  if (m !== 'gg' || S.phase !== 'live') return;
+  if (src === 'sword' && t.ggL > 0 && att && att.team !== t.team) { t.ggL--; emit({ k: 'msg', small: t.name + ' kılıçla bir seviye geri düştü' }); }
+  if (!att || att === t || att.team === t.team) return;
+  const fin = GG_ORDER.length - 1;
+  if ((att.ggL | 0) >= fin) { arFinish(att.team, att.name + ' kılıçla bitirdi'); return; }
+  att.ggL = (att.ggL | 0) + 1;
+  if (att.alive) ggEquip(att);
+  emit({ k: 'gg', p: att.id, l: att.ggL });
+}
+function arFinish(team, why) {
+  if (S.phase === 'end' || S.phase === 'over') return;
+  const A = S.arena;
+  A.win = team;
+  S.phase = 'end'; S.phaseT = END_TIME;
+  S.score = arScores();
+  S.matchWinner = team;
+  S.lastResult = { win: team, reason: 'arena' };
+  emit({ k: 'rend', w: team, r: 'arena', why: why || '' });
+}
+/* skor tablosu: sn = puanlar; gg = takımın en yüksek silah seviyesi (1..8) */
+function arScores() {
+  const A = S.arena;
+  if (A.m === 'sn') return [Math.floor(A.sc[0]), Math.floor(A.sc[1])];
+  const best = t => Math.max(0, ...S.players.filter(p => p.team === t).map(p => ggLv(p) + 1));
+  return [best(0), best(1)];
+}
+/* ---------- ANA ADIM (host) ---------- */
+function arHostTick(dt) {
+  const A = S.arena, m = A.m;
+  S.time += dt;
+  for (const p of S.players) if (p.ctrl === 'bot') botUpdate(p, dt);
+  updateZones(dt);
+  for (const p of S.players) updateStatus(p, dt);
+  for (const p of S.players) {
+    if (!p.alive) continue;
+    if (p.ctrl !== 'remote') movePlayer(p, dt, p.input);
+    else p.spd = p.netMv * RUN;
+  }
+  separatePlayers();
+  for (const p of S.players) updateCombat(p, dt);
+  updateProjectiles(dt); updateDeps(dt); updateBeams(dt); updateTWalls(dt);
+  updateOrbs(); updateHeal(dt); footstepsHear(dt);
+  S.phaseT -= dt;
+  if (S.phase === 'buy') {
+    if (S.phaseT <= 0) { S.phase = 'live'; S.phaseT = AR_TIME; emit({ k: 'go' }); }
+  } else if (S.phase === 'live') {
+    for (const p of S.players) if (!p.alive && p.respawnAt && S.time >= p.respawnAt) arRespawn(p);
+    if (m === 'sn' && A.z) {
+      A.zt -= dt;
+      const inZ = [0, 0];
+      for (const p of S.players) if (p.alive && dist2(p.x, p.y, A.z.x, A.z.y) < A.z.r * A.z.r) inZ[p.team]++;
+      A.own = inZ[0] && inZ[1] ? 2 : inZ[0] ? 0 : inZ[1] ? 1 : -1;
+      if (A.own === 0 || A.own === 1) {
+        const k = A.own, before = A.sc[k];
+        A.sc[k] = Math.min(SN_WIN, A.sc[k] + SN_RATE * (1 + 0.2 * Math.min(3, inZ[k] - 1)) * dt);
+        if (Math.floor(before / 25) !== Math.floor(A.sc[k] / 25) && A.sc[k] < SN_WIN) emit({ k: 'msg', small: (k === 0 ? 'A' : 'B') + ' takımı ' + Math.floor(A.sc[k]) + ' puana ulaştı' });
+        if (A.sc[k] >= SN_WIN) arFinish(k, 'Süpernova bölgesini tuttu');
+      }
+      if (A.zt <= 0 && S.phase === 'live') snMoveZone(false);
+    }
+    S.score = arScores();
+    if (S.phase === 'live' && S.phaseT <= 0) {
+      const sc = arScores();
+      arFinish(sc[0] > sc[1] ? 0 : sc[1] > sc[0] ? 1 : -1, 'Süre doldu');
+    }
+  } else if (S.phase === 'end' && S.phaseT <= 0) {
+    S.phase = 'over'; S.phaseT = 0; emit({ k: 'over', w: S.matchWinner });
+  }
+  recordHistory();
+}
+/* ---------- botlar: arena hedefi ---------- */
+function arGoal(p, ai) {
+  const m = arMode(), A = S.arena;
+  if (m === 'sn' && A && A.z) {
+    if (!ai.zSpot || ai.zKey !== A.zi) { const a = Math.random() * TAU, r = Math.random() * A.z.r * 0.6; const f = findFree(A.z.x + Math.cos(a) * r, A.z.y + Math.sin(a) * r, PR); ai.zSpot = { x: f.x, y: f.y }; ai.zKey = A.zi; }
+    const at = dist(p.x, p.y, ai.zSpot.x, ai.zSpot.y) < 40;
+    if (at && Math.random() < 0.004) ai.zKey = -1; // bölge içinde ara sıra yer değiştir
+    return { x: ai.zSpot.x, y: ai.zSpot.y, key: 'z' + A.zi + '_' + (ai.zSpot.x | 0), hold: at };
+  }
+  // silah yarışı: bilinen en yakın düşmana, yoksa haritada dolaş
+  const ks = knownEnemies(p.team, 6);
+  let best = null, bd = 1e9;
+  for (const k of ks) { const d = dist(p.x, p.y, k.x, k.y); if (d < bd) { bd = d; best = k; } }
+  if (best) return { x: best.x, y: best.y, key: 'hunt' + ((best.x / 160) | 0) + '_' + ((best.y / 160) | 0) };
+  if (!ai.roam || dist(p.x, p.y, ai.roam.x, ai.roam.y) < 60) { const sp = snSpots(), s = sp[randi(0, sp.length - 1)], f = findFree(s.x + rand(-120, 120), s.y + rand(-120, 120), PR); ai.roam = { x: f.x, y: f.y, n: (ai.roam ? ai.roam.n : 0) + 1 }; }
+  return { x: ai.roam.x, y: ai.roam.y, key: 'roam' + ai.roam.n };
+}
+/* ---------- görsel: bölge (dünya + mini harita) ve arayüz ---------- */
+const ggLv = p => ((p.ggL !== undefined ? p.ggL : p.gl) | 0);
+function snZoneCol(me) {
+  const A = S.arena, mt = me ? me.team : 0;
+  return !A || A.own === -1 ? [0.92, 0.9, 0.85] : A.own === 2 ? [0.96, 0.77, 0.32] : A.own === mt ? [0.12, 0.89, 0.81] : [1, 0.27, 0.33];
+}
+function arDrawWorld(me, t) {
+  const A = S.arena; if (!A || A.m !== 'sn' || !A.z) return;
+  const z = A.z, c = snZoneCol(me), pulse = 0.75 + Math.sin(t * 3) * 0.25, warn = A.zt < 6 && S.phase === 'live';
+  Q('ring', z.x, 1.5, z.y, t * 0.4, 0, z.r * 2, 1, z.r * 2, [c[0], c[1], c[2], 0.9 * (warn ? (Math.sin(t * 12) > 0 ? 1 : 0.3) : 1)], { add: true, lit: 0 });
+  Q('disc', z.x, 1.2, z.y, 0, 0, z.r * 2, 1, z.r * 2, [c[0], c[1], c[2], 0.1], { add: true, lit: 0 });
+  Q('cyl', z.x, 520, z.y, t * 0.6, 0, 34, 1040, 34, [c[0], c[1], c[2], 0.22 * pulse], { add: true, lit: 0 });
+  Q('cyl', z.x, 520, z.y, 0, 0, 10, 1040, 10, [1, 1, 1, 0.35 * pulse], { add: true, lit: 0 });
+  Q('octa', z.x, 120 + Math.sin(t * 2) * 10, z.y, t * 1.5, 0, 34, 46, 34, [c[0], c[1], c[2], 0.85], { add: true, lit: 0, em: c });
+}
+function arDrawMinimap(P, s, me) {
+  const A = S.arena; if (!A || A.m !== 'sn' || !A.z) return;
+  const [px, py] = P(A.z.x, A.z.y), c = snZoneCol(me);
+  circle(px, py, A.z.r * s, 'rgba(' + c.map(v => Math.round(v * 255)).join(',') + ',0.22)', 'rgba(' + c.map(v => Math.round(v * 255)).join(',') + ',0.95)', 2);
+}
+/* üst çubuk yerine arena paneli */
+function arTopBar(me) {
+  const A = S.arena, mt = me ? me.team : 0, et = 1 - mt, cx = W / 2, y = IS_TOUCH ? 46 : 10;
+  const sc = A.m === 'sn' ? [Math.floor(A.sc[0]), Math.floor(A.sc[1])] : arScores();
+  panel(cx - 70, y, 140, 48, 0.9);
+  txt(S.phase === 'end' || S.phase === 'over' ? '—' : fmtTime(S.phaseT), cx, y + 21, 26, PAL.white, 'center');
+  txt(S.phase === 'buy' ? 'HAZIRLAN' : AR_NAMES[A.m], cx, y + 40, 11, S.phase === 'buy' ? PAL.gold : PAL.dim, 'center');
+  const bw = 150;
+  for (const [team, dir, col] of [[mt, -1, PAL.teal], [et, 1, PAL.red]]) {
+    const x0 = dir < 0 ? cx - 76 - bw : cx + 76;
+    ctx.fillStyle = 'rgba(10,14,20,0.8)'; ctx.fillRect(x0, y, bw, 48);
+    if (A.m === 'sn') {
+      const f = clamp(sc[team] / SN_WIN, 0, 1); ctx.fillStyle = col; ctx.globalAlpha = 0.85;
+      if (dir < 0) ctx.fillRect(x0 + bw * (1 - f), y + 40, bw * f, 8); else ctx.fillRect(x0, y + 40, bw * f, 8);
+      ctx.globalAlpha = 1;
+      txt(String(sc[team]), dir < 0 ? x0 + bw - 12 : x0 + 12, y + 20, 26, col, dir < 0 ? 'right' : 'left');
+      txt(team === mt ? 'TAKIMIN' : 'RAKİP', dir < 0 ? x0 + 10 : x0 + bw - 10, y + 20, 11, PAL.dim, dir < 0 ? 'left' : 'right');
+    } else {
+      const best = S.players.filter(p => p.team === team).sort((a, b) => ggLv(b) - ggLv(a))[0];
+      txt(sc[team] + ' / ' + GG_ORDER.length, dir < 0 ? x0 + bw - 12 : x0 + 12, y + 20, 22, col, dir < 0 ? 'right' : 'left');
+      if (best) txt(best.name, dir < 0 ? x0 + bw - 12 : x0 + 12, y + 39, 11, PAL.dim, dir < 0 ? 'right' : 'left');
+    }
+  }
+  // bilgi satırı
+  let info = '';
+  if (A.m === 'sn' && A.z) info = (A.own === -1 ? 'BÖLGE BOŞ' : A.own === 2 ? 'BÖLGE ÇEKİŞMELİ' : A.own === mt ? 'BÖLGE SİZDE' : 'BÖLGE RAKİPTE') + ' · yer değişimine ' + Math.max(0, Math.ceil(A.zt)) + ' sn';
+  else if (A.m === 'gg' && me) { const l = ggLv(me), w = GG_ORDER[l], nx = GG_ORDER[l + 1]; info = 'SİLAH ' + (l + 1) + '/' + GG_ORDER.length + ': ' + WEAPONS[w].name + (nx ? '  →  ' + WEAPONS[nx].name : '  ·  KILIÇLA ÖLDÜR VE KAZAN'); }
+  if (info) { ctx.font = 'bold 12px ' + FONT; const tw = ctx.measureText(tl(info)).width + 24; panel(cx - tw / 2, y + 54, tw, 20, 0.8); txt(info, cx, y + 64, 12, A.m === 'sn' ? snColCss(me) : PAL.gold, 'center'); }
+}
+function snColCss(me) { const c = snZoneCol(me); return 'rgb(' + c.map(v => Math.round(v * 255)).join(',') + ')'; }
+
+/* =====================================================================
    04 · AJAN YETENEKLERİ (10 ajan × Q / E / X)
         mermiler (projectile), alanlar (area), cihazlar (deployable),
         huzmeler (beam) ve bunların güncelleme mantığı
@@ -5150,7 +5402,7 @@ const ABIL = {
 };
 
 function useAbility(p, k, tgt) {
-  if (!p || !S || !p.alive || !canAct(p) || PKMAP) return false; // parkurda yetenek yok
+  if (!p || !S || !p.alive || !canAct(p) || PKMAP || arOn()) return false; // parkurda ve arena modlarında yetenek yok
   if (S.phase !== 'live' && S.phase !== 'planted') return false;
   if (p.plantT > 0 || p.defT > 0) return false;
   const ag = AGENTS[p.agent];
@@ -5611,6 +5863,7 @@ function threatSite(team) {
 function botGoal(p, ai) {
   const side = sideOf(p.team), sp = S.bomb, plan = S.plan;
   if (ai.retreatT > S.time && ai.cover) return { x: ai.cover.x, y: ai.cover.y, key: 'cv' + (ai.cover.x | 0), look: ai.lk };
+  if (arOn()) return arGoal(p, ai); // arena modları (03c)
   if (ai.reviveGoal) {
     const c = S.corpses.find(c => c.id === ai.reviveGoal);
     if (c && p.ult >= AGENTS.vital.x.pts) return { x: c.x, y: c.y, key: 'rv' + c.id };
@@ -5847,6 +6100,7 @@ function moveToward(p, inp, x, y) {
 /* ---------- SATIN ALMA ---------- */
 function botBuy(p, dt) {
   const ai = p.ai; if (ai.buyDone) return;
+  if (arOn()) { ai.buyDone = true; return; }
   ai.buyT -= dt; if (ai.buyT > 0) return;
   ai.buyDone = true;
   const pistol = S.round === 1 || S.round === HALF_ROUNDS + 1;
@@ -6278,6 +6532,7 @@ function snapP(p) {
     ammo: p.ammo, ch: p.ch, ult: p.ult, st, slowAmt: p.slowAmt, zoneSlow: r2(p.zoneSlow), zoneFire: r2(p.zoneFire), hasBomb: p.hasBomb, kit: p.kit ? 1 : 0,
     plantT: r2(p.plantT), defT: r2(p.defT), crouch: p.crouch, kills: p.kills, deaths: p.deaths, dmg: Math.round(p.dmg), posVer: p.posVer, reloadT: r2(p.reloadT),
     switchT: r2(p.switchT), bloom: Math.round(p.bloom * 1000) / 1000, scoped: p.scoped, spd: Math.round(p.spd), shotN: p.shotN, jz: r1(p.jz || 0), rbT: r2(p.rbT || 0), tk: p.tk || 0, vm: p.vm ? 1 : 0, vt: p.vt ? 1 : 0,
+    gl: p.ggL | 0, rsp: r1(p.respawnAt || 0), prot: r1(p.prot || 0),
     pkCp: p.pkCp | 0, pkW: p.pkW | 0, pkP: r2(p.pkP || 0), pkF: p.pkF || 0, pkSum: r2(p.pkSum || 0), pkT: r1(p.pkT || 0)
   };
 }
@@ -6292,7 +6547,8 @@ function makeSnapshot() {
     tw: S.twalls.map(w => ({ id: w.id, tiles: w.tiles, hp: Math.ceil(w.hp), t: r1(w.t) })),
     sp: { state: S.bomb.state, carrier: S.bomb.carrier, x: r1(S.bomb.x), y: r1(S.bomb.y), t: r2(S.bomb.t), site: S.bomb.site, defuser: S.bomb.defuser, prog: r2(S.bomb.prog), half: S.bomb.half },
     ob: S.orbs, cp: S.corpses, cd: S.cards || [], rb: (S.rb || []).map(r => r2(r.cd)), hl: (S.heal || []).map(h => h.cd > 0 ? 1 : 0), ev: S.evq.slice(),
-    pk: S.pk ? { bk: S.pk.bk, fin: S.pk.fin, w: S.pk.winner, c: S.pk.champ, t0: r2(S.pk.t0) } : 0
+    pk: S.pk ? { bk: S.pk.bk, fin: S.pk.fin, w: S.pk.winner, c: S.pk.champ, t0: r2(S.pk.t0) } : 0,
+    am: S.arena ? { m: S.arena.m, sc: S.arena.sc.map(r1), z: S.arena.z, zi: S.arena.zi, zt: r1(S.arena.zt), own: S.arena.own, win: S.arena.win } : 0
   };
 }
 function netHostUpdate(dt) {
@@ -6537,6 +6793,7 @@ function clientApplySnap(d) {
   if ('sp' in d) S.bomb = s.sp;
   if ('ob' in d) S.orbs = s.ob;
   if ('cp' in d) S.corpses = s.cp;
+  if ('am' in d) S.arena = s.am || null;
   if ('cd' in d) S.cards = s.cd || [];
   if ('rb' in d) S.rb = (s.rb || []).map(cd => ({ cd }));
   if ('hl' in d || !S.heal) S.heal = (MAPDATA.heal || []).map((h, i) => ({ id: h.id, x: h.x, y: h.y, cd: s.hl && s.hl[i] ? 1 : 0 }));
@@ -8080,6 +8337,7 @@ function projHeight(pr) {
 function drawWorldDynamic(v, me, t) {
   const mt = me ? me.team : 0;
   if (PKMAP) drawPkDynamic(t, me);
+  if (arOn()) arDrawWorld(me, t);
   // geçici duvarlar
   for (const w of S.twalls) for (const i of w.tiles) {
     const x = (i % MW + 0.5) * TILE, z = (((i / MW) | 0) + 0.5) * TILE;
@@ -8501,7 +8759,7 @@ const KEYS = {}, MOUSE = { x: 640, y: 360, down: false, right: false, fp: 0 };
 const LOOK = { yaw: 0, pitch: 0 };
 const FONT = '"Bahnschrift","DIN Alternate","Arial Narrow","Roboto Condensed","Segoe UI",Arial,sans-serif';
 const SRC_NAMES = { sword: 'Kılıç', blade: 'Karanlık Kesik', fire: 'Ateş Duvarı', poison: 'Zehir Sisi', mine: 'Tuzak Mayını', turret: 'Mini Taret', shock: 'Şok Oku', orbital: 'Yörünge Lazeri', quake: 'Sarsıntı Dalgası', rift: 'Tektonik Yarık', chain: 'Zincir Yük', overload: 'Aşırı Yük', wolf: 'Gölge Kurdu', bomb: 'BOMBA', nightmare: 'Kabus Alanı', tcollapse: 'Zaman Çöküşü', railgun: 'Railgun' };
-const REASONS = { elim: 'Rakip takım elendi', time: 'Süre doldu', bomb: 'Bomba patladı', defuse: 'Bomba imha edildi' };
+const REASONS = { elim: 'Rakip takım elendi', time: 'Süre doldu', bomb: 'Bomba patladı', defuse: 'Bomba imha edildi', arena: '' };
 
 function initRender() {
   glcv = document.getElementById('gl'); cv = document.getElementById('hud'); ctx = cv.getContext('2d');
@@ -8675,6 +8933,14 @@ function handleEvent(ev) {
       break;
     case 'round': {
       const side = me ? sideOf(me.team) : 'atk';
+      if (arOn()) { // arena modları: tek uzun raunt
+        const m = arMode();
+        showMsg(AR_NAMES[m], m === 'gg' ? 'Her öldürmede sıradaki silah · kılıçla öldüren kazanır' : 'Parlayan bölgeyi tut · 100 puana ilk ulaşan kazanır', PAL.gold, 3.5);
+        AU.play('round'); G.spec = null; UIS.deathBy = undefined; UIS.pings.length = 0;
+        LOOK.yaw = side === 'atk' ? -Math.PI / 2 : Math.PI / 2; LOOK.pitch = 0;
+        if (ev.n === 1 && G.running) cineStart('match');
+        break;
+      }
       if (ev.n === MATCH_ROUNDS) setTimeout(() => showMsg(null, 'SON RAUNT!', PAL.gold), 900);
       showMsg('RAUNT ' + ev.n + ' / ' + MATCH_ROUNDS, side === 'atk' ? 'SALDIRI — Bombayı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, bombayı imha et', side === 'atk' ? PAL.red : PAL.teal, 3);
       AU.play('round'); G.spec = null; UIS.deathBy = undefined; UIS.pings.length = 0;
@@ -8682,9 +8948,16 @@ function handleEvent(ev) {
       if (ev.n === 1 && G.running) cineStart('match'); // maç başı sinematik giriş
       break;
     }
-    case 'go': showMsg(null, 'RAUNT BAŞLADI — BARİYERLER KALKTI', PAL.gold); AU.play('lockbeep'); break;
+    case 'go': showMsg(null, arOn() ? 'BAŞLADI — BARİYERLER KALKTI' : 'RAUNT BAŞLADI — BARİYERLER KALKTI', PAL.gold); AU.play('lockbeep'); break;
+    case 'gg': {
+      const p = S.pmap[ev.p];
+      if (ev.p === G.myId) { showMsg(null, 'SİLAH ' + (ev.l + 1) + '/' + GG_ORDER.length + ' · ' + WEAPONS[GG_ORDER[ev.l]].name, PAL.gold); AU.play('buy'); }
+      else if (p && ev.l === GG_ORDER.length - 1) showMsg(null, p.name + ' SON SİLAHTA: KILIÇ!', p.team === myTeam() ? PAL.teal : PAL.red);
+      break;
+    }
     case 'rend': {
       const win = ev.w === myTeam();
+      if (ev.r === 'arena') { const dr = ev.w === -1; showMsg(dr ? 'BERABERE' : win ? 'MAÇI KAZANDINIZ' : 'MAÇI KAYBETTİNİZ', ev.why || '', dr ? PAL.gold : win ? PAL.teal : PAL.red, 4); AU.play(win || dr ? 'win' : 'lose'); break; }
       showMsg(win ? 'RAUNDU KAZANDINIZ' : 'RAUNDU KAYBETTİNİZ', REASONS[ev.r] || '', win ? PAL.teal : PAL.red, 4);
       AU.play(win ? 'win' : 'lose');
       break;
@@ -8768,6 +9041,7 @@ function txt(s, x, y, size, col, align, weight) {
   ctx.fillStyle = col; ctx.fillText(tl(s), x, y);
 }
 function drawTopBar(me) {
+  if (arOn() && S.arena) { arTopBar(me); return; }
   const mt = me ? me.team : 0, et = 1 - mt, cx = W / 2, y = IS_TOUCH ? 46 : 10; // dokunmatikte üstteki düğme sırasının altında
   const myScore = S.score[mt], enScore = S.score[et];
   panel(cx - 60, y, 120, 48, 0.9);
@@ -8850,6 +9124,7 @@ function drawMinimap(me, v) {
     if (pg.t <= 0) { UIS.pings.splice(i, 1); continue; }
     const [px, py] = P(pg.x, pg.y); circle(px, py, 3 + (1.3 - pg.t) * 6, null, 'rgba(255,70,85,' + pg.t / 1.3 + ')', 1.5);
   }
+  if (arOn()) arDrawMinimap(P, s, me);
   const mt = me ? me.team : 0;
   for (const p of S.players) {
     if (!p.alive) continue;
@@ -8954,13 +9229,15 @@ function drawBottom(me) {
   else if (me.reloadT > 0) txt('ŞARJÖR...', W - 30, by + 38, 22, PAL.gold, 'right');
   else { txt(String(am.mag), W - 92, by + 38, 34, am.mag <= Math.ceil(w.mag * 0.25) ? PAL.red : PAL.white, 'right'); txt('/ ' + am.res, W - 30, by + 42, 16, PAL.dim, 'right'); }
   txt('¤ ' + me.credits, W - 226, by + 14, 14, PAL.gold);
-  txt((me.primary ? '1 ' + WEAPONS[me.primary].name + '  ' : '') + '2 ' + WEAPONS[me.secondary].name + '  3 Kılıç', W - 226, by + 52, 11, PAL.dim);
+  txt((me.primary ? '1 ' + WEAPONS[me.primary].name + '  ' : '') + (me.secondary ? '2 ' + WEAPONS[me.secondary].name + '  ' : '') + '3 Kılıç', W - 226, by + 52, 11, PAL.dim);
 }
 function drawDeathPanel(me, v) {
   const killer = S.pmap[UIS.deathBy];
   panel(W / 2 - 180, H - 96, 360, 70, 0.9);
   txt('ÖLDÜN' + (killer ? ' — ' + killer.name + ' (' + AGENTS[killer.agent].name + ')' : ''), W / 2, H - 76, 16, PAL.red, 'center');
-  if (v && v !== me) txt((v.team !== me.team ? 'İZLENİYOR (RAKİP): ' : 'İZLENİYOR: ') + v.name + '   [BOŞLUK] değiştir', W / 2, H - 50, 12, v.team !== me.team ? PAL.red : PAL.white, 'center');
+  const rsp = me.respawnAt || me.rsp;
+  if (arOn() && rsp && S.phase === 'live') txt('YENİDEN DOĞUŞ: ' + Math.max(0, Math.ceil(rsp - S.time)) + ' sn', W / 2, H - 50, 14, PAL.gold, 'center');
+  else if (v && v !== me) txt((v.team !== me.team ? 'İZLENİYOR (RAKİP): ' : 'İZLENİYOR: ') + v.name + '   [BOŞLUK] değiştir', W / 2, H - 50, 12, v.team !== me.team ? PAL.red : PAL.white, 'center');
   else txt('Takımında hayatta kimse kalmadı', W / 2, H - 50, 12, PAL.dim, 'center');
   const myCard = (S.cards || []).find(c => c.owner === me.id);
   if (myCard && (S.phase === 'live' || S.phase === 'planted')) {
@@ -8973,7 +9250,7 @@ function drawDeathPanel(me, v) {
 function drawHints(me) {
   let h = null;
   const sp = S.bomb;
-  if (S.phase === 'buy' && me.alive) h = '[B] MAĞAZA · ' + Math.ceil(S.phaseT) + ' sn';
+  if (S.phase === 'buy' && me.alive) h = arOn() ? 'HAZIRLAN · ' + Math.ceil(S.phaseT) + ' sn' : '[B] MAĞAZA · ' + Math.ceil(S.phaseT) + ' sn';
   else if (me.alive && me.hasBomb && S.phase === 'live') h = siteAt(me.x, me.y) ? '[F] BASILI TUT: BOMBA KUR' : 'BOMBA SENDE — A/B bölgesine götür · [G] bırak';
   else if (me.alive && S.phase === 'planted' && sideOf(me.team) === 'def' && dist(me.x, me.y, sp.x, sp.y) < 58) h = '[F] BASILI TUT: BOMBA İMHA ET' + (me.kit ? ' · KİT: 1 SN' : '');
   const myCards = me.alive ? (S.cards || []).filter(c => c.carrier === me.id) : [];
@@ -9011,7 +9288,7 @@ function drawCenterMsgs(dt) {
       ctx.restore();
     }
   }
-  let y = 96;
+  let y = IS_TOUCH ? 128 : 96; // dokunmatikte üst panel aşağıda olduğundan mesajlar da aşağıda
   for (let i = UIS.msgs.length - 1; i >= 0; i--) { UIS.msgs[i].t -= dt; if (UIS.msgs[i].t <= 0) UIS.msgs.splice(i, 1); }
   for (const m of UIS.msgs) {
     ctx.save(); ctx.globalAlpha = Math.min(1, m.t);
@@ -9329,6 +9606,14 @@ function cineMatchShots() {
   const cx = WW / 2, cz = WH / 2, big = Math.max(WW, WH);
   const A = tc(...MAPDATA.sites.A.center), B = tc(...MAPDATA.sites.B.center), m = MAPS[CUR_MAP];
   const hi = clamp(big * 0.3, 1400, 2600);
+  if (typeof arOn === 'function' && arOn()) {
+    const sn = arMode() === 'sn', Z = sn && S.arena && S.arena.z ? { x: S.arena.z.x, y: S.arena.z.y } : { x: cx, y: cz };
+    return [
+      { d: 2.6, p0: [cx - big * 0.42, hi * 1.05, cz + WH * 0.62], p1: [cx + big * 0.12, hi * 0.85, cz + WH * 0.58], l0: [cx, 0, cz - WH * 0.05], l1: [cx, 0, cz - WH * 0.1], title: m.name, sub: AR_NAMES[arMode()], col: PAL.white },
+      { d: 2.4, p0: [Z.x - 1100, 820, Z.y + 900], p1: [Z.x - 320, 480, Z.y + 640], l0: [Z.x, 40, Z.y], l1: [Z.x + 60, 40, Z.y], title: sn ? 'SÜPERNOVA BÖLGESİ' : 'SİLAH YARIŞI', sub: sn ? 'Bölgede kalan takım puan toplar · bölge yer değiştirir' : 'Her öldürmede sıradaki silah · son silah kılıç', col: PAL.gold },
+      { d: INTRO_TIME - 5, me: true, title: 'TAKIMLAR', col: PAL.teal }
+    ];
+  }
   return [
     { d: 2.3, p0: [cx - big * 0.42, hi * 1.05, cz + WH * 0.62], p1: [cx + big * 0.12, hi * 0.85, cz + WH * 0.58], l0: [cx, 0, cz - WH * 0.05], l1: [cx, 0, cz - WH * 0.1],
       title: m.name, sub: m.desc, col: PAL.white },
@@ -9400,12 +9685,17 @@ function drawCine(dt, me) {
     const mt = me ? me.team : 0;
     for (const side of [0, 1]) {
       const team = side ? 1 - mt : mt, ps = S.players.filter(p => p.team === team), x = side ? W - 40 * sm : 40 * sm, al = side ? 'right' : 'left', col = side ? PAL.red : PAL.teal;
-      txt((side ? 'RAKİP · ' : 'TAKIMIN · ') + (sideOf(team) === 'atk' ? 'SALDIRAN' : 'SAVUNAN'), x, bh + 34 * sm, Math.round(15 * sm), col, al);
+      txt((side ? 'RAKİP' : 'TAKIMIN') + (arOn() ? '' : ' · ' + (sideOf(team) === 'atk' ? 'SALDIRAN' : 'SAVUNAN')), x, bh + 34 * sm, Math.round(15 * sm), col, al);
       ps.forEach((p, i) => txt(p.name + ' · ' + AGENTS[p.agent].name, x, bh + (62 + i * 24) * sm, Math.round(14 * sm), p.id === G.myId ? PAL.gold : PAL.white, al, 'normal'));
     }
     { const g = ctx.createLinearGradient(0, H - bh - 90 * sm, 0, H - bh); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.7)'); ctx.fillStyle = g; ctx.fillRect(0, H - bh - 90 * sm, W, 90 * sm); }
-    txt('RAUNT 1 / ' + MATCH_ROUNDS, W / 2, H - bh - 46 * sm, Math.round(30 * sm), PAL.white, 'center');
-    txt(me && sideOf(me.team) === 'atk' ? 'SALDIRI — Bombayı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, bombayı imha et', W / 2, H - bh - 18 * sm, Math.round(14 * sm), me && sideOf(me.team) === 'atk' ? PAL.red : PAL.teal, 'center', 'normal');
+    if (arOn()) {
+      txt(AR_NAMES[arMode()], W / 2, H - bh - 46 * sm, Math.round(30 * sm), PAL.gold, 'center');
+      txt(arMode() === 'gg' ? 'Her öldürmede yeni silah · kılıçla öldüren takım kazanır' : 'Parlayan bölgeyi tut · 100 puana ilk ulaşan takım kazanır', W / 2, H - bh - 18 * sm, Math.round(14 * sm), PAL.white, 'center', 'normal');
+    } else {
+      txt('RAUNT 1 / ' + MATCH_ROUNDS, W / 2, H - bh - 46 * sm, Math.round(30 * sm), PAL.white, 'center');
+      txt(me && sideOf(me.team) === 'atk' ? 'SALDIRI — Bombayı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, bombayı imha et', W / 2, H - bh - 18 * sm, Math.round(14 * sm), me && sideOf(me.team) === 'atk' ? PAL.red : PAL.teal, 'center', 'normal');
+    }
   } else if (s.title) {
     const y = H - bh - 70 * sm;
     { const g = ctx.createLinearGradient(0, 0, W * 0.6, 0); g.addColorStop(0, 'rgba(0,0,0,0.55)'); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.fillRect(0, y - 50 * sm, W * 0.6, 100 * sm); }
@@ -10238,12 +10528,13 @@ function uiInit() {
     $('spSideRow').style.display = $('spMapRow').style.display = pk ? 'none' : '';
     $('spSizeL').textContent = pk ? 'YARIŞÇI SAYISI' : 'TAKIM BOYUTU';
     for (const o of $('spSize').options) o.textContent = pk ? (o.value * 2) + ' yarışçı' : o.value + 'v' + o.value;
-    $('spSub').textContent = pk ? 'Kılıçla engel yarışı · 5 raunt, her raunt farklı uzun parkur · bitişe ilk varan raundu alır' : 'Botlara karşı tam maç · 20 raunt · 10. rauntten sonra taraf değişir';
+    const am = $('spMode').value;
+    $('spSub').textContent = pk ? 'Kılıçla engel yarışı · 5 raunt, her raunt farklı uzun parkur · bitişe ilk varan raundu alır' : am === 'gg' ? 'SİLAH YARIŞI · her öldürmede sıradaki silah · son silah kılıç: kılıçla ilk öldüren takım kazanır' : am === 'sn' ? 'SÜPERNOVA · parlayan bölge yer değiştirir · bölgeyi tutan takım puan toplar · 100 puan kazanır' : 'Botlara karşı tam maç · 20 raunt · 10. rauntten sonra taraf değişir';
     $('btnSpGo').textContent = pk ? 'PARKURA BAŞLA' : 'AJAN SEÇİMİ';
     const i = +$('spMap').value;
     $('spMapNote').textContent = pk ? 'Elinde yalnızca kılıç var: rakipleri it, barikatları kır, boşluklardan atla. Düşersen son kontrol noktasından devam edersin.' : i >= 0 ? MAPS[i].desc : 'Her maçta ' + MAPS.length + ' haritadan biri rastgele seçilir.';
   };
-  try { const md = localStorage.getItem('spk_mode'); if (md === 'pk' || md === 'bomb') $('spMode').value = md; } catch (e) { }
+  try { const md = localStorage.getItem('spk_mode'); if (md === 'pk' || md === 'bomb' || md === 'gg' || md === 'sn') $('spMode').value = md; } catch (e) { }
   $('spMode').onchange = () => { try { localStorage.setItem('spk_mode', $('spMode').value); } catch (e) { } spNote(); };
   spNote();
   $('spMap').onchange = () => {
@@ -10254,7 +10545,7 @@ function uiInit() {
   for (const b of document.querySelectorAll('[data-back]')) b.onclick = () => { if (NET.mode !== 'off') netShutdown(); uiShow(b.dataset.back || 'scr-menu'); };
   $('btnSpGo').onclick = () => {
     NET.mode = 'off'; G.myId = 'h';
-    const cfg = { teamSize: +$('spSize').value, fill: true, diff: $('spDiff').value, map: +$('spMap').value, mode: $('spMode').value === 'pk' ? 'pk' : 'bomb' };
+    const cfg = { teamSize: +$('spSize').value, fill: true, diff: $('spDiff').value, map: +$('spMap').value, mode: modeOf($('spMode').value) };
     const team = $('spSide').value === 'atk' ? 0 : 1;
     selStart([{ id: 'h', name: playerName(), team, cos: SHOP.cos() }], cfg);
   };
@@ -10277,7 +10568,7 @@ function uiInit() {
   $('btnLobbyLeave').onclick = () => { netShutdown(); uiShow('scr-play'); };
   for (const id of ['lbSize', 'lbFill', 'lbDiff', 'lbMap', 'lbMode']) $(id).onchange = () => {
     if (NET.mode !== 'host') return;
-    NET.lobby.cfg = { teamSize: +$('lbSize').value, fill: $('lbFill').checked, diff: $('lbDiff').value, map: +$('lbMap').value, ff: NET.lobby.cfg.ff !== false, mode: $('lbMode').value === 'pk' ? 'pk' : 'bomb' };
+    NET.lobby.cfg = { teamSize: +$('lbSize').value, fill: $('lbFill').checked, diff: $('lbDiff').value, map: +$('lbMap').value, ff: NET.lobby.cfg.ff !== false, mode: modeOf($('lbMode').value) };
     broadcastLobby();
   };
   // TAKIM ATEŞİ: tek tıkla aç/kapa (lobide host, maçta host veya tek oyunculu)
@@ -10360,12 +10651,12 @@ function uiRenderLobby() {
   uiNetStatus();
   const mv = L.cfg.map === undefined ? 0 : L.cfg.map;
   const pkm = L.cfg.mode === 'pk';
-  $('lbSize').value = L.cfg.teamSize; $('lbFill').checked = L.cfg.fill; $('lbDiff').value = L.cfg.diff; $('lbMap').value = String(mv); $('lbMode').value = pkm ? 'pk' : 'bomb';
+  $('lbSize').value = L.cfg.teamSize; $('lbFill').checked = L.cfg.fill; $('lbDiff').value = L.cfg.diff; $('lbMap').value = String(mv); $('lbMode').value = modeOf(L.cfg.mode);
   $('lbSize').disabled = $('lbFill').disabled = $('lbDiff').disabled = $('lbMap').disabled = $('lbFF').disabled = $('lbMode').disabled = !host;
   $('lbMapRow').style.display = $('lbFF').parentNode.style.display = pkm ? 'none' : '';
   const ffv = L.cfg.ff !== false; $('lbFF').textContent = 'TAKIM ATEŞİ: ' + (ffv ? 'AÇIK' : 'KAPALI') + (host ? '  ·  tıkla' : ''); $('lbFF').classList.toggle('off', !ffv);
   if (pkm) $('lbCfgText').textContent = 'Mod: PARKUR · 5 parkur · takım yok, herkes kendi için yarışır · Yarışçı: ' + L.cfg.teamSize * 2 + (L.cfg.fill ? ' (botlarla)' : '') + ' · Zorluk: ' + L.cfg.diff;
-  else $('lbCfgText').textContent = 'Harita: ' + mapLabel(mv) + ' · Takım boyutu: ' + L.cfg.teamSize + 'v' + L.cfg.teamSize + ' · Bot doldurma: ' + (L.cfg.fill ? 'Açık' : 'Kapalı') + ' · Zorluk: ' + L.cfg.diff + ' · Takım ateşi: ' + (L.cfg.ff !== false ? 'Açık' : 'Kapalı');
+  else $('lbCfgText').textContent = (L.cfg.mode === 'gg' ? 'Mod: SİLAH YARIŞI · ' : L.cfg.mode === 'sn' ? 'Mod: SÜPERNOVA · ' : '') + 'Harita: ' + mapLabel(mv) + ' · Takım boyutu: ' + L.cfg.teamSize + 'v' + L.cfg.teamSize + ' · Bot doldurma: ' + (L.cfg.fill ? 'Açık' : 'Kapalı') + ' · Zorluk: ' + L.cfg.diff + ' · Takım ateşi: ' + (L.cfg.ff !== false ? 'Açık' : 'Kapalı');
   for (const team of [0, 1]) {
     const box = $('lbTeam' + team); box.innerHTML = '';
     const ps = L.players.filter(p => p.team === team);
@@ -10595,6 +10886,7 @@ function toggleBuy() {
   const me = S && S.pmap[G.myId];
   if (!me || !me.alive) return;
   if (PKMAP) { showMsg(null, 'PARKURDA MAĞAZA YOK — YALNIZCA KILIÇ', PAL.dim); return; }
+  if (arOn()) { showMsg(null, AR_NAMES[arMode()] + ' MODUNDA MAĞAZA YOK', PAL.dim); return; }
   if (S.phase !== 'buy') { showMsg(null, 'SATIN ALMA EVRESİ BİTTİ', PAL.red); return; }
   UI.buyOpen = true; $('buy').classList.remove('hidden'); UI.overlay = true; MOUSE.down = false; G._buySig = null;
   unlockPointer(); syncCursor();
@@ -10647,6 +10939,7 @@ function uiRenderBuy() {
 function castAbility(k) {
   const me = S && S.pmap[G.myId]; if (!me || !me.alive) return;
   if (PKMAP) { showMsg(null, 'PARKURDA YETENEK YOK — YALNIZCA KILIÇ', PAL.dim); return; }
+  if (arOn()) { showMsg(null, AR_NAMES[arMode()] + ' MODUNDA YETENEK YOK', PAL.dim); return; }
   const wm = aimPoint(me), ang = LOOK.yaw;
   const ag = AGENTS[me.agent];
   const avail = k === 'x' ? me.ult >= ag.x.pts : me.ch[k] > 0;
@@ -10834,6 +11127,7 @@ function uiGameTick(dt) {
     if (G._overT > 2) { G._overT = 0; G.overShown = true; uiShowEnd(); }
   }
 }
+function modeOf(v) { return v === 'pk' || v === 'gg' || v === 'sn' ? v : 'bomb'; }
 function uiShowEnd() {
   const me = S.pmap[G.myId], mt = me ? me.team : 0, win = S.matchWinner === mt;
   closeBuy();

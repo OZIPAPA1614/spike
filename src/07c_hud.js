@@ -11,7 +11,7 @@ const KEYS = {}, MOUSE = { x: 640, y: 360, down: false, right: false, fp: 0 };
 const LOOK = { yaw: 0, pitch: 0 };
 const FONT = '"Bahnschrift","DIN Alternate","Arial Narrow","Roboto Condensed","Segoe UI",Arial,sans-serif';
 const SRC_NAMES = { sword: 'Kılıç', blade: 'Karanlık Kesik', fire: 'Ateş Duvarı', poison: 'Zehir Sisi', mine: 'Tuzak Mayını', turret: 'Mini Taret', shock: 'Şok Oku', orbital: 'Yörünge Lazeri', quake: 'Sarsıntı Dalgası', rift: 'Tektonik Yarık', chain: 'Zincir Yük', overload: 'Aşırı Yük', wolf: 'Gölge Kurdu', bomb: 'BOMBA', nightmare: 'Kabus Alanı', tcollapse: 'Zaman Çöküşü', railgun: 'Railgun' };
-const REASONS = { elim: 'Rakip takım elendi', time: 'Süre doldu', bomb: 'Bomba patladı', defuse: 'Bomba imha edildi' };
+const REASONS = { elim: 'Rakip takım elendi', time: 'Süre doldu', bomb: 'Bomba patladı', defuse: 'Bomba imha edildi', arena: '' };
 
 function initRender() {
   glcv = document.getElementById('gl'); cv = document.getElementById('hud'); ctx = cv.getContext('2d');
@@ -185,6 +185,14 @@ function handleEvent(ev) {
       break;
     case 'round': {
       const side = me ? sideOf(me.team) : 'atk';
+      if (arOn()) { // arena modları: tek uzun raunt
+        const m = arMode();
+        showMsg(AR_NAMES[m], m === 'gg' ? 'Her öldürmede sıradaki silah · kılıçla öldüren kazanır' : 'Parlayan bölgeyi tut · 100 puana ilk ulaşan kazanır', PAL.gold, 3.5);
+        AU.play('round'); G.spec = null; UIS.deathBy = undefined; UIS.pings.length = 0;
+        LOOK.yaw = side === 'atk' ? -Math.PI / 2 : Math.PI / 2; LOOK.pitch = 0;
+        if (ev.n === 1 && G.running) cineStart('match');
+        break;
+      }
       if (ev.n === MATCH_ROUNDS) setTimeout(() => showMsg(null, 'SON RAUNT!', PAL.gold), 900);
       showMsg('RAUNT ' + ev.n + ' / ' + MATCH_ROUNDS, side === 'atk' ? 'SALDIRI — Bombayı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, bombayı imha et', side === 'atk' ? PAL.red : PAL.teal, 3);
       AU.play('round'); G.spec = null; UIS.deathBy = undefined; UIS.pings.length = 0;
@@ -192,9 +200,16 @@ function handleEvent(ev) {
       if (ev.n === 1 && G.running) cineStart('match'); // maç başı sinematik giriş
       break;
     }
-    case 'go': showMsg(null, 'RAUNT BAŞLADI — BARİYERLER KALKTI', PAL.gold); AU.play('lockbeep'); break;
+    case 'go': showMsg(null, arOn() ? 'BAŞLADI — BARİYERLER KALKTI' : 'RAUNT BAŞLADI — BARİYERLER KALKTI', PAL.gold); AU.play('lockbeep'); break;
+    case 'gg': {
+      const p = S.pmap[ev.p];
+      if (ev.p === G.myId) { showMsg(null, 'SİLAH ' + (ev.l + 1) + '/' + GG_ORDER.length + ' · ' + WEAPONS[GG_ORDER[ev.l]].name, PAL.gold); AU.play('buy'); }
+      else if (p && ev.l === GG_ORDER.length - 1) showMsg(null, p.name + ' SON SİLAHTA: KILIÇ!', p.team === myTeam() ? PAL.teal : PAL.red);
+      break;
+    }
     case 'rend': {
       const win = ev.w === myTeam();
+      if (ev.r === 'arena') { const dr = ev.w === -1; showMsg(dr ? 'BERABERE' : win ? 'MAÇI KAZANDINIZ' : 'MAÇI KAYBETTİNİZ', ev.why || '', dr ? PAL.gold : win ? PAL.teal : PAL.red, 4); AU.play(win || dr ? 'win' : 'lose'); break; }
       showMsg(win ? 'RAUNDU KAZANDINIZ' : 'RAUNDU KAYBETTİNİZ', REASONS[ev.r] || '', win ? PAL.teal : PAL.red, 4);
       AU.play(win ? 'win' : 'lose');
       break;
@@ -278,6 +293,7 @@ function txt(s, x, y, size, col, align, weight) {
   ctx.fillStyle = col; ctx.fillText(tl(s), x, y);
 }
 function drawTopBar(me) {
+  if (arOn() && S.arena) { arTopBar(me); return; }
   const mt = me ? me.team : 0, et = 1 - mt, cx = W / 2, y = IS_TOUCH ? 46 : 10; // dokunmatikte üstteki düğme sırasının altında
   const myScore = S.score[mt], enScore = S.score[et];
   panel(cx - 60, y, 120, 48, 0.9);
@@ -360,6 +376,7 @@ function drawMinimap(me, v) {
     if (pg.t <= 0) { UIS.pings.splice(i, 1); continue; }
     const [px, py] = P(pg.x, pg.y); circle(px, py, 3 + (1.3 - pg.t) * 6, null, 'rgba(255,70,85,' + pg.t / 1.3 + ')', 1.5);
   }
+  if (arOn()) arDrawMinimap(P, s, me);
   const mt = me ? me.team : 0;
   for (const p of S.players) {
     if (!p.alive) continue;
@@ -464,13 +481,15 @@ function drawBottom(me) {
   else if (me.reloadT > 0) txt('ŞARJÖR...', W - 30, by + 38, 22, PAL.gold, 'right');
   else { txt(String(am.mag), W - 92, by + 38, 34, am.mag <= Math.ceil(w.mag * 0.25) ? PAL.red : PAL.white, 'right'); txt('/ ' + am.res, W - 30, by + 42, 16, PAL.dim, 'right'); }
   txt('¤ ' + me.credits, W - 226, by + 14, 14, PAL.gold);
-  txt((me.primary ? '1 ' + WEAPONS[me.primary].name + '  ' : '') + '2 ' + WEAPONS[me.secondary].name + '  3 Kılıç', W - 226, by + 52, 11, PAL.dim);
+  txt((me.primary ? '1 ' + WEAPONS[me.primary].name + '  ' : '') + (me.secondary ? '2 ' + WEAPONS[me.secondary].name + '  ' : '') + '3 Kılıç', W - 226, by + 52, 11, PAL.dim);
 }
 function drawDeathPanel(me, v) {
   const killer = S.pmap[UIS.deathBy];
   panel(W / 2 - 180, H - 96, 360, 70, 0.9);
   txt('ÖLDÜN' + (killer ? ' — ' + killer.name + ' (' + AGENTS[killer.agent].name + ')' : ''), W / 2, H - 76, 16, PAL.red, 'center');
-  if (v && v !== me) txt((v.team !== me.team ? 'İZLENİYOR (RAKİP): ' : 'İZLENİYOR: ') + v.name + '   [BOŞLUK] değiştir', W / 2, H - 50, 12, v.team !== me.team ? PAL.red : PAL.white, 'center');
+  const rsp = me.respawnAt || me.rsp;
+  if (arOn() && rsp && S.phase === 'live') txt('YENİDEN DOĞUŞ: ' + Math.max(0, Math.ceil(rsp - S.time)) + ' sn', W / 2, H - 50, 14, PAL.gold, 'center');
+  else if (v && v !== me) txt((v.team !== me.team ? 'İZLENİYOR (RAKİP): ' : 'İZLENİYOR: ') + v.name + '   [BOŞLUK] değiştir', W / 2, H - 50, 12, v.team !== me.team ? PAL.red : PAL.white, 'center');
   else txt('Takımında hayatta kimse kalmadı', W / 2, H - 50, 12, PAL.dim, 'center');
   const myCard = (S.cards || []).find(c => c.owner === me.id);
   if (myCard && (S.phase === 'live' || S.phase === 'planted')) {
@@ -483,7 +502,7 @@ function drawDeathPanel(me, v) {
 function drawHints(me) {
   let h = null;
   const sp = S.bomb;
-  if (S.phase === 'buy' && me.alive) h = '[B] MAĞAZA · ' + Math.ceil(S.phaseT) + ' sn';
+  if (S.phase === 'buy' && me.alive) h = arOn() ? 'HAZIRLAN · ' + Math.ceil(S.phaseT) + ' sn' : '[B] MAĞAZA · ' + Math.ceil(S.phaseT) + ' sn';
   else if (me.alive && me.hasBomb && S.phase === 'live') h = siteAt(me.x, me.y) ? '[F] BASILI TUT: BOMBA KUR' : 'BOMBA SENDE — A/B bölgesine götür · [G] bırak';
   else if (me.alive && S.phase === 'planted' && sideOf(me.team) === 'def' && dist(me.x, me.y, sp.x, sp.y) < 58) h = '[F] BASILI TUT: BOMBA İMHA ET' + (me.kit ? ' · KİT: 1 SN' : '');
   const myCards = me.alive ? (S.cards || []).filter(c => c.carrier === me.id) : [];
@@ -521,7 +540,7 @@ function drawCenterMsgs(dt) {
       ctx.restore();
     }
   }
-  let y = 96;
+  let y = IS_TOUCH ? 128 : 96; // dokunmatikte üst panel aşağıda olduğundan mesajlar da aşağıda
   for (let i = UIS.msgs.length - 1; i >= 0; i--) { UIS.msgs[i].t -= dt; if (UIS.msgs[i].t <= 0) UIS.msgs.splice(i, 1); }
   for (const m of UIS.msgs) {
     ctx.save(); ctx.globalAlpha = Math.min(1, m.t);
