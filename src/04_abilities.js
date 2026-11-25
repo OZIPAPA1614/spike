@@ -405,7 +405,7 @@ function updateZones(dt) {
         }
         break;
       case 'heal':
-        for (const t of S.players) if (t.alive && t.team === a.team && inR(t, a.x, a.y, a.r)) t.hp = Math.min(100, t.hp + 14 * dt);
+        for (const t of S.players) if (t.alive && t.team === a.team && inR(t, a.x, a.y, a.r)) t.hp = Math.max(t.hp, Math.min(100, t.hp + 14 * dt));
         break;
       case 'firewall': {
         const hitT = new Set();
@@ -413,7 +413,7 @@ function updateZones(dt) {
           if (!t.alive || hitT.has(t.id) || !inR(t, pt[0], pt[1], a.pr + PR * 0.6)) continue;
           hitT.add(t.id);
           if (t.team !== a.team) dot(t, 30, dt, own, 'fire');
-          else if (own && t.id === own.id) t.hp = Math.min(100, t.hp + 10 * dt);
+          else if (own && t.id === own.id) t.hp = Math.max(t.hp, Math.min(100, t.hp + 10 * dt));
         }
         break;
       }

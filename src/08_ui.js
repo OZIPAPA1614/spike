@@ -243,6 +243,7 @@ function uiInit() {
   uiSettingsRefresh();
   applyLang(); i18nObserve();
   $('sensR').oninput = () => { SETTINGS.sens = +$('sensR').value; $('sensV').textContent = SETTINGS.sens.toFixed(2); try { localStorage.setItem('spk_sens', SETTINGS.sens); } catch (e) { } };
+  admInit(); // admin paneli (08b)
   if (!glok) setTimeout(() => uiToast('WebGL başlatılamadı — tarayıcın 3D grafiği desteklemiyor olabilir.', true), 300);
   try { const n = localStorage.getItem('spk_name'); if (n) $('inName').value = n; } catch (e) { }
   $('btnSP').onclick = () => { AU.init(); AU.resume(); uiShow('scr-sp'); };
@@ -740,6 +741,7 @@ function cycleSpec() {
 function onKeyDown(e) {
   const tag = e.target && e.target.tagName;
   if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+  if (e.code === 'Escape' && UI.admOpen) { admClose(); return; }
   if (e.code === 'Escape' && UI.setOpen) { closeSettings(); return; }
   KEYS[e.code] = true;
   if (e.code === 'Tab') { e.preventDefault(); UI.board = true; }

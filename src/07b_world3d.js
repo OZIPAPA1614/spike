@@ -654,7 +654,7 @@ function drawViewmodel(p, dt, t) {
   const a = -Math.PI / 2 - 0.09, pitch = 0.03 + VM.kick * 0.2 - rl * 0.5;
   const R = rotMat(a, pitch, rl * 0.6, new Array(9));
   if (MDL.ready || mdlInit()) { drawViewmodelModel(p, t, wid, R, gx, gy, gz, ag); return; }
-  const sc = wid === 'operator' || wid === 'railgun' ? 0.42 : 0.48;
+  const sc = wid === 'operator' || wid === 'railgun' || wid === 'admin' ? 0.42 : 0.48;
   for (const [s, o, c, gl] of gunPartsFor(wid, p, t)) {
     const off = xf(R, o[0] * sc, o[1] * sc, o[2] * sc);
     QR('box', gx + off[0], gy + off[1], gz + off[2], R, s[0] * sc, s[1] * sc, s[2] * sc, c, gl ? { vm: true, em: [c[0] * gl, c[1] * gl, c[2] * gl] } : vm);
@@ -684,7 +684,7 @@ function vmArm(hand, elbow, slc, r) {
   QR('cyl', m[0], m[1], m[2], RB, r * 1.2, l - s0, r * 1.2, [base[0] + slc[0] * k, base[1] + slc[1] * k, base[2] + slc[2] * k, 1], vm);
 }
 function drawViewmodelModel(p, t, wid, R, gx, gy, gz, ag) {
-  const G = MDL.guns[wid] || MDL.guns.classic, sc = clamp(14 / G.len, 0.3, 0.5), vm = { vm: true };
+  const G = mdlGun(wid), sc = clamp(14 / G.len, 0.3, 0.5), vm = { vm: true };
   drawGunModel(wid, gx, gy, gz, R, sc, vm, gunColsFor(wid, p, t));
   const cs = charSkin(p, t), slc = cs ? cs.suit : ag, pistol = wid === 'classic' || wid === 'sheriff';
   const P = (x, y, z) => { const o = xf(R, x * sc, y * sc, z * sc); return [gx + o[0], gy + o[1], gz + o[2]]; };

@@ -280,6 +280,19 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
 .eco{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:#c9c5bd}
 .eco b{color:var(--gold)}
 #pause .panel,#end .panel{text-align:center;min-width:420px}
+#admOv{z-index:24}
+#admOv .panel{width:min(560px,94vw);max-height:92vh;overflow:auto}
+#admOv .panel:before{background:var(--gold)}
+#admOv h4{margin:14px 0 8px;font-size:12px;letter-spacing:.2em;color:var(--gold)}
+.admrow{display:flex;gap:8px;margin:6px 0}
+.admrow input{flex:1;min-width:0}
+.admrow input[type=number]{flex:0 0 130px}
+.admrow button{flex:1;margin:0;padding:11px 6px;font-size:13px}
+.admgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.admgrid button{margin:0;padding:12px 6px;font-size:13px;letter-spacing:.08em}
+.admgrid button.on{border-color:var(--gold);color:var(--gold);background:rgba(245,196,81,.1)}
+#admOv .note{min-height:18px;margin-top:4px}
+button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
 #pause button,#end button{display:block;width:100%;margin-top:10px}
 #endTitle{font-size:72px;font-weight:900;letter-spacing:.2em}
 #endTitle.win{color:var(--teal)} #endTitle.lose{color:var(--red)}
@@ -358,6 +371,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <button id="btnPlay" class="primary big">OYNA</button>
     <button id="btnStore" class="store big">💎 MAĞAZA</button>
     <button id="btnSettings" class="big">AYARLAR</button>
+    <button id="btnAdmin" class="big adm hidden">🛡 ADMİN</button>
   </div>
   <div class="brand"><svg class="logoSvg" viewBox="0 0 640 230" role="img" aria-label="NOVA"><use href="#novaLogo" width="640" height="230"/></svg><div class="sub2">3D TAKTİK FPS</div></div>
   <div id="gemBar" title="Maç bittikçe gems kazanırsın"><span class="gi">💎</span> <b id="gemN">0</b> <span>GEMS</span></div>
@@ -575,6 +589,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <button id="btnResume" class="ghost">MAÇA DÖN <span class="kh">ESC</span></button>
     <div class="sens">HASSASİYET <input type="range" id="sensR" min="0.2" max="3" step="0.05" value="1"><span id="sensV">1.00</span></div>
     <button id="btnPauseSet">AYARLAR</button>
+    <button id="btnPauseAdm" class="adm hidden">🛡 ADMİN PANELİ</button>
     <button id="btnFF" class="fftog">TAKIM ATEŞİ: AÇIK</button>
     <button id="btnMute">SESİ KAPAT</button>
   </div>
@@ -625,6 +640,28 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <div class="row-btn"><button id="accGo" class="primary">KAYIT OL</button></div>
     <div class="acclink"><a href="#" id="accSwitch">Hesabın var mı? GİRİŞ YAP</a></div>
     <div class="acclink small"><a href="#" id="accGuest">Misafir olarak oyna (arkadaş sistemi olmadan)</a></div>
+  </div>
+</div>
+
+<div id="admOv" class="overlay hidden">
+  <div class="panel">
+    <h2>🛡 ADMİN PANELİ</h2>
+    <div class="sub" id="admWho">Yalnızca admin hesabında görünür</div>
+    <h4>OYUNCULARA GEMS</h4>
+    <div class="admrow"><input id="admNick" maxlength="16" autocomplete="off" placeholder="Kullanıcı adı"><input id="admAmt" type="number" min="1" max="1000000" step="1" value="1000"></div>
+    <div class="admrow"><button id="admGive" class="primary">💎 VER</button><button id="admTake">SİL</button><button id="admZero" class="ghost">SIFIRLA</button></div>
+    <div id="admGemMsg" class="note"></div>
+    <h4>OYUN İÇİ GÜÇLER</h4>
+    <div class="admgrid">
+      <button data-adm="hp">❤ CAN +100</button>
+      <button data-adm="ar">⛨ KALKAN +50</button>
+      <button data-adm="am">⁍ MERMİ +100</button>
+      <button data-adm="spd" id="admSpd">» HIZ ×1</button>
+      <button data-adm="dmg" id="admDmg">✦ GÜÇ ×1</button>
+      <button data-adm="gun" class="store">ADMİN SİLAHI</button>
+    </div>
+    <div id="admGameMsg" class="note"></div>
+    <div class="row-btn"><button id="admClose" class="primary">KAPAT <span class="kh">ESC</span></button></div>
   </div>
 </div>
 

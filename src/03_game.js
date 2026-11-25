@@ -211,6 +211,7 @@ function playerSpeed(p, inp) {
   if (p.st.ovl > 0) s *= 1.9;
   if (p.st.lock > 0) s *= 0.55;
   if (p.st.slow > 0) s *= (1 - (p.slowAmt || 0.3));
+  if (p.admSpd > 1) s *= p.admSpd; // admin: hız çarpanı
   return s;
 }
 function barrierFor(p) { const t = PKMAP ? T_ATK : sideOf(p.team) === 'atk' ? T_ATK : T_DEF; return (tx, ty) => tileAt(tx, ty) !== t; }
@@ -453,9 +454,10 @@ function switchSlot(p, s) {
 function damage(t, amt, att, src, hs, quiet, bp) {
   if (!t || !t.alive || S.phase === 'buy' || S.phase === 'over' || PKMAP) return;
   if (t.prot && S.time < t.prot) return; // arena: yeniden doğuş koruması
+  if (att && att.admDmg > 1 && att !== t) amt *= att.admDmg; // admin: atak gücü çarpanı
   amt = Math.round(amt); if (amt <= 0) return;
   let rem = amt;
-  const pierce = src === 'blade' || src === 'bomb' || src === 'railgun', real = Math.min(amt, Math.max(0, Math.ceil(t.hp) + (pierce ? 0 : Math.max(0, t.armor)))); // gerçekten giden hasar (can + zırh kadar)
+  const pierce = src === 'blade' || src === 'bomb' || src === 'railgun' || src === 'admin', real = Math.min(amt, Math.max(0, Math.ceil(t.hp) + (pierce ? 0 : Math.max(0, t.armor)))); // gerçekten giden hasar (can + zırh kadar)
   if (pierce) rem = 9999;
   else if (t.armor > 0) { const ab = Math.min(t.armor, rem); t.armor -= ab; rem -= ab; }
   t.hp -= rem;
@@ -526,6 +528,7 @@ function buyItem(p, item) {
   const rb = p.roundBuys;
   if (WEAPONS[item]) {
     const w = WEAPONS[item];
+    if (w.hidden) return false; // admin silahı satın alınamaz
     if ((w.slot === 1 && p.primary === item) || (w.slot === 2 && p.secondary === item)) return false;
     const key = w.slot === 1 ? 'primary' : 'secondary', refund = rb[key] ? rb[key].price : 0;
     if (p.credits + refund < w.price) return false;
@@ -704,7 +707,7 @@ function updateHeal(dt) {
     if (S.phase !== 'live' && S.phase !== 'planted') continue;
     for (const p of S.players) if (p.alive && p.hp < HEAL_MAX && (p.jz || 0) < 60 && dist2(p.x, p.y, h.x, h.y) < HEAL_R * HEAL_R) {
       const add = Math.min(HEAL_AMT, HEAL_MAX - p.hp);
-      p.hp = Math.min(HEAL_MAX, p.hp + HEAL_AMT); h.cd = HEAL_CD;
+      p.hp = Math.max(p.hp, Math.min(HEAL_MAX, p.hp + HEAL_AMT)); h.cd = HEAL_CD; // 100'ün üstündeki (admin) canı düşürmez
       emit({ k: 'heal', id: p.id, a: Math.round(add), x: r1(h.x), y: r1(h.y) });
       emitSnd('heal', h.x, h.y);
       break;

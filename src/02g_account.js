@@ -93,7 +93,7 @@ const ACC = {
     const me = await this.db('GET', 'users/' + this.uid) || {};
     if (me.p && me.p.lastSeen) this.skew = me.p.lastSeen - Math.round((t0 + Date.now()) / 2);
     const out = { friends: me.friends || {}, inbox: me.inbox || {}, pres: {} };
-    try { if (typeof SHOP !== 'undefined') SHOP.cloud(me.prof); } catch (e) { } // gems/skin profili eşitle
+    try { if (typeof SHOP !== 'undefined') { SHOP.cloud(me.prof); SHOP.claimGifts(); } } catch (e) { } // gems/skin profili eşitle + admin hediyeleri
     await Promise.all(Object.keys(out.friends).slice(0, 40).map(async f => { try { out.pres[f] = await this.db('GET', 'users/' + f + '/p'); } catch (e) { } }));
     return out;
   },

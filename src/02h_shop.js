@@ -126,6 +126,30 @@ const SHOP = {
     if (cp.v > this.prof.v) { this.prof = cp; this.save(false); if (typeof uiStoreRender === 'function') uiStoreRender(); }
     else if (this.prof.v > cp.v) this.pushSoon();
   },
+  /* ADMİN HEDİYESİ: admin'in gk/<anahtar>/ altına bıraktığı gems ekleme/silme kayıtları.
+     Her kayıt önce sunucudan silinir, silme başarılıysa uygulanır (iki kez uygulanmaz). */
+  async claimGifts() {
+    if (this._gBusy || !(FR && FR.acc && ACC.uid && ACC.nick)) return;
+    this._gBusy = true;
+    try {
+      const k = admKey(ACC.nick), all = await ACC.db('GET', 'gk/' + k);
+      if (!all || typeof all !== 'object') return;
+      if (!this.prof) this.load();
+      let got = 0, n = 0;
+      for (const id of Object.keys(all).sort()) {
+        const g = all[id] || {};
+        await ACC.db('DELETE', 'gk/' + k + '/' + id);
+        const before = this.prof.gems;
+        if (g.z) this.prof.gems = 0;
+        this.prof.gems = Math.max(0, Math.min(1e9, this.prof.gems + (Math.round(+g.g) || 0)));
+        got += this.prof.gems - before; n++;
+      }
+      if (!n) return;
+      this.bump();
+      if (typeof uiStoreRender === 'function') uiStoreRender();
+      if (typeof uiToast === 'function') uiToast('ADMİN: ' + (got >= 0 ? '+' : '−') + Math.abs(got) + ' GEMS', got < 0);
+    } catch (e) { } finally { this._gBusy = false; }
+  },
   cos() { const p = this.prof || this.load(); return { sw: p.sw, ws: p.wsk || '', cs: p.csk || '' }; },
   /* maç sonu ödülü: bir maç için bir kez */
   award(res, kills) {

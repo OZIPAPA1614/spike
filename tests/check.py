@@ -311,6 +311,43 @@ try:
     except Exception as e: fail('açık sunucu: ' + str(e)[:300])
     report_errs(errs, 'açık sunucu')
     ctx.close()
+
+    # ---------- 7) admin paneli (OZN): gems ver/sil, yetkisiz yazma, oyun içi güçler ----------
+    errs = []
+    ca = b.new_context(viewport={'width': 960, 'height': 540}); cb = b.new_context(viewport={'width': 960, 'height': 540})
+    try:
+        A = page(ca, 'ADMİN', errs, 'OZN'); B = page(cb, 'HEDEF', errs, 'Hedef1')
+        A.evaluate("async () => { await ACC.signUp('OZN', 'sifre123'); FR.onLogin(); SHOP.load(); }")
+        B.evaluate("async () => { await ACC.signUp('Hedef1', 'sifre123'); FR.onLogin(); SHOP.load(); }")
+        if not until(A, "() => !document.getElementById('btnAdmin').classList.contains('hidden')", 20): fail('admin: OZN hesabında ADMİN düğmesi görünmedi')
+        B.wait_for_timeout(1300)
+        if B.is_visible('#btnAdmin'): fail('admin: admin olmayan hesapta ADMİN düğmesi görünüyor')
+        g0 = B.evaluate("() => SHOP.prof.gems")
+        A.click('#btnAdmin'); A.fill('#admNick', 'hedef1'); A.fill('#admAmt', '1000'); A.click('#admGive')
+        if not until(A, "() => document.getElementById('admGemMsg').textContent.startsWith('✓')", 20): fail('admin: gems gönderilemedi: ' + A.evaluate("() => document.getElementById('admGemMsg').textContent"))
+        B.evaluate("() => SHOP.claimGifts()")
+        if not until(B, f"() => SHOP.prof.gems === {g0} + 1000", 20): fail(f'admin: hedef oyuncuya 1000 gems işlenmedi ({g0} → ' + str(B.evaluate("() => SHOP.prof.gems")) + ')')
+        A.fill('#admAmt', '300'); A.click('#admTake'); until(A, "() => document.getElementById('admGemMsg').textContent.startsWith('✓')", 20)
+        B.evaluate("() => SHOP.claimGifts()")
+        if not until(B, f"() => SHOP.prof.gems === {g0} + 700", 20): fail('admin: gems silme işlenmedi')
+        if B.evaluate("async () => { try { await ACC.db('PUT', 'gk/' + admKey('OZN') + '/x', { g: 5 }); return 'yazdı'; } catch (e) { return 'red'; } }") != 'red': fail('admin: admin olmayan hesap başkasına gems yazabildi')
+        else: ok('admin paneli: OZN gems verip silebiliyor, hedefe işleniyor, başkası yazamıyor')
+        A.click('#admClose')
+        # oyun içi güçler (tek oyunculu)
+        A.evaluate("""() => { const A=['vex','ignis','mist','aegis','pulse'], B=['chrono','terra','vital','volt','phantom'], roster=[];
+            A.forEach((a,j)=>roster.push({id:j?'x'+j:'h',name:j?a:'OZN',team:0,agent:a,bot:j>0})); B.forEach((a,j)=>roster.push({id:'y'+j,name:a,team:1,agent:a,bot:true}));
+            NET.mode='off'; G.myId='h'; launchGame(roster, {teamSize:5, fill:true, diff:'kolay', map:0}); try { cineStop(false); } catch (e) {} S.phase='live'; S.phaseT=120; }""")
+        r = A.evaluate("""() => { for (const c of ['hp','ar','am','spd','dmg','dmg','gun']) admGame(c); const me=S.pmap.h, e=S.pmap.y0;
+            const sp0 = playerSpeed({ ...me, admSpd: 1 }, me.input), sp1 = playerSpeed(me, me.input);
+            let d = 0; const oh = handleEvent; window.handleEvent = ev => { if (ev.k==='hit' && ev.t==='y0') d = ev.d; return oh(ev); };
+            e.armor = 0; damage(e, 10, me, 'classic'); window.handleEvent = oh;
+            const buy = buyItem(S.pmap.x1, 'admin'); render(1/60);
+            return { hp: me.hp, ar: me.armor, res: me.ammo.classic.res, sp: Math.round(sp1 / sp0 * 10) / 10, d, pri: me.primary, slot: me.slot, buy }; }""")
+        if r != {'hp': 200, 'ar': 50, 'res': 136, 'sp': 1.5, 'd': 50, 'pri': 'admin', 'slot': 1, 'buy': False}: fail(f'admin: oyun içi güçler beklenen gibi değil: {r}')
+        else: ok('admin paneli: can, kalkan, mermi, hız, atak gücü ve admin silahı çalışıyor; admin silahı satın alınamıyor')
+    except Exception as e: fail('admin paneli: ' + str(e)[:300])
+    report_errs(errs, 'admin paneli')
+    ca.close(); cb.close()
     b.close()
 finally:
     sig.kill(); fb.kill(); srv.shutdown()

@@ -20,6 +20,9 @@ const EN_EXACT = {
   'Hafif Zırh': 'Light Armor', 'Ağır Zırh': 'Heavy Armor', '+25 zırh': '+25 armor', '+50 zırh': '+50 armor', '✂ İmha Kiti': '✂ Defuse Kit', 'İmha Kiti': 'Defuse Kit',
   'SES AÇIK': 'SOUND ON', 'SES KAPALI': 'SOUND OFF', 'SESİ KAPAT': 'MUTE SOUND', 'SESİ AÇ': 'UNMUTE SOUND', 'seçiyor…': 'picking…', 'Maç sona erdi.': 'Match over.',
   'SALDIRAN': 'ATTACK', 'SAVUNAN': 'DEFENSE', 'CAN': 'HP', 'Ö': 'D', 'TEKRAR': 'AGAIN',
+  '🛡 ADMİN': '🛡 ADMIN', '🛡 ADMİN PANELİ': '🛡 ADMIN PANEL', 'OYUNCULARA GEMS': 'GEMS FOR PLAYERS', 'OYUN İÇİ GÜÇLER': 'IN-GAME POWERS',
+  '💎 VER': '💎 GIVE', 'SİL': 'REMOVE', 'SIFIRLA': 'RESET', '❤ CAN +100': '❤ HP +100', '⛨ KALKAN +50': '⛨ SHIELD +50', '⁍ MERMİ +100': '⁍ AMMO +100',
+  'ADMİN SİLAHI': 'ADMIN GUN', 'Kullanıcı adı': 'Username', 'Yalnızca admin hesabında görünür': 'Only visible on the admin account',
   'ÖLDÜRDÜN': 'ELIMINATED', 'SEN ONA': 'YOU DEALT', 'ÖLDÜN': 'YOU DIED',
   'AÇIK': 'ON', 'KAPALI': 'OFF', 'DÜŞÜK': 'LOW', 'ORTA': 'MEDIUM', 'YÜKSEK': 'HIGH', 'TÜRKÇE': 'TÜRKÇE', 'ENGLISH': 'ENGLISH', 'AYARLAR': 'SETTINGS'
 };
@@ -195,7 +198,7 @@ Object.assign(EN_FRAG, {
 });
 for (const k of Object.keys(EN_FRAG)) { if (k.length < 26 && /^[A-Za-zÇĞİÖŞÜçğıöşü ]+$/.test(k)) { const u = k.toLocaleUpperCase('tr-TR'); if (u !== k && !(u in EN_FRAG)) EN_FRAG[u] = EN_FRAG[k].toUpperCase(); } }
 const EN_RULES = [
-  [/^\+(\d+) CAN$/, '+$1 HP'], [/^RAUNT (\d+)( \/ |\/)(\d+)$/, 'ROUND $1$2$3'], [/^(\d+) sn$/, '$1 s'], [/(\d+) sn\b/g, '$1 s'], [/ \(BOT\)$/, ' (BOT)'], [/^1 isabet$/, '1 hit'], [/^(\d+) isabet$/, '$1 hits']
+  [/^\+(\d+) CAN$/, '+$1 HP'], [/^RAUNT (\d+)( \/ |\/)(\d+)$/, 'ROUND $1$2$3'], [/^(\d+) sn$/, '$1 s'], [/(\d+) sn\b/g, '$1 s'], [/ \(BOT\)$/, ' (BOT)'], [/^» HIZ ×(.+)$/, '» SPEED ×$1'], [/^✦ GÜÇ ×(.+)$/, '✦ POWER ×$1'], [/^1 isabet$/, '1 hit'], [/^(\d+) isabet$/, '$1 hits']
 ];
 let _EN_RE = null; const _EN_CACHE = new Map();
 function tl(s) { return LANG === 'tr' ? s : tlEN(s); }

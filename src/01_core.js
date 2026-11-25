@@ -376,6 +376,10 @@ for (const k in WEAPONS) { const w = WEAPONS[k]; w.range = Math.round(w.range * 
    Sol tık: hızlı kesik (50, sırttan 100) · Sağ tık: ağır darbe (75, sırttan 150) */
 WEAPONS.sword = { vk: 0, name: 'Kılıç', type: 'Yakın Dövüş', slot: 3, price: 0, melee: true, dmg: 50, heavy: 75, hs: 1, rate: 1.7, heavyRate: 0.95, reach: 78,
   auto: true, mag: 1, res: 0, reload: 0, base: 0, move: 0, bloom: 0, bmax: 0, range: 78, fall: [], snd: 'sword', sway: 0, spd: 1.22, trace: '#ffffff', len: 30 };
+/* ADMİN SİLAHI (gizli: mağazada yok, satın alınamaz; yalnızca admin panelinden verilir):
+   her isabet öldürür (zırhı yok sayar), oyuncuların içinden geçer, çok hızlı ve bol mermili */
+WEAPONS.admin = { vk: 0, name: 'ADMİN', type: 'Admin Silahı', slot: 1, price: 0, hidden: true, mdl: 'railgun', dmg: 999, hs: 1, rate: 12, auto: true, mag: 250, res: 9999,
+  reload: 0.6, base: 0, move: 0, bloom: 0, bmax: 0, range: Math.round(3400 * MS * 1.25), fall: [], snd: 'vandal', sway: 0, pierce: true, oneshot: true, trace: '#ffd166' };
 const ARMOR = { light: { name: 'Hafif Zırh', price: 400, val: 25 }, heavy: { name: 'Ağır Zırh', price: 1000, val: 50 } };
 
 /* ---------- AJANLAR ---------- */

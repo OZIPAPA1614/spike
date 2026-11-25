@@ -1,8 +1,10 @@
-# Firebase Auth + Realtime Database REST taklidi (yalnızca test): CORS, kurallar (sahibi yazar, inbox/<gönderen>), sunucu zamanı
+# Firebase Auth + Realtime Database REST taklidi (yalnızca test): CORS, kurallar (sahibi yazar, inbox/<gönderen>,
+# gk/<kod>: yalnızca admin ve n<kod>@ e-postalı hesap), sunucu zamanı
 import json, sys, time, random, string, re
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
-USERS = {}; TOK = {}; REF = {}; DB = {}
+USERS = {}; TOK = {}; REF = {}; DB = {}; EM = {}
+ADMIN = 'nn55g4@spike-oyun.app'  # OZN
 def rid(n): return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(n))
 def sv(v):
     if isinstance(v, dict):
@@ -37,7 +39,7 @@ class H(BaseHTTPRequestHandler):
             j = json.loads(b); e = j['email'].lower(); p = j['password']
             if len(p) < 6: return self.err('WEAK_PASSWORD : Password should be at least 6 characters')
             if e in USERS: return self.err('EMAIL_EXISTS')
-            uid = rid(28); USERS[e] = (uid, p); t = 'tk' + rid(20); r = 'rf' + rid(20); TOK[t] = uid; REF[r] = uid
+            uid = rid(28); USERS[e] = (uid, p); EM[uid] = e; t = 'tk' + rid(20); r = 'rf' + rid(20); TOK[t] = uid; REF[r] = uid
             return self.out(200, {'localId': uid, 'idToken': t, 'refreshToken': r, 'expiresIn': '3600', 'email': e})
         if u.path.endswith('accounts:signInWithPassword'):
             j = json.loads(b); e = j['email'].lower()
@@ -64,6 +66,14 @@ class H(BaseHTTPRequestHandler):
             if path[0] == 'clk' and v != {'.sv': 'timestamp'}: return self.out(401, {'error': 'Permission denied'})
             put(path, sv(v)); return self.out(200, sv(v))
         if not auth: return self.out(401, {'error': 'Permission denied'})
+        if path and path[0] == 'gk':  # admin hediyeleri: gerçek kurallarla aynı
+            em = EM.get(auth, '')
+            if len(path) < 2 or not (em == 'n' + path[1] + '@spike-oyun.app' or em == ADMIN): return self.out(401, {'error': 'Permission denied'})
+            if method == 'GET': return self.out(200, get(path))
+            b = self.body(); v = json.loads(b) if b else None
+            if method == 'DELETE': put(path, None); return self.out(200, None)
+            if method == 'PUT': put(path, sv(v)); return self.out(200, sv(v))
+            return self.out(401, {'error': 'Permission denied'})
         if method == 'GET': return self.out(200, get(path))
         ok = len(path) >= 2 and path[0] == 'users' and (path[1] == auth or (len(path) >= 4 and path[2] == 'inbox' and path[3] == auth))
         if not ok: return self.out(401, {'error': 'Permission denied'})

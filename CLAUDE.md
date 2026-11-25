@@ -15,7 +15,7 @@ The owner writes in Turkish: reply to them in Turkish and write commit messages 
 ## Checking
 - `python3 tests/check.py` — build consistency, menus/store, bot matches on every map (2 full matches),
   PARKUR mode (5 bot rounds, UI flow, multiplayer map/round sync), cinematic intro, single-player flow,
-  local multiplayer (room, join, sync, chat, voice), public-server matchmaking.
+  local multiplayer (room, join, sync, chat, voice), public-server matchmaking, admin panel (gems, powers).
   `--quick` skips the full matches. Needs Playwright + `/usr/bin/google-chrome`; no internet needed
   (local signalling server `tests/sigserver.py` and Firebase mock `tests/fbmock.py`).
 - Exit code 0 and `SONUÇ: SORUN YOK` = healthy. Every problem line starts with `FAIL:`.
@@ -25,7 +25,9 @@ The owner writes in Turkish: reply to them in Turkish and write commit messages 
   (stored as base32 emails `n…@spike-oyun.app`). These two ids keep the game's old name on purpose:
   a Firebase project id cannot be renamed and changing the email domain would lock every player out.
   Rules allow `users/<uid>` (owner writes),
-  `pub/<code>` (public room list) and `clk` (server clock).
+  `pub/<code>` (public room list), `clk` (server clock) and `gk/<code>` (admin gem gifts: only the admin
+  account OZN = `nn55g4@spike-oyun.app` and the account `n<code>@spike-oyun.app` may read/write).
+- Admin panel (`src/08b_admin.js`) is visible only when logged in as OZN.
 - Multiplayer signalling: public PeerJS server 0.peerjs.com via the embedded MiniPeer (`src/00_peer.js`).
 
 ## Daily health check (scheduled task, 12:00 Europe/Istanbul)

@@ -280,6 +280,19 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
 .eco{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:#c9c5bd}
 .eco b{color:var(--gold)}
 #pause .panel,#end .panel{text-align:center;min-width:420px}
+#admOv{z-index:24}
+#admOv .panel{width:min(560px,94vw);max-height:92vh;overflow:auto}
+#admOv .panel:before{background:var(--gold)}
+#admOv h4{margin:14px 0 8px;font-size:12px;letter-spacing:.2em;color:var(--gold)}
+.admrow{display:flex;gap:8px;margin:6px 0}
+.admrow input{flex:1;min-width:0}
+.admrow input[type=number]{flex:0 0 130px}
+.admrow button{flex:1;margin:0;padding:11px 6px;font-size:13px}
+.admgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.admgrid button{margin:0;padding:12px 6px;font-size:13px;letter-spacing:.08em}
+.admgrid button.on{border-color:var(--gold);color:var(--gold);background:rgba(245,196,81,.1)}
+#admOv .note{min-height:18px;margin-top:4px}
+button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
 #pause button,#end button{display:block;width:100%;margin-top:10px}
 #endTitle{font-size:72px;font-weight:900;letter-spacing:.2em}
 #endTitle.win{color:var(--teal)} #endTitle.lose{color:var(--red)}
@@ -358,6 +371,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <button id="btnPlay" class="primary big">OYNA</button>
     <button id="btnStore" class="store big">💎 MAĞAZA</button>
     <button id="btnSettings" class="big">AYARLAR</button>
+    <button id="btnAdmin" class="big adm hidden">🛡 ADMİN</button>
   </div>
   <div class="brand"><svg class="logoSvg" viewBox="0 0 640 230" role="img" aria-label="NOVA"><use href="#novaLogo" width="640" height="230"/></svg><div class="sub2">3D TAKTİK FPS</div></div>
   <div id="gemBar" title="Maç bittikçe gems kazanırsın"><span class="gi">💎</span> <b id="gemN">0</b> <span>GEMS</span></div>
@@ -575,6 +589,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <button id="btnResume" class="ghost">MAÇA DÖN <span class="kh">ESC</span></button>
     <div class="sens">HASSASİYET <input type="range" id="sensR" min="0.2" max="3" step="0.05" value="1"><span id="sensV">1.00</span></div>
     <button id="btnPauseSet">AYARLAR</button>
+    <button id="btnPauseAdm" class="adm hidden">🛡 ADMİN PANELİ</button>
     <button id="btnFF" class="fftog">TAKIM ATEŞİ: AÇIK</button>
     <button id="btnMute">SESİ KAPAT</button>
   </div>
@@ -625,6 +640,28 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
     <div class="row-btn"><button id="accGo" class="primary">KAYIT OL</button></div>
     <div class="acclink"><a href="#" id="accSwitch">Hesabın var mı? GİRİŞ YAP</a></div>
     <div class="acclink small"><a href="#" id="accGuest">Misafir olarak oyna (arkadaş sistemi olmadan)</a></div>
+  </div>
+</div>
+
+<div id="admOv" class="overlay hidden">
+  <div class="panel">
+    <h2>🛡 ADMİN PANELİ</h2>
+    <div class="sub" id="admWho">Yalnızca admin hesabında görünür</div>
+    <h4>OYUNCULARA GEMS</h4>
+    <div class="admrow"><input id="admNick" maxlength="16" autocomplete="off" placeholder="Kullanıcı adı"><input id="admAmt" type="number" min="1" max="1000000" step="1" value="1000"></div>
+    <div class="admrow"><button id="admGive" class="primary">💎 VER</button><button id="admTake">SİL</button><button id="admZero" class="ghost">SIFIRLA</button></div>
+    <div id="admGemMsg" class="note"></div>
+    <h4>OYUN İÇİ GÜÇLER</h4>
+    <div class="admgrid">
+      <button data-adm="hp">❤ CAN +100</button>
+      <button data-adm="ar">⛨ KALKAN +50</button>
+      <button data-adm="am">⁍ MERMİ +100</button>
+      <button data-adm="spd" id="admSpd">» HIZ ×1</button>
+      <button data-adm="dmg" id="admDmg">✦ GÜÇ ×1</button>
+      <button data-adm="gun" class="store">ADMİN SİLAHI</button>
+    </div>
+    <div id="admGameMsg" class="note"></div>
+    <div class="row-btn"><button id="admClose" class="primary">KAPAT <span class="kh">ESC</span></button></div>
   </div>
 </div>
 
@@ -1300,6 +1337,10 @@ for (const k in WEAPONS) { const w = WEAPONS[k]; w.range = Math.round(w.range * 
    Sol tık: hızlı kesik (50, sırttan 100) · Sağ tık: ağır darbe (75, sırttan 150) */
 WEAPONS.sword = { vk: 0, name: 'Kılıç', type: 'Yakın Dövüş', slot: 3, price: 0, melee: true, dmg: 50, heavy: 75, hs: 1, rate: 1.7, heavyRate: 0.95, reach: 78,
   auto: true, mag: 1, res: 0, reload: 0, base: 0, move: 0, bloom: 0, bmax: 0, range: 78, fall: [], snd: 'sword', sway: 0, spd: 1.22, trace: '#ffffff', len: 30 };
+/* ADMİN SİLAHI (gizli: mağazada yok, satın alınamaz; yalnızca admin panelinden verilir):
+   her isabet öldürür (zırhı yok sayar), oyuncuların içinden geçer, çok hızlı ve bol mermili */
+WEAPONS.admin = { vk: 0, name: 'ADMİN', type: 'Admin Silahı', slot: 1, price: 0, hidden: true, mdl: 'railgun', dmg: 999, hs: 1, rate: 12, auto: true, mag: 250, res: 9999,
+  reload: 0.6, base: 0, move: 0, bloom: 0, bmax: 0, range: Math.round(3400 * MS * 1.25), fall: [], snd: 'vandal', sway: 0, pierce: true, oneshot: true, trace: '#ffd166' };
 const ARMOR = { light: { name: 'Hafif Zırh', price: 400, val: 25 }, heavy: { name: 'Ağır Zırh', price: 1000, val: 50 } };
 
 /* ---------- AJANLAR ---------- */
@@ -2709,6 +2750,9 @@ const EN_EXACT = {
   'Hafif Zırh': 'Light Armor', 'Ağır Zırh': 'Heavy Armor', '+25 zırh': '+25 armor', '+50 zırh': '+50 armor', '✂ İmha Kiti': '✂ Defuse Kit', 'İmha Kiti': 'Defuse Kit',
   'SES AÇIK': 'SOUND ON', 'SES KAPALI': 'SOUND OFF', 'SESİ KAPAT': 'MUTE SOUND', 'SESİ AÇ': 'UNMUTE SOUND', 'seçiyor…': 'picking…', 'Maç sona erdi.': 'Match over.',
   'SALDIRAN': 'ATTACK', 'SAVUNAN': 'DEFENSE', 'CAN': 'HP', 'Ö': 'D', 'TEKRAR': 'AGAIN',
+  '🛡 ADMİN': '🛡 ADMIN', '🛡 ADMİN PANELİ': '🛡 ADMIN PANEL', 'OYUNCULARA GEMS': 'GEMS FOR PLAYERS', 'OYUN İÇİ GÜÇLER': 'IN-GAME POWERS',
+  '💎 VER': '💎 GIVE', 'SİL': 'REMOVE', 'SIFIRLA': 'RESET', '❤ CAN +100': '❤ HP +100', '⛨ KALKAN +50': '⛨ SHIELD +50', '⁍ MERMİ +100': '⁍ AMMO +100',
+  'ADMİN SİLAHI': 'ADMIN GUN', 'Kullanıcı adı': 'Username', 'Yalnızca admin hesabında görünür': 'Only visible on the admin account',
   'ÖLDÜRDÜN': 'ELIMINATED', 'SEN ONA': 'YOU DEALT', 'ÖLDÜN': 'YOU DIED',
   'AÇIK': 'ON', 'KAPALI': 'OFF', 'DÜŞÜK': 'LOW', 'ORTA': 'MEDIUM', 'YÜKSEK': 'HIGH', 'TÜRKÇE': 'TÜRKÇE', 'ENGLISH': 'ENGLISH', 'AYARLAR': 'SETTINGS'
 };
@@ -2884,7 +2928,7 @@ Object.assign(EN_FRAG, {
 });
 for (const k of Object.keys(EN_FRAG)) { if (k.length < 26 && /^[A-Za-zÇĞİÖŞÜçğıöşü ]+$/.test(k)) { const u = k.toLocaleUpperCase('tr-TR'); if (u !== k && !(u in EN_FRAG)) EN_FRAG[u] = EN_FRAG[k].toUpperCase(); } }
 const EN_RULES = [
-  [/^\+(\d+) CAN$/, '+$1 HP'], [/^RAUNT (\d+)( \/ |\/)(\d+)$/, 'ROUND $1$2$3'], [/^(\d+) sn$/, '$1 s'], [/(\d+) sn\b/g, '$1 s'], [/ \(BOT\)$/, ' (BOT)'], [/^1 isabet$/, '1 hit'], [/^(\d+) isabet$/, '$1 hits']
+  [/^\+(\d+) CAN$/, '+$1 HP'], [/^RAUNT (\d+)( \/ |\/)(\d+)$/, 'ROUND $1$2$3'], [/^(\d+) sn$/, '$1 s'], [/(\d+) sn\b/g, '$1 s'], [/ \(BOT\)$/, ' (BOT)'], [/^» HIZ ×(.+)$/, '» SPEED ×$1'], [/^✦ GÜÇ ×(.+)$/, '✦ POWER ×$1'], [/^1 isabet$/, '1 hit'], [/^(\d+) isabet$/, '$1 hits']
 ];
 let _EN_RE = null; const _EN_CACHE = new Map();
 function tl(s) { return LANG === 'tr' ? s : tlEN(s); }
@@ -3289,7 +3333,7 @@ const ACC = {
     const me = await this.db('GET', 'users/' + this.uid) || {};
     if (me.p && me.p.lastSeen) this.skew = me.p.lastSeen - Math.round((t0 + Date.now()) / 2);
     const out = { friends: me.friends || {}, inbox: me.inbox || {}, pres: {} };
-    try { if (typeof SHOP !== 'undefined') SHOP.cloud(me.prof); } catch (e) { } // gems/skin profili eşitle
+    try { if (typeof SHOP !== 'undefined') { SHOP.cloud(me.prof); SHOP.claimGifts(); } } catch (e) { } // gems/skin profili eşitle + admin hediyeleri
     await Promise.all(Object.keys(out.friends).slice(0, 40).map(async f => { try { out.pres[f] = await this.db('GET', 'users/' + f + '/p'); } catch (e) { } }));
     return out;
   },
@@ -3423,6 +3467,30 @@ const SHOP = {
     cp = this.fix(cp);
     if (cp.v > this.prof.v) { this.prof = cp; this.save(false); if (typeof uiStoreRender === 'function') uiStoreRender(); }
     else if (this.prof.v > cp.v) this.pushSoon();
+  },
+  /* ADMİN HEDİYESİ: admin'in gk/<anahtar>/ altına bıraktığı gems ekleme/silme kayıtları.
+     Her kayıt önce sunucudan silinir, silme başarılıysa uygulanır (iki kez uygulanmaz). */
+  async claimGifts() {
+    if (this._gBusy || !(FR && FR.acc && ACC.uid && ACC.nick)) return;
+    this._gBusy = true;
+    try {
+      const k = admKey(ACC.nick), all = await ACC.db('GET', 'gk/' + k);
+      if (!all || typeof all !== 'object') return;
+      if (!this.prof) this.load();
+      let got = 0, n = 0;
+      for (const id of Object.keys(all).sort()) {
+        const g = all[id] || {};
+        await ACC.db('DELETE', 'gk/' + k + '/' + id);
+        const before = this.prof.gems;
+        if (g.z) this.prof.gems = 0;
+        this.prof.gems = Math.max(0, Math.min(1e9, this.prof.gems + (Math.round(+g.g) || 0)));
+        got += this.prof.gems - before; n++;
+      }
+      if (!n) return;
+      this.bump();
+      if (typeof uiStoreRender === 'function') uiStoreRender();
+      if (typeof uiToast === 'function') uiToast('ADMİN: ' + (got >= 0 ? '+' : '−') + Math.abs(got) + ' GEMS', got < 0);
+    } catch (e) { } finally { this._gBusy = false; }
   },
   cos() { const p = this.prof || this.load(); return { sw: p.sw, ws: p.wsk || '', cs: p.csk || '' }; },
   /* maç sonu ödülü: bir maç için bir kez */
@@ -3942,6 +4010,7 @@ function playerSpeed(p, inp) {
   if (p.st.ovl > 0) s *= 1.9;
   if (p.st.lock > 0) s *= 0.55;
   if (p.st.slow > 0) s *= (1 - (p.slowAmt || 0.3));
+  if (p.admSpd > 1) s *= p.admSpd; // admin: hız çarpanı
   return s;
 }
 function barrierFor(p) { const t = PKMAP ? T_ATK : sideOf(p.team) === 'atk' ? T_ATK : T_DEF; return (tx, ty) => tileAt(tx, ty) !== t; }
@@ -4184,9 +4253,10 @@ function switchSlot(p, s) {
 function damage(t, amt, att, src, hs, quiet, bp) {
   if (!t || !t.alive || S.phase === 'buy' || S.phase === 'over' || PKMAP) return;
   if (t.prot && S.time < t.prot) return; // arena: yeniden doğuş koruması
+  if (att && att.admDmg > 1 && att !== t) amt *= att.admDmg; // admin: atak gücü çarpanı
   amt = Math.round(amt); if (amt <= 0) return;
   let rem = amt;
-  const pierce = src === 'blade' || src === 'bomb' || src === 'railgun', real = Math.min(amt, Math.max(0, Math.ceil(t.hp) + (pierce ? 0 : Math.max(0, t.armor)))); // gerçekten giden hasar (can + zırh kadar)
+  const pierce = src === 'blade' || src === 'bomb' || src === 'railgun' || src === 'admin', real = Math.min(amt, Math.max(0, Math.ceil(t.hp) + (pierce ? 0 : Math.max(0, t.armor)))); // gerçekten giden hasar (can + zırh kadar)
   if (pierce) rem = 9999;
   else if (t.armor > 0) { const ab = Math.min(t.armor, rem); t.armor -= ab; rem -= ab; }
   t.hp -= rem;
@@ -4257,6 +4327,7 @@ function buyItem(p, item) {
   const rb = p.roundBuys;
   if (WEAPONS[item]) {
     const w = WEAPONS[item];
+    if (w.hidden) return false; // admin silahı satın alınamaz
     if ((w.slot === 1 && p.primary === item) || (w.slot === 2 && p.secondary === item)) return false;
     const key = w.slot === 1 ? 'primary' : 'secondary', refund = rb[key] ? rb[key].price : 0;
     if (p.credits + refund < w.price) return false;
@@ -4435,7 +4506,7 @@ function updateHeal(dt) {
     if (S.phase !== 'live' && S.phase !== 'planted') continue;
     for (const p of S.players) if (p.alive && p.hp < HEAL_MAX && (p.jz || 0) < 60 && dist2(p.x, p.y, h.x, h.y) < HEAL_R * HEAL_R) {
       const add = Math.min(HEAL_AMT, HEAL_MAX - p.hp);
-      p.hp = Math.min(HEAL_MAX, p.hp + HEAL_AMT); h.cd = HEAL_CD;
+      p.hp = Math.max(p.hp, Math.min(HEAL_MAX, p.hp + HEAL_AMT)); h.cd = HEAL_CD; // 100'ün üstündeki (admin) canı düşürmez
       emit({ k: 'heal', id: p.id, a: Math.round(add), x: r1(h.x), y: r1(h.y) });
       emitSnd('heal', h.x, h.y);
       break;
@@ -5573,7 +5644,7 @@ function updateZones(dt) {
         }
         break;
       case 'heal':
-        for (const t of S.players) if (t.alive && t.team === a.team && inR(t, a.x, a.y, a.r)) t.hp = Math.min(100, t.hp + 14 * dt);
+        for (const t of S.players) if (t.alive && t.team === a.team && inR(t, a.x, a.y, a.r)) t.hp = Math.max(t.hp, Math.min(100, t.hp + 14 * dt));
         break;
       case 'firewall': {
         const hitT = new Set();
@@ -5581,7 +5652,7 @@ function updateZones(dt) {
           if (!t.alive || hitT.has(t.id) || !inR(t, pt[0], pt[1], a.pr + PR * 0.6)) continue;
           hitT.add(t.id);
           if (t.team !== a.team) dot(t, 30, dt, own, 'fire');
-          else if (own && t.id === own.id) t.hp = Math.min(100, t.hp + 10 * dt);
+          else if (own && t.id === own.id) t.hp = Math.max(t.hp, Math.min(100, t.hp + 10 * dt));
         }
         break;
       }
@@ -8132,7 +8203,7 @@ function drawViewmodel(p, dt, t) {
   const a = -Math.PI / 2 - 0.09, pitch = 0.03 + VM.kick * 0.2 - rl * 0.5;
   const R = rotMat(a, pitch, rl * 0.6, new Array(9));
   if (MDL.ready || mdlInit()) { drawViewmodelModel(p, t, wid, R, gx, gy, gz, ag); return; }
-  const sc = wid === 'operator' || wid === 'railgun' ? 0.42 : 0.48;
+  const sc = wid === 'operator' || wid === 'railgun' || wid === 'admin' ? 0.42 : 0.48;
   for (const [s, o, c, gl] of gunPartsFor(wid, p, t)) {
     const off = xf(R, o[0] * sc, o[1] * sc, o[2] * sc);
     QR('box', gx + off[0], gy + off[1], gz + off[2], R, s[0] * sc, s[1] * sc, s[2] * sc, c, gl ? { vm: true, em: [c[0] * gl, c[1] * gl, c[2] * gl] } : vm);
@@ -8162,7 +8233,7 @@ function vmArm(hand, elbow, slc, r) {
   QR('cyl', m[0], m[1], m[2], RB, r * 1.2, l - s0, r * 1.2, [base[0] + slc[0] * k, base[1] + slc[1] * k, base[2] + slc[2] * k, 1], vm);
 }
 function drawViewmodelModel(p, t, wid, R, gx, gy, gz, ag) {
-  const G = MDL.guns[wid] || MDL.guns.classic, sc = clamp(14 / G.len, 0.3, 0.5), vm = { vm: true };
+  const G = mdlGun(wid), sc = clamp(14 / G.len, 0.3, 0.5), vm = { vm: true };
   drawGunModel(wid, gx, gy, gz, R, sc, vm, gunColsFor(wid, p, t));
   const cs = charSkin(p, t), slc = cs ? cs.suit : ag, pistol = wid === 'classic' || wid === 'sheriff';
   const P = (x, y, z) => { const o = xf(R, x * sc, y * sc, z * sc); return [gx + o[0], gy + o[1], gz + o[2]]; };
@@ -8988,7 +9059,7 @@ function drawTopBar(me) {
       txt(ag.icon, x, yy + 1, 13, '#0b1016', 'center');
       ctx.restore();
       if (!p.alive) { ctx.strokeStyle = PAL.red; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 9, yy - 9); ctx.lineTo(x + 9, yy + 9); ctx.stroke(); }
-      if (team === mt && p.alive) { ctx.fillStyle = PAL.teal; ctx.fillRect(x - 13, yy + 19, 26 * p.hp / 100, 3); }
+      if (team === mt && p.alive) { ctx.fillStyle = PAL.teal; ctx.fillRect(x - 13, yy + 19, 26 * Math.min(1, p.hp / 100), 3); }
       if (p.ult >= AGENTS[p.agent].x.pts && (team === mt)) circle(x + 11, yy - 11, 4, PAL.gold);
     });
   };
@@ -9110,12 +9181,12 @@ function drawBottom(me) {
   const ag = AGENTS[me.agent], by = H - 78;
   // can / zırh
   panel(18, by, 210, 62);
-  txt(String(Math.ceil(me.hp)), 30, by + 30, 42, me.hp < 35 ? PAL.red : PAL.white);
+  txt(String(Math.ceil(me.hp)), 30, by + 30, me.hp >= 200 ? 33 : 42, me.hp < 35 ? PAL.red : PAL.white); // admin canı (3 hane) çubuğa taşmasın
   txt('CAN', 30, by + 54, 10, PAL.dim);
   ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fillRect(110, by + 14, 104, 6);
-  ctx.fillStyle = me.hp < 35 ? PAL.red : PAL.white; ctx.fillRect(110, by + 14, 104 * me.hp / 100, 6);
+  ctx.fillStyle = me.hp < 35 ? PAL.red : PAL.white; ctx.fillRect(110, by + 14, 104 * Math.min(1, me.hp / 100), 6);
   ctx.fillStyle = 'rgba(159,216,255,0.2)'; ctx.fillRect(110, by + 28, 104, 6);
-  ctx.fillStyle = '#9fd8ff'; ctx.fillRect(110, by + 28, 104 * me.armor / 50, 6);
+  ctx.fillStyle = '#9fd8ff'; ctx.fillRect(110, by + 28, 104 * Math.min(1, me.armor / 50), 6);
   txt('⛨ ' + Math.ceil(me.armor), 110, by + 48, 16, '#9fd8ff');
   if (me.kit) txt('✂ KİT', 158, by + 48, 12, PAL.green);
   txt(ag.name, 214, by + 48, 12, ag.color, 'right');
@@ -9425,7 +9496,7 @@ function drawMobileStats(me) {
   txt('⛨' + Math.ceil(me.armor), x + 56, y + 18, 14, '#9fd8ff');
   txt('¤' + me.credits, x + w - 6, y + 18, 13, PAL.gold, 'right');
   ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fillRect(x + 8, y + 32, w - 16, 4);
-  ctx.fillStyle = me.hp < 35 ? PAL.red : PAL.white; ctx.fillRect(x + 8, y + 32, (w - 16) * me.hp / 100, 4);
+  ctx.fillStyle = me.hp < 35 ? PAL.red : PAL.white; ctx.fillRect(x + 8, y + 32, (w - 16) * Math.min(1, me.hp / 100), 4);
   const ammoTxt = me.st.ovl > 0 ? '⚡ IŞIN' : wpn.melee ? '⚔' : me.reloadT > 0 ? 'ŞARJÖR...' : am.mag + ' / ' + am.res;
   txt(wpn.name.toUpperCase(), x + 8, y + 50, 11, PAL.dim);
   txt(ammoTxt, x + w - 6, y + 50, 15, !wpn.melee && am.mag <= Math.ceil(wpn.mag * 0.25) ? PAL.red : PAL.white, 'right');
@@ -9448,7 +9519,7 @@ function drawWorldMarkers(dt, me, v) {
     ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillText(p.name, s[0] + 1, s[1] + 1);
     ctx.fillStyle = PAL.teal; ctx.fillText(p.name, s[0], s[1]);
     ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(s[0] - 16 * sc, s[1] + 4, 32 * sc, 4);
-    ctx.fillStyle = PAL.teal; ctx.fillRect(s[0] - 16 * sc, s[1] + 4, 32 * sc * p.hp / 100, 4);
+    ctx.fillStyle = PAL.teal; ctx.fillRect(s[0] - 16 * sc, s[1] + 4, 32 * sc * Math.min(1, p.hp / 100), 4);
     if (p.hasBomb) drawBombIcon(s[0] + 26 * sc, s[1] - 4, 6, true);
   }
   for (const p of S.players) {
@@ -10091,11 +10162,14 @@ function mdlInit() {
   MDL.ready = true;
   return true;
 }
+/* silahın 3B modeli (kendi modeli yoksa WEAPONS[wid].mdl, o da yoksa tabanca) */
+function mdlGun(wid) { const w = WEAPONS[wid]; return MDL.guns[wid] || (w && w.mdl && MDL.guns[w.mdl]) || MDL.guns.classic; }
 /* Silah modeli: yerel +X namlu, +Y yukarı, +Z sağ; başlangıç noktası kabza */
 const GUN_STYLE = {
   railgun: { main: hexRGB('#1d2733'), dark: hexRGB('#2e3d4d'), acc: hexRGB('#7cf3ff'), glow: 0.9 },
   phantom: { main: hexRGB('#c3cad1'), dark: hexRGB('#2b3138'), acc: hexRGB('#5d6670'), glow: 0 },
-  operator: { main: hexRGB('#3e4a3b'), dark: hexRGB('#1c1f22'), acc: hexRGB('#2b3138'), glow: 0 }
+  operator: { main: hexRGB('#3e4a3b'), dark: hexRGB('#1c1f22'), acc: hexRGB('#2b3138'), glow: 0 },
+  admin: { main: hexRGB('#d9a92e'), dark: hexRGB('#2a2012'), acc: hexRGB('#fff0a0'), glow: 1, glowMain: 0.25 }
 };
 function gunColsFor(wid, p, t) {
   if (wid === 'sword') {
@@ -10103,10 +10177,10 @@ function gunColsFor(wid, p, t) {
     if (_SKC[key]) return _SKC[key];
     return (_SKC[key] = { main: hexRGB(T.c[0]), dark: hexRGB(T.c[3]), acc: hexRGB(T.c[2]), glowMain: T.glow || 0 });
   }
-  const sk = p && p.wsk ? WSK[p.wsk] : null;
+  const sk = p && p.wsk && wid !== 'admin' ? WSK[p.wsk] : null; // admin silahı her zaman altın
   if (!sk) {
     const key = 'gc' + wid; if (_SKC[key]) return _SKC[key];
-    const G = MDL.guns[wid], S0 = GUN_STYLE[wid] || {}, o = { glow: S0.glow || 0 };
+    const G = mdlGun(wid), S0 = GUN_STYLE[wid] || {}, o = { glow: S0.glow || 0, glowMain: S0.glowMain || 0 };
     for (const pt of G.parts) o[pt.r] = S0[pt.r] || pt.c;
     return (_SKC[key] = o);
   }
@@ -10116,7 +10190,7 @@ function gunColsFor(wid, p, t) {
   return o;
 }
 function drawGunModel(wid, x, h, z, R, sc, o, cols, alpha) {
-  const G = MDL.guns[wid] || MDL.guns.classic, A = alpha === undefined ? 1 : alpha;
+  const G = mdlGun(wid), A = alpha === undefined ? 1 : alpha;
   for (const pt of G.parts) {
     const c = cols[pt.r] || pt.c, gl = pt.r === 'acc' ? cols.glow : pt.r === 'main' ? cols.glowMain : 0;
     const oo = gl ? Object.assign({}, o || {}, { em: [c[0] * gl, c[1] * gl, c[2] * gl] }) : o;
@@ -10369,6 +10443,7 @@ function uiInit() {
   uiSettingsRefresh();
   applyLang(); i18nObserve();
   $('sensR').oninput = () => { SETTINGS.sens = +$('sensR').value; $('sensV').textContent = SETTINGS.sens.toFixed(2); try { localStorage.setItem('spk_sens', SETTINGS.sens); } catch (e) { } };
+  admInit(); // admin paneli (08b)
   if (!glok) setTimeout(() => uiToast('WebGL başlatılamadı — tarayıcın 3D grafiği desteklemiyor olabilir.', true), 300);
   try { const n = localStorage.getItem('spk_name'); if (n) $('inName').value = n; } catch (e) { }
   $('btnSP').onclick = () => { AU.init(); AU.resume(); uiShow('scr-sp'); };
@@ -10866,6 +10941,7 @@ function cycleSpec() {
 function onKeyDown(e) {
   const tag = e.target && e.target.tagName;
   if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+  if (e.code === 'Escape' && UI.admOpen) { admClose(); return; }
   if (e.code === 'Escape' && UI.setOpen) { closeSettings(); return; }
   KEYS[e.code] = true;
   if (e.code === 'Tab') { e.preventDefault(); UI.board = true; }
@@ -11114,6 +11190,118 @@ function startBgTicker() {
   });
 }
 window.addEventListener('DOMContentLoaded', () => splashStart(() => { uiInit(); startBgTicker(); })); // açılış ekranı (07f) çizildikten sonra yükle
+
+/* =====================================================================
+   08b · ADMİN PANELİ (yalnızca OZN hesabı)
+   · Oyunculara gems ver / sil / sıfırla: Firebase'de gk/<anahtar>/<kayıt> altına bir kayıt
+     bırakılır; oyuncu oyuna girince (SHOP.claimGifts) hesabına işlenir. Anahtar, kullanıcı adının
+     hesap e-postasındaki koddur (n<kod>@spike-oyun.app). Bu yolu Firebase kuralları yalnızca
+     admin'e ve kaydın sahibine açar.
+   · Oyun içi güçler (can, kalkan, mermi, hız, atak gücü, gizli admin silahı): oyunu bu cihaz
+     yönetiyorsa çalışır (tek oyunculu ya da kendi kurduğun oda); başkasının odasında kapalıdır.
+   ===================================================================== */
+const ADM = { email: 'nn55g4@spike-oyun.app', spd: [1, 1.5, 2, 3], dmg: [1, 2, 5, 10], open: false, gm: '' };
+function admIs() { try { return !!(FR && FR.acc && ACC.uid && ACC.nick && ACC.email(ACC.nick) === ADM.email); } catch (e) { return false; } }
+function admKey(nick) { const e = ACC.email(nick); return e.slice(1, e.indexOf('@')); }
+function admMe() { return G.running && S && S.pmap ? S.pmap[G.myId] : null; }
+function admGameOk() { return !!(admMe() && G.mode !== 'client'); }
+
+function admOpen() {
+  if (!admIs()) return;
+  ADM.open = true; UI.admOpen = true; UI.overlay = true; MOUSE.down = false;
+  $('admOv').classList.remove('hidden');
+  try { unlockPointer(); syncCursor(); } catch (e) { }
+  $('admWho').textContent = 'Admin: ' + ACC.nick;
+  ADM.gm = ''; $('admGameMsg').textContent = '';
+  admRender();
+}
+function admClose() {
+  ADM.open = false; UI.admOpen = false;
+  $('admOv').classList.add('hidden');
+  UI.overlay = UI.pauseOpen || UI.buyOpen || !!UI.setOpen;
+  try { syncCursor(); } catch (e) { }
+}
+function admRender() {
+  const me = admMe(), ok = admGameOk(), sp = (me && me.admSpd) || 1, dm = (me && me.admDmg) || 1;
+  $('admSpd').textContent = '» HIZ ×' + sp; $('admSpd').classList.toggle('on', sp > 1);
+  $('admDmg').textContent = '✦ GÜÇ ×' + dm; $('admDmg').classList.toggle('on', dm > 1);
+  for (const b of document.querySelectorAll('#admOv [data-adm]')) b.disabled = !ok;
+  $('admGameMsg').textContent = ok ? ADM.gm : G.running ? 'Başkasının odasında kapalı: tek oyunculu ya da kendi kurduğun odada çalışır' : 'Maçtayken kullanılır (tek oyunculu ya da kendi kurduğun oda)';
+}
+
+/* ---- oyun içi güçler (bu cihaz oyunu yönetiyorsa doğrudan oyuncuya uygulanır) ---- */
+function admGame(c) {
+  if (!admIs() || !admGameOk()) { admRender(); return; }
+  const me = admMe();
+  if (!me.alive && c !== 'spd' && c !== 'dmg') { ADM.gm = 'Önce yeniden doğman gerekiyor'; admRender(); return; }
+  let m = '';
+  switch (c) {
+    case 'hp': me.hp = Math.min(999, Math.ceil(me.hp) + 100); m = 'CAN ' + Math.ceil(me.hp); break;
+    case 'ar': me.armor = Math.min(999, Math.ceil(me.armor || 0) + 50); m = 'KALKAN ' + me.armor; break;
+    case 'am': {
+      let any = false;
+      for (const id of [me.primary, me.secondary]) {
+        const w = id && WEAPONS[id]; if (!w || w.melee) continue;
+        const a = me.ammo[id] || (me.ammo[id] = { mag: 0, res: 0 });
+        a.mag = w.mag; a.res = Math.min(9999, (a.res || 0) + 100); any = true;
+      }
+      m = any ? 'MERMİ +100 · şarjör dolu' : 'Elinde mermili silah yok'; break;
+    }
+    case 'spd': { const L = ADM.spd; me.admSpd = L[(L.indexOf(me.admSpd || 1) + 1) % L.length]; m = 'HIZ ×' + me.admSpd; break; }
+    case 'dmg': { const L = ADM.dmg; me.admDmg = L[(L.indexOf(me.admDmg || 1) + 1) % L.length]; m = 'ATAK GÜCÜ ×' + me.admDmg; break; }
+    case 'gun': {
+      if (PKMAP) { m = 'Parkurda silah kullanılamaz'; break; }
+      const w = WEAPONS.admin;
+      me.primary = 'admin'; me.ammo.admin = { mag: w.mag, res: w.res };
+      me.slot = 1; me.switchT = 0.2; me.reloadT = 0; me.scoped = false;
+      m = 'ADMİN SİLAHI ELİNDE (1. yuva)'; break;
+    }
+    default: return;
+  }
+  ADM.gm = m;
+  showMsg(null, 'ADMİN · ' + m, PAL.gold); AU.play('buy');
+  admRender();
+}
+
+/* ---- oyunculara gems ver / sil / sıfırla ---- */
+async function admGems(kind) {
+  if (!admIs()) return;
+  const msg = $('admGemMsg'), nick = $('admNick').value.trim(), amt = Math.floor(+$('admAmt').value || 0);
+  const bad = t => { msg.style.color = '#ff6b78'; msg.textContent = t; };
+  if (!FR.validNick(nick)) return bad('Geçerli bir kullanıcı adı yaz (3–16 karakter)');
+  if (kind !== 'zero' && !(amt > 0 && amt <= 1000000)) return bad('Miktar 1 ile 1.000.000 arasında olmalı');
+  const rec = { g: kind === 'give' ? amt : kind === 'take' ? -amt : 0, by: ACC.nick, ts: { '.sv': 'timestamp' } };
+  if (kind === 'zero') rec.z = 1;
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7), btns = ['admGive', 'admTake', 'admZero'].map($);
+  msg.style.color = ''; msg.textContent = 'Gönderiliyor…'; btns.forEach(b => { b.disabled = true; });
+  try {
+    await ACC.db('PUT', 'gk/' + admKey(nick) + '/' + id, rec);
+    msg.textContent = '✓ ' + nick + ': ' + (kind === 'give' ? '+' + amt + ' GEMS' : kind === 'take' ? '−' + amt + ' GEMS' : 'GEMS SIFIRLANDI') + ' · oyuna girince hesabına işlenir';
+    if (admKey(nick) === admKey(ACC.nick)) SHOP.claimGifts(); // kendine verdiysen hemen işle
+  } catch (e) {
+    bad(/DB 40[13]/.test(e.message) ? '✗ İzin yok: Firebase kurallarına admin (gk) kuralı eklenmemiş' : '✗ ' + ACC.errText(e.message));
+  } finally { btns.forEach(b => { b.disabled = false; }); }
+}
+
+/* admin hesabıyla girilince düğmeleri göster (giriş/çıkış değişebilir: saniyede bir bak) */
+function admVis() {
+  const on = admIs();
+  $('btnAdmin').classList.toggle('hidden', !on); $('btnPauseAdm').classList.toggle('hidden', !on);
+  if (!on && ADM.open) admClose();
+  else if (ADM.open) admRender();
+}
+function admInit() {
+  $('btnAdmin').onclick = () => admOpen();
+  $('btnPauseAdm').onclick = () => admOpen();
+  $('admClose').onclick = () => admClose();
+  $('admGive').onclick = () => admGems('give');
+  $('admTake').onclick = () => admGems('take');
+  $('admZero').onclick = () => admGems('zero');
+  for (const b of document.querySelectorAll('#admOv [data-adm]')) b.onclick = () => admGame(b.dataset.adm);
+  $('admOv').addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); admClose(); } });
+  $('admNick').addEventListener('keydown', e => { if (e.key === 'Enter') $('admAmt').focus(); });
+  admVis(); setInterval(admVis, 1000);
+}
 
 </script>
 </body>

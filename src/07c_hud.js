@@ -326,7 +326,7 @@ function drawTopBar(me) {
       txt(ag.icon, x, yy + 1, 13, '#0b1016', 'center');
       ctx.restore();
       if (!p.alive) { ctx.strokeStyle = PAL.red; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 9, yy - 9); ctx.lineTo(x + 9, yy + 9); ctx.stroke(); }
-      if (team === mt && p.alive) { ctx.fillStyle = PAL.teal; ctx.fillRect(x - 13, yy + 19, 26 * p.hp / 100, 3); }
+      if (team === mt && p.alive) { ctx.fillStyle = PAL.teal; ctx.fillRect(x - 13, yy + 19, 26 * Math.min(1, p.hp / 100), 3); }
       if (p.ult >= AGENTS[p.agent].x.pts && (team === mt)) circle(x + 11, yy - 11, 4, PAL.gold);
     });
   };
@@ -448,12 +448,12 @@ function drawBottom(me) {
   const ag = AGENTS[me.agent], by = H - 78;
   // can / zırh
   panel(18, by, 210, 62);
-  txt(String(Math.ceil(me.hp)), 30, by + 30, 42, me.hp < 35 ? PAL.red : PAL.white);
+  txt(String(Math.ceil(me.hp)), 30, by + 30, me.hp >= 200 ? 33 : 42, me.hp < 35 ? PAL.red : PAL.white); // admin canı (3 hane) çubuğa taşmasın
   txt('CAN', 30, by + 54, 10, PAL.dim);
   ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fillRect(110, by + 14, 104, 6);
-  ctx.fillStyle = me.hp < 35 ? PAL.red : PAL.white; ctx.fillRect(110, by + 14, 104 * me.hp / 100, 6);
+  ctx.fillStyle = me.hp < 35 ? PAL.red : PAL.white; ctx.fillRect(110, by + 14, 104 * Math.min(1, me.hp / 100), 6);
   ctx.fillStyle = 'rgba(159,216,255,0.2)'; ctx.fillRect(110, by + 28, 104, 6);
-  ctx.fillStyle = '#9fd8ff'; ctx.fillRect(110, by + 28, 104 * me.armor / 50, 6);
+  ctx.fillStyle = '#9fd8ff'; ctx.fillRect(110, by + 28, 104 * Math.min(1, me.armor / 50), 6);
   txt('⛨ ' + Math.ceil(me.armor), 110, by + 48, 16, '#9fd8ff');
   if (me.kit) txt('✂ KİT', 158, by + 48, 12, PAL.green);
   txt(ag.name, 214, by + 48, 12, ag.color, 'right');
@@ -763,7 +763,7 @@ function drawMobileStats(me) {
   txt('⛨' + Math.ceil(me.armor), x + 56, y + 18, 14, '#9fd8ff');
   txt('¤' + me.credits, x + w - 6, y + 18, 13, PAL.gold, 'right');
   ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fillRect(x + 8, y + 32, w - 16, 4);
-  ctx.fillStyle = me.hp < 35 ? PAL.red : PAL.white; ctx.fillRect(x + 8, y + 32, (w - 16) * me.hp / 100, 4);
+  ctx.fillStyle = me.hp < 35 ? PAL.red : PAL.white; ctx.fillRect(x + 8, y + 32, (w - 16) * Math.min(1, me.hp / 100), 4);
   const ammoTxt = me.st.ovl > 0 ? '⚡ IŞIN' : wpn.melee ? '⚔' : me.reloadT > 0 ? 'ŞARJÖR...' : am.mag + ' / ' + am.res;
   txt(wpn.name.toUpperCase(), x + 8, y + 50, 11, PAL.dim);
   txt(ammoTxt, x + w - 6, y + 50, 15, !wpn.melee && am.mag <= Math.ceil(wpn.mag * 0.25) ? PAL.red : PAL.white, 'right');
@@ -786,7 +786,7 @@ function drawWorldMarkers(dt, me, v) {
     ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillText(p.name, s[0] + 1, s[1] + 1);
     ctx.fillStyle = PAL.teal; ctx.fillText(p.name, s[0], s[1]);
     ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(s[0] - 16 * sc, s[1] + 4, 32 * sc, 4);
-    ctx.fillStyle = PAL.teal; ctx.fillRect(s[0] - 16 * sc, s[1] + 4, 32 * sc * p.hp / 100, 4);
+    ctx.fillStyle = PAL.teal; ctx.fillRect(s[0] - 16 * sc, s[1] + 4, 32 * sc * Math.min(1, p.hp / 100), 4);
     if (p.hasBomb) drawBombIcon(s[0] + 26 * sc, s[1] - 4, 6, true);
   }
   for (const p of S.players) {

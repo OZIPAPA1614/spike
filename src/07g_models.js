@@ -31,11 +31,14 @@ function mdlInit() {
   MDL.ready = true;
   return true;
 }
+/* silahın 3B modeli (kendi modeli yoksa WEAPONS[wid].mdl, o da yoksa tabanca) */
+function mdlGun(wid) { const w = WEAPONS[wid]; return MDL.guns[wid] || (w && w.mdl && MDL.guns[w.mdl]) || MDL.guns.classic; }
 /* Silah modeli: yerel +X namlu, +Y yukarı, +Z sağ; başlangıç noktası kabza */
 const GUN_STYLE = {
   railgun: { main: hexRGB('#1d2733'), dark: hexRGB('#2e3d4d'), acc: hexRGB('#7cf3ff'), glow: 0.9 },
   phantom: { main: hexRGB('#c3cad1'), dark: hexRGB('#2b3138'), acc: hexRGB('#5d6670'), glow: 0 },
-  operator: { main: hexRGB('#3e4a3b'), dark: hexRGB('#1c1f22'), acc: hexRGB('#2b3138'), glow: 0 }
+  operator: { main: hexRGB('#3e4a3b'), dark: hexRGB('#1c1f22'), acc: hexRGB('#2b3138'), glow: 0 },
+  admin: { main: hexRGB('#d9a92e'), dark: hexRGB('#2a2012'), acc: hexRGB('#fff0a0'), glow: 1, glowMain: 0.25 }
 };
 function gunColsFor(wid, p, t) {
   if (wid === 'sword') {
@@ -43,10 +46,10 @@ function gunColsFor(wid, p, t) {
     if (_SKC[key]) return _SKC[key];
     return (_SKC[key] = { main: hexRGB(T.c[0]), dark: hexRGB(T.c[3]), acc: hexRGB(T.c[2]), glowMain: T.glow || 0 });
   }
-  const sk = p && p.wsk ? WSK[p.wsk] : null;
+  const sk = p && p.wsk && wid !== 'admin' ? WSK[p.wsk] : null; // admin silahı her zaman altın
   if (!sk) {
     const key = 'gc' + wid; if (_SKC[key]) return _SKC[key];
-    const G = MDL.guns[wid], S0 = GUN_STYLE[wid] || {}, o = { glow: S0.glow || 0 };
+    const G = mdlGun(wid), S0 = GUN_STYLE[wid] || {}, o = { glow: S0.glow || 0, glowMain: S0.glowMain || 0 };
     for (const pt of G.parts) o[pt.r] = S0[pt.r] || pt.c;
     return (_SKC[key] = o);
   }
@@ -56,7 +59,7 @@ function gunColsFor(wid, p, t) {
   return o;
 }
 function drawGunModel(wid, x, h, z, R, sc, o, cols, alpha) {
-  const G = MDL.guns[wid] || MDL.guns.classic, A = alpha === undefined ? 1 : alpha;
+  const G = mdlGun(wid), A = alpha === undefined ? 1 : alpha;
   for (const pt of G.parts) {
     const c = cols[pt.r] || pt.c, gl = pt.r === 'acc' ? cols.glow : pt.r === 'main' ? cols.glowMain : 0;
     const oo = gl ? Object.assign({}, o || {}, { em: [c[0] * gl, c[1] * gl, c[2] * gl] }) : o;
