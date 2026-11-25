@@ -23,6 +23,9 @@ const EN_EXACT = {
   '🛡 ADMİN': '🛡 ADMIN', '🛡 ADMİN PANELİ': '🛡 ADMIN PANEL', 'OYUNCULARA GEMS': 'GEMS FOR PLAYERS', 'OYUN İÇİ GÜÇLER': 'IN-GAME POWERS',
   '💎 VER': '💎 GIVE', 'SİL': 'REMOVE', 'SIFIRLA': 'RESET', '❤ CAN +100': '❤ HP +100', '⛨ KALKAN +50': '⛨ SHIELD +50', '⁍ MERMİ +100': '⁍ AMMO +100',
   'ADMİN SİLAHI': 'ADMIN GUN', 'Kullanıcı adı': 'Username', 'Yalnızca admin hesabında görünür': 'Only visible on the admin account',
+  'SPAWN MENÜSÜ': 'SPAWN MENU', 'SERBEST': 'FREE ROAM', 'SİLAHLAR': 'WEAPONS', "NPC'LER": 'NPCS', 'PİLLER': 'PILLS', "KENDİ NPC'N": 'YOUR NPC', 'MODLAR': 'MODS',
+  'İNSANA DÖN': 'BACK TO HUMAN', 'RESİM SEÇ': 'PICK IMAGE', 'KAYDET VE AÇ': 'SAVE & ENABLE', 'ÖRNEK MOD': 'EXAMPLE MOD', 'LİNKTEN AL': 'LOAD URL', 'DÜZENLE': 'EDIT',
+  'SPAWN': 'SPAWN', 'HAZIRLAN': 'GET READY', 'YENİ MOD': 'NEW MOD', 'MOD GÜNLÜĞÜ': 'MOD LOG',
   'ÖLDÜRDÜN': 'ELIMINATED', 'SEN ONA': 'YOU DEALT', 'ÖLDÜN': 'YOU DIED',
   'AÇIK': 'ON', 'KAPALI': 'OFF', 'DÜŞÜK': 'LOW', 'ORTA': 'MEDIUM', 'YÜKSEK': 'HIGH', 'TÜRKÇE': 'TÜRKÇE', 'ENGLISH': 'ENGLISH', 'AYARLAR': 'SETTINGS'
 };

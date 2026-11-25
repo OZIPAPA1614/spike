@@ -177,6 +177,7 @@ function hostRecv(conn, d) {
       else if (d.a === 'drop') dropBomb(p);
       else if (d.a === 'req') requestBomb(p);
       else if (d.a === 'emote') hostEmote(p, d.e);
+      else if (frOn()) frAct(p, d); // serbest mod: silah / NPC / pill istekleri (03d)
       break;
     }
   }
@@ -258,7 +259,7 @@ function buildRoster(humans, cfg) {
   let bn = 0;
   for (const team of [0, 1]) {
     let n = roster.filter(r => r.team === team).length;
-    const target = cfg.fill ? cfg.teamSize : Math.max(1, n);
+    const target = cfg.fill ? cfg.teamSize : cfg.mode === 'fr' ? n : Math.max(1, n); // serbest: boş takıma bot eklenmez
     while (n < target) {
       const used = new Set(roster.filter(r => r.team === team).map(r => r.agent));
       const ag = pick(AGENT_IDS.filter(a => !used.has(a)));
@@ -286,7 +287,7 @@ function snapP(p) {
     ammo: p.ammo, ch: p.ch, ult: p.ult, st, slowAmt: p.slowAmt, zoneSlow: r2(p.zoneSlow), zoneFire: r2(p.zoneFire), hasBomb: p.hasBomb, kit: p.kit ? 1 : 0,
     plantT: r2(p.plantT), defT: r2(p.defT), crouch: p.crouch, kills: p.kills, deaths: p.deaths, dmg: Math.round(p.dmg), posVer: p.posVer, reloadT: r2(p.reloadT),
     switchT: r2(p.switchT), bloom: Math.round(p.bloom * 1000) / 1000, scoped: p.scoped, spd: Math.round(p.spd), shotN: p.shotN, jz: r1(p.jz || 0), rbT: r2(p.rbT || 0), tk: p.tk || 0, vm: p.vm ? 1 : 0, vt: p.vt ? 1 : 0,
-    gl: p.ggL | 0, rsp: r1(p.respawnAt || 0), prot: r1(p.prot || 0),
+    gl: p.ggL | 0, rsp: r1(p.respawnAt || 0), prot: r1(p.prot || 0), pill: p.pill || '', modSpd: p.modSpd || 0,
     pkCp: p.pkCp | 0, pkW: p.pkW | 0, pkP: r2(p.pkP || 0), pkF: p.pkF || 0, pkSum: r2(p.pkSum || 0), pkT: r1(p.pkT || 0)
   };
 }
@@ -302,6 +303,7 @@ function makeSnapshot() {
     sp: { state: S.bomb.state, carrier: S.bomb.carrier, x: r1(S.bomb.x), y: r1(S.bomb.y), t: r2(S.bomb.t), site: S.bomb.site, defuser: S.bomb.defuser, prog: r2(S.bomb.prog), half: S.bomb.half },
     ob: S.orbs, cp: S.corpses, cd: S.cards || [], rb: (S.rb || []).map(r => r2(r.cd)), hl: (S.heal || []).map(h => h.cd > 0 ? 1 : 0), ev: S.evq.slice(),
     pk: S.pk ? { bk: S.pk.bk, fin: S.pk.fin, w: S.pk.winner, c: S.pk.champ, t0: r2(S.pk.t0) } : 0,
+    np: S.npcs ? S.npcs.map(n => [n.id, n.k, r1(n.x), r1(n.y), Math.ceil(n.hp || 0)]) : 0, nk: S.npcK || 0,
     am: S.arena ? { m: S.arena.m, sc: S.arena.sc.map(r1), z: S.arena.z, zi: S.arena.zi, zt: r1(S.arena.zt), own: S.arena.own, win: S.arena.win } : 0
   };
 }
@@ -548,6 +550,8 @@ function clientApplySnap(d) {
   if ('ob' in d) S.orbs = s.ob;
   if ('cp' in d) S.corpses = s.cp;
   if ('am' in d) S.arena = s.am || null;
+  if ('np' in d) frClientNpcs(s.np || []);
+  if ('nk' in d) S.npcK = s.nk || {};
   if ('cd' in d) S.cards = s.cd || [];
   if ('rb' in d) S.rb = (s.rb || []).map(cd => ({ cd }));
   if ('hl' in d || !S.heal) S.heal = (MAPDATA.heal || []).map((h, i) => ({ id: h.id, x: h.x, y: h.y, cd: s.hl && s.hl[i] ? 1 : 0 }));
@@ -615,7 +619,7 @@ function clientPredictFire(me, inp, dt) {
   LF.cd -= dt * (me.zoneFire || 1);
   if (inp.fp !== LF.lastFp) { LF.lastFp = inp.fp; LF.pend = true; LF.pendT = 0.35; }
   if (LF.pend) { LF.pendT -= dt; if (LF.pendT <= 0) LF.pend = false; }
-  if (S.phase === 'buy' || S.phase === 'over' || me.st.ovl > 0 || me.st.lock > 0 || me.st.knock > 0 || inp.use || me.plantT > 0 || me.defT > 0) return;
+  if (me.pill || S.phase === 'buy' || S.phase === 'over' || me.st.ovl > 0 || me.st.lock > 0 || me.st.knock > 0 || inp.use || me.plantT > 0 || me.defT > 0) return;
   if (me.reloadT > 0 || me.switchT > 0) return;
   if (w.melee) {
     const heavy = inp.alt && !inp.fire && !LF.pend;

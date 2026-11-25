@@ -113,6 +113,7 @@ function mapLabel(i) { return i >= 0 && MAPS[i] ? MAPS[i].name : 'Rastgele'; }
 /* ESC: maçtan çıkıp ana menüye dön */
 function quitToMenu() {
   if (!G.running) return;
+  if (FRM.open) frMenuToggle(false);
   uiBackToMenu();
   uiToast('Maçtan çıkıldı — ana menü');
 }
@@ -244,6 +245,7 @@ function uiInit() {
   applyLang(); i18nObserve();
   $('sensR').oninput = () => { SETTINGS.sens = +$('sensR').value; $('sensV').textContent = SETTINGS.sens.toFixed(2); try { localStorage.setItem('spk_sens', SETTINGS.sens); } catch (e) { } };
   admInit(); // admin paneli (08b)
+  frMenuInit(); // serbest mod spawn menüsü (08c)
   if (!glok) setTimeout(() => uiToast('WebGL başlatılamadı — tarayıcın 3D grafiği desteklemiyor olabilir.', true), 300);
   try { const n = localStorage.getItem('spk_name'); if (n) $('inName').value = n; } catch (e) { }
   $('btnSP').onclick = () => { AU.init(); AU.resume(); uiShow('scr-sp'); };
@@ -306,12 +308,12 @@ function uiInit() {
     $('spSizeL').textContent = pk ? 'YARIŞÇI SAYISI' : 'TAKIM BOYUTU';
     for (const o of $('spSize').options) o.textContent = pk ? (o.value * 2) + ' yarışçı' : o.value + 'v' + o.value;
     const am = $('spMode').value;
-    $('spSub').textContent = pk ? 'Kılıçla engel yarışı · 5 raunt, her raunt farklı uzun parkur · bitişe ilk varan raundu alır' : am === 'gg' ? 'SİLAH YARIŞI · her öldürmede sıradaki silah · son silah kılıç: kılıçla ilk öldüren takım kazanır' : am === 'sn' ? 'SÜPERNOVA · parlayan bölge yer değiştirir · bölgeyi tutan takım puan toplar · 100 puan kazanır' : 'Botlara karşı tam maç · 20 raunt · 10. rauntten sonra taraf değişir';
+    $('spSub').textContent = pk ? 'Kılıçla engel yarışı · 5 raunt, her raunt farklı uzun parkur · bitişe ilk varan raundu alır' : am === 'gg' ? 'SİLAH YARIŞI · her öldürmede sıradaki silah · son silah kılıç: kılıçla ilk öldüren takım kazanır' : am === 'sn' ? 'SÜPERNOVA · parlayan bölge yer değiştirir · bölgeyi tutan takım puan toplar · 100 puan kazanır' : am === 'fr' ? 'SERBEST · görev ve süre yok · [Q] spawn menüsü: bedava silah, NPC, pill · arkadaşlarınla oynamak için ODA KUR' : 'Botlara karşı tam maç · 20 raunt · 10. rauntten sonra taraf değişir';
     $('btnSpGo').textContent = pk ? 'PARKURA BAŞLA' : 'AJAN SEÇİMİ';
     const i = +$('spMap').value;
     $('spMapNote').textContent = pk ? 'Elinde yalnızca kılıç var: rakipleri it, barikatları kır, boşluklardan atla. Düşersen son kontrol noktasından devam edersin.' : i >= 0 ? MAPS[i].desc : 'Her maçta ' + MAPS.length + ' haritadan biri rastgele seçilir.';
   };
-  try { const md = localStorage.getItem('spk_mode'); if (md === 'pk' || md === 'bomb' || md === 'gg' || md === 'sn') $('spMode').value = md; } catch (e) { }
+  try { const md = localStorage.getItem('spk_mode'); if (md === 'pk' || md === 'bomb' || md === 'gg' || md === 'sn' || md === 'fr') $('spMode').value = md; } catch (e) { }
   $('spMode').onchange = () => { try { localStorage.setItem('spk_mode', $('spMode').value); } catch (e) { } spNote(); };
   spNote();
   $('spMap').onchange = () => {
@@ -323,6 +325,7 @@ function uiInit() {
   $('btnSpGo').onclick = () => {
     NET.mode = 'off'; G.myId = 'h';
     const cfg = { teamSize: +$('spSize').value, fill: true, diff: $('spDiff').value, map: +$('spMap').value, mode: modeOf($('spMode').value) };
+    if (cfg.mode === 'fr') cfg.fill = false; // serbest: tek başına dolaş (NPC'leri spawn menüsünden çıkar)
     const team = $('spSide').value === 'atk' ? 0 : 1;
     selStart([{ id: 'h', name: playerName(), team, cos: SHOP.cos() }], cfg);
   };
@@ -339,7 +342,7 @@ function uiInit() {
   $('btnLobbyStart').onclick = () => {
     if (NET.mode !== 'host') return;
     const L = NET.lobby;
-    if (!L.cfg.fill && (!L.players.some(p => p.team === 0) || !L.players.some(p => p.team === 1))) uiToast('Bir takım boş — o takıma bot eklenecek.');
+    if (!L.cfg.fill && L.cfg.mode !== 'fr' && (!L.players.some(p => p.team === 0) || !L.players.some(p => p.team === 1))) uiToast('Bir takım boş — o takıma bot eklenecek.');
     selStart(L.players.filter(p => !p.bot), L.cfg);
   };
   $('btnLobbyLeave').onclick = () => { netShutdown(); uiShow('scr-play'); };
@@ -433,7 +436,7 @@ function uiRenderLobby() {
   $('lbMapRow').style.display = $('lbFF').parentNode.style.display = pkm ? 'none' : '';
   const ffv = L.cfg.ff !== false; $('lbFF').textContent = 'TAKIM ATEŞİ: ' + (ffv ? 'AÇIK' : 'KAPALI') + (host ? '  ·  tıkla' : ''); $('lbFF').classList.toggle('off', !ffv);
   if (pkm) $('lbCfgText').textContent = 'Mod: PARKUR · 5 parkur · takım yok, herkes kendi için yarışır · Yarışçı: ' + L.cfg.teamSize * 2 + (L.cfg.fill ? ' (botlarla)' : '') + ' · Zorluk: ' + L.cfg.diff;
-  else $('lbCfgText').textContent = (L.cfg.mode === 'gg' ? 'Mod: SİLAH YARIŞI · ' : L.cfg.mode === 'sn' ? 'Mod: SÜPERNOVA · ' : '') + 'Harita: ' + mapLabel(mv) + ' · Takım boyutu: ' + L.cfg.teamSize + 'v' + L.cfg.teamSize + ' · Bot doldurma: ' + (L.cfg.fill ? 'Açık' : 'Kapalı') + ' · Zorluk: ' + L.cfg.diff + ' · Takım ateşi: ' + (L.cfg.ff !== false ? 'Açık' : 'Kapalı');
+  else $('lbCfgText').textContent = (L.cfg.mode === 'gg' ? 'Mod: SİLAH YARIŞI · ' : L.cfg.mode === 'sn' ? 'Mod: SÜPERNOVA · ' : L.cfg.mode === 'fr' ? 'Mod: SERBEST · ' : '') + 'Harita: ' + mapLabel(mv) + ' · Takım boyutu: ' + L.cfg.teamSize + 'v' + L.cfg.teamSize + ' · Bot doldurma: ' + (L.cfg.fill ? 'Açık' : 'Kapalı') + ' · Zorluk: ' + L.cfg.diff + ' · Takım ateşi: ' + (L.cfg.ff !== false ? 'Açık' : 'Kapalı');
   for (const team of [0, 1]) {
     const box = $('lbTeam' + team); box.innerHTML = '';
     const ps = L.players.filter(p => p.team === team);
@@ -619,7 +622,7 @@ function uiStartGame() {
 }
 function uiBackToMenu(msg) {
   const wasOver = S && S.phase === 'over';
-  G.running = false; G.paused = false; S = null; toggleEmote(false); cineStop(false);
+  G.running = false; G.paused = false; S = null; toggleEmote(false); cineStop(false); modStopAll(); if (FRM.open) frMenuToggle(false);
   document.body.classList.remove('pk'); if (PKMAP) loadMap(0); // parkurdan çıkınca menü arka planı normal haritaya döner
   if (CHAT.open) chatClose(false); UIS.chat.length = 0;
   document.body.classList.remove('ingame', 'ovl'); $('touch').classList.add('hidden');
@@ -659,6 +662,7 @@ function togglePause(force, noRelock) {
   syncCursor();
 }
 function toggleBuy() {
+  if (frOn()) { frMenuToggle(); return; } // serbest mod: mağaza yerine spawn menüsü (08c)
   if (UI.buyOpen) { closeBuy(); return; }
   const me = S && S.pmap[G.myId];
   if (!me || !me.alive) return;
@@ -742,6 +746,7 @@ function onKeyDown(e) {
   const tag = e.target && e.target.tagName;
   if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
   if (e.code === 'Escape' && UI.admOpen) { admClose(); return; }
+  if (e.code === 'Escape' && UI.frOpen) { frMenuToggle(false); return; }
   if (e.code === 'Escape' && UI.setOpen) { closeSettings(); return; }
   KEYS[e.code] = true;
   if (e.code === 'Tab') { e.preventDefault(); UI.board = true; }
@@ -769,7 +774,9 @@ function onKeyDown(e) {
     case 'Enter': case 'NumpadEnter': if (UI.pauseOpen) quitToMenu(); break;
     case 'KeyP': if (UI.buyOpen) closeBuy(); togglePause(); break;
     case 'KeyB': if (!UI.pauseOpen) toggleBuy(); break;
-    case 'KeyQ': case 'KeyE': case 'KeyX': if (!UI.overlay) castAbility(e.code.slice(3).toLowerCase()); break;
+    case 'KeyQ': if (frOn() && !UI.pauseOpen) { frMenuToggle(); break; } // serbest mod: Q = spawn menüsü (GMod gibi)
+    // falls through
+    case 'KeyE': case 'KeyX': if (!UI.overlay) castAbility(e.code.slice(3).toLowerCase()); break;
     case 'KeyR': if (!UI.overlay) doReload(); break;
     case 'Digit1': doSlot(1); break;
     case 'Digit2': doSlot(2); break;
@@ -886,7 +893,8 @@ function updateTouchButtons() {
   $('tbDrop').classList.toggle('hidden', !me.hasBomb);
   const car = S.bomb && S.bomb.state === 'carried' ? S.pmap[S.bomb.carrier] : null;
   $('tbReq').classList.toggle('hidden', !(me.alive && !me.hasBomb && car && car.team === me.team && (S.phase === 'live' || S.phase === 'buy')));
-  $('tbBuy').classList.toggle('hidden', S.phase !== 'buy');
+  $('tbBuy').classList.toggle('hidden', S.phase !== 'buy' && !frOn()); // serbest modda SPAWN menüsü her zaman
+  $('tbBuy').textContent = frOn() ? 'SPAWN' : 'MAĞAZA';
   $('tbScope').classList.toggle('hidden', !WEAPONS[curW(me)].scope);
   const use = $('tbUse');
   const nearRb = (MAPDATA.reboot || []).some((r, i) => (S.cards || []).some(c => c.carrier === me.id) && dist(me.x, me.y, r.x, r.y) < REBOOT_R && !(S.rb[i] && S.rb[i].cd > 0));
@@ -905,7 +913,7 @@ function uiGameTick(dt) {
     if (G._overT > 2) { G._overT = 0; G.overShown = true; uiShowEnd(); }
   }
 }
-function modeOf(v) { return v === 'pk' || v === 'gg' || v === 'sn' ? v : 'bomb'; }
+function modeOf(v) { return v === 'pk' || v === 'gg' || v === 'sn' || v === 'fr' ? v : 'bomb'; }
 function uiShowEnd() {
   const me = S.pmap[G.myId], mt = me ? me.team : 0, win = S.matchWinner === mt;
   closeBuy();

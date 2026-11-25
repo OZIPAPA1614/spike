@@ -348,6 +348,70 @@ try:
     except Exception as e: fail('admin paneli: ' + str(e)[:300])
     report_errs(errs, 'admin paneli')
     ca.close(); cb.close()
+
+    # ---------- 8) SERBEST mod: NPC, pill, bedava silah, JS modları; çok oyunculu eşitleme ----------
+    errs = []
+    ctx = b.new_context(viewport={'width': 960, 'height': 540})
+    F = page(ctx, 'SERBEST', errs, 'Serbestci')
+    try:
+        F.click('#btnPlay'); F.click('#btnSP'); F.select_option('#spMode', 'fr'); F.click('#btnSpGo')
+        F.click('#selGrid .agent >> nth=0'); F.click('#btnLock')
+        if not until(F, "() => !!(G.running && S && S.cfg.mode==='fr')", 40): fail('SERBEST mod başlamadı')
+        F.evaluate("() => { localStorage.setItem('spk_mods', JSON.stringify([{ name: 'Örnek', code: MOD_EXAMPLE, on: true }, { name: 'Döngü', code: \"nova.on('chat',(p,t)=>{ if(t==='!d') while(true){} });\", on: true }])); cineStop(false); G.paused = true; for (let i = 0; i < 60 * 30 && S.phase !== 'live'; i++) hostTick(SIM_DT); G.paused = false; }")
+        F.wait_for_timeout(1500)
+        r = F.evaluate("""() => { G.paused = true; const me = S.pmap.h, out = { n: S.players.length, live: S.phase };
+            frAct(me, { a: 'npc', k: 'grin' }); me.prot = 0; const n = S.npcs[0]; n.x = me.x + Math.cos(me.ang) * 300; n.y = me.y + Math.sin(me.ang) * 300; n.hitT = 0;
+            let t = 0; for (; t < 240 && me.alive; t++) hostTick(SIM_DT); out.chaseKill = !me.alive;
+            S.npcs.length = 0; for (let i = 0; i < 60 * 4; i++) hostTick(SIM_DT); out.respawn = me.alive;
+            frAct(me, { a: 'pill', k: 'ghost' }); out.pillSpd = Math.round(playerSpeed(me, me.input)); frAct(me, { a: 'pill', k: '' });
+            frAct(me, { a: 'frw', w: 'operator' }); frAct(me, { a: 'frw', w: 'admin' }); out.w = me.primary;
+            frAct(me, { a: 'npc', k: 'cube' }); const c = S.npcs[0]; c.x = me.x + Math.cos(me.ang) * 150; c.y = me.y + Math.sin(me.ang) * 150;
+            for (let k = 0; k < 20 && S.npcs.length; k++) traceBullet(me.x, me.y, me.ang, 3000, me.team, me, 'vandal', WEAPONS.vandal, null, 0, EYE);
+            out.cubeDead = S.npcs.length === 0; out.mods = MODS.run.length; out.modK = Object.keys(S.npcK).filter(k => k.startsWith('m')).length;
+            render(1/60); G.paused = false; return out; }""")
+        F.evaluate("() => { S.pmap.h.prot = S.time + 999; S.pmap.h._chatT = 0; hostChat('h', '!yağmur'); }"); F.wait_for_timeout(900)
+        r['rain'] = F.evaluate("() => S.npcs.filter(n => n.k.startsWith('m')).length")
+        F.evaluate("() => { S.pmap.h._chatT = 0; hostChat('h', '!d'); }"); F.wait_for_timeout(500)
+        r['alive'] = F.evaluate("() => { const t = performance.now(); G.paused = true; for (let i = 0; i < 30; i++) hostTick(SIM_DT); G.paused = false; return performance.now() - t < 3000; }")
+        exp = {'n': 1, 'live': 'live', 'chaseKill': True, 'respawn': True, 'pillSpd': 400, 'w': 'operator', 'cubeDead': True, 'mods': 2, 'modK': 1, 'rain': 5, 'alive': True}
+        if r != exp: fail(f'SERBEST: beklenen gibi değil: {r}')
+        else: ok('SERBEST: tek başına, NPC kovalayıp öldürüyor, yeniden doğuş, pill, bedava silah (admin silahı yok), NPC vurulur, JS modları (sohbet komutu, sonsuz döngü oyunu dondurmuyor)')
+        F.keyboard.press('KeyQ'); F.wait_for_timeout(200)
+        if not F.is_visible('#frOv'): fail('SERBEST: Q ile spawn menüsü açılmadı')
+        for tab in ['w', 'n', 'p', 'c', 'm']: F.click(f'#frTabs [data-tab="{tab}"]'); F.wait_for_timeout(80)
+        F.keyboard.press('Escape'); F.wait_for_timeout(150)
+        if F.is_visible('#frOv'): fail('SERBEST: spawn menüsü ESC ile kapanmadı')
+    except Exception as e: fail('SERBEST: ' + str(e)[:300])
+    report_errs(errs, 'serbest mod')
+    ctx.close()
+    errs = []
+    ctx = b.new_context(viewport={'width': 560, 'height': 340})
+    H = page(ctx, 'SERBEST-HOST', errs, 'SerbestHost'); C = page(ctx, 'SERBEST-İSTEMCİ', errs, 'SerbestMisafir')
+    try:
+        H.click('#btnPlay'); H.click('#btnHost')
+        if not until(H, "() => UI.screen==='scr-lobby' && (document.getElementById('lbCode').textContent||'').replace(/-/g,'').length>=5", 60): fail('SERBEST: oda açılamadı')
+        code = H.inner_text('#lbCode')
+        C.click('#btnPlay'); C.click('#btnJoin'); C.fill('#inCode', code); C.click('#btnConnect')
+        if not until(C, "() => UI.screen==='scr-lobby'", 80): fail('SERBEST: istemci odaya katılamadı')
+        H.select_option('#lbMode', 'fr'); H.select_option('#lbSize', '1'); H.wait_for_timeout(600); H.click('#btnLobbyStart')
+        until(C, "() => UI.screen==='scr-select'", 60)
+        C.click('.agent[data-id="vex"]'); C.wait_for_timeout(200); C.click('#btnLock')
+        H.click('.agent[data-id="mist"]'); H.wait_for_timeout(200); H.click('#btnLock')
+        if not until(C, "() => !!(G.running && S && S.cfg && S.cfg.mode==='fr')", 80): fail('SERBEST: çok oyunculu maç istemcide başlamadı')
+        H.evaluate("() => { cineStop(false); S.phase='live'; S.phaseT=1e9; }"); C.evaluate("() => { cineStop(false); if (UI.pauseOpen) togglePause(false); }")
+        H.wait_for_timeout(600)
+        img = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVR4nGP8z8DwnwEJMDEgAUYGBgAuIAEDHRwRxQAAAABJRU5ErkJggg=="
+        C.evaluate("(img) => { frRequest({ a: 'npck', n: 'Misafir Botu', img, spd: 300, hp: 0 }); frRequest({ a: 'npc', k: npcIdOf(img) }); frRequest({ a: 'pill', k: 'grin' }); }", img)
+        C.wait_for_timeout(900)
+        hk = H.evaluate("() => [S.npcs.length, Object.keys(S.npcK).length, S.pmap[Object.keys(NET.conns)[0]] ? S.pmap[Object.keys(NET.conns)[0]].pill : '?']")
+        H.evaluate("() => { frAct(S.pmap.h, { a: 'npc', k: 'eye' }); S.npcs.forEach(n => { n.hitT = S.time + 999; }); }"); H.wait_for_timeout(900)
+        ck = C.evaluate("() => [S.npcs.length, Object.keys(S.npcK || {}).length, S.pmap[G.myId].pill, Math.round(playerSpeed(S.pmap[G.myId], S.pmap[G.myId].input))]")
+        if hk != [1, 1, 'grin']: fail(f'SERBEST: istemcinin NPC/pill isteği host\'a işlenmedi: {hk}')
+        elif ck != [2, 1, 'grin', 330]: fail(f'SERBEST: istemci NPC\'leri / pill\'i görmüyor: {ck}')
+        else: ok('SERBEST çok oyunculu: istemci kendi resmiyle NPC çıkarıyor, pill oluyor; NPC\'ler ve pill herkese gidiyor')
+    except Exception as e: fail('SERBEST çok oyunculu: ' + str(e)[:300])
+    report_errs(errs, 'serbest çok oyunculu')
+    ctx.close()
     b.close()
 finally:
     sig.kill(); fb.kill(); srv.shutdown()

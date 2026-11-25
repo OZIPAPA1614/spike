@@ -526,6 +526,11 @@ function drawC4(x, h, z, ang, pitch, s, mode, t, alpha) {
   P(-5, 9.6, -4, 1.8, 1.8, 1.8, blink ? [1, 0.25, 0.25] : [0.35, 0.08, 0.08], { em: blink ? [1, 0.15, 0.15] : ZERO3 }, 'sphere');
 }
 function drawCharacter(p, rel, alpha, xray, t) {
+  if (p.pill && npcKind(p.pill) && !xray) { // pill: oyuncu NPC resmi olarak görünür (07h)
+    drawNpcSprite(p.pill, p.x, p.y, p.jz || 0, alpha);
+    Q('ring', p.x, 2, p.y, 0, 0, 44, 1, 44, rel === 'ally' ? [0.12, 0.89, 0.81, 0.8] : [1, 0.27, 0.33, 0.8], { add: true, lit: 0 });
+    return;
+  }
   const em = p._emo && p._emo.t > 0 ? p._emo : null, ek = em ? EMOTES[em.e].k : null, et = em ? EMOTE_TIME - em.t : 0;
   const ag = AGCOL[p.agent] || COL.white, lift = (p.st.knock > 0 ? KNOCK_LIFT + Math.sin(t * 8) * 3 : 0) + (p.jz || 0) + (ek === 'dance' ? Math.abs(Math.sin(et * 9)) * 6 : ek === 'cheer' || ek === 'gg' ? Math.abs(Math.sin(et * 7)) * 9 : 0);
   const A = p.ang + (ek === 'dance' ? et * 6.5 : 0), R = rotMat(A, 0, p.st.knock > 0 ? Math.sin(t * 6) * 0.3 : ek === 'laugh' ? Math.sin(et * 28) * 0.07 : 0, new Array(9));
@@ -630,7 +635,7 @@ function _basisY(d) { // Y ekseni d yönünde dik taban (silindir/kol için)
 
 /* ---------- birinci şahıs silah görünümü ---------- */
 function drawViewmodel(p, dt, t) {
-  if (!p || !p.alive || p.scoped) return;
+  if (!p || !p.alive || p.scoped || p.pill) return;
   const wid = curW(p);
   if (VM.lastW !== wid) { VM.lastW = wid; VM.swap = 1; }
   VM.kick = Math.max(0, VM.kick - dt * 7); VM.flash = Math.max(0, VM.flash - dt); VM.swap = Math.max(0, VM.swap - dt * 3.2);
@@ -774,6 +779,7 @@ function drawWorldDynamic(v, me, t) {
   const mt = me ? me.team : 0;
   if (PKMAP) drawPkDynamic(t, me);
   if (arOn()) arDrawWorld(me, t);
+  if (S.npcs) drawNpcs(t); // serbest mod NPC'leri (07h)
   // geçici duvarlar
   for (const w of S.twalls) for (const i of w.tiles) {
     const x = (i % MW + 0.5) * TILE, z = (((i / MW) | 0) + 0.5) * TILE;

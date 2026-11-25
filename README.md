@@ -10,6 +10,7 @@ Tarayıcıda oynanan 3D taktik FPS (5v5, ajanlar, bomba kur/imha et).
 - **PARKUR modu:** yalnızca kılıçla engel yarışı · 5 raunt, her raunt farklı ve çok uzun, ince bir pist · bitişe ilk varan raundu alır
 - **SİLAH YARIŞI:** her öldürmede sıradaki silah, kılıçla öldüren takım kazanır
 - **SÜPERNOVA:** yer değiştiren enerji bölgesini tutan takım puan toplar, 100 puan kazanır
+- **SERBEST:** Garry's Mod tarzı serbest dolaşma (tek ya da çok oyunculu) · [Q] spawn menüsü: bedava silah, kovalayan NPC'ler, pill ile NPC'ye dönüşme, kendi resminle NPC · JavaScript modları (`nova` arayüzü, oyunu kuran cihazda güvenli alanda çalışır)
 - Savaş raporu: öldürünce rakibe nereye (kafa / gövde / bacak) kaç isabet ve ne kadar hasar verdiğin; ölünce seni öldürenin sana nereye ne kadar vurduğu
 - Silahlar 3B model (Quaternius / Kenney, CC0)
 - Maç başında sinematik giriş (harita üstünden kamera uçuşu, atlanabilir)

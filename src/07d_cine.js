@@ -100,7 +100,7 @@ function drawCine(dt, me) {
     { const g = ctx.createLinearGradient(0, H - bh - 90 * sm, 0, H - bh); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.7)'); ctx.fillStyle = g; ctx.fillRect(0, H - bh - 90 * sm, W, 90 * sm); }
     if (arOn()) {
       txt(AR_NAMES[arMode()], W / 2, H - bh - 46 * sm, Math.round(30 * sm), PAL.gold, 'center');
-      txt(arMode() === 'gg' ? 'Her öldürmede yeni silah · kılıçla öldüren takım kazanır' : 'Parlayan bölgeyi tut · 100 puana ilk ulaşan takım kazanır', W / 2, H - bh - 18 * sm, Math.round(14 * sm), PAL.white, 'center', 'normal');
+      txt(arMode() === 'gg' ? 'Her öldürmede yeni silah · kılıçla öldüren takım kazanır' : arMode() === 'fr' ? 'Görev yok · dolaş, NPC çıkar, pill kullan · ' + (IS_TOUCH ? '[SPAWN]' : '[Q]') + ' spawn menüsü' : 'Parlayan bölgeyi tut · 100 puana ilk ulaşan takım kazanır', W / 2, H - bh - 18 * sm, Math.round(14 * sm), PAL.white, 'center', 'normal');
     } else {
       txt('RAUNT 1 / ' + MATCH_ROUNDS, W / 2, H - bh - 46 * sm, Math.round(30 * sm), PAL.white, 'center');
       txt(me && sideOf(me.team) === 'atk' ? 'SALDIRI — Bombayı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, bombayı imha et', W / 2, H - bh - 18 * sm, Math.round(14 * sm), me && sideOf(me.team) === 'atk' ? PAL.red : PAL.teal, 'center', 'normal');

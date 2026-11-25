@@ -211,7 +211,9 @@ function playerSpeed(p, inp) {
   if (p.st.ovl > 0) s *= 1.9;
   if (p.st.lock > 0) s *= 0.55;
   if (p.st.slow > 0) s *= (1 - (p.slowAmt || 0.3));
+  if (p.pill) { const K = npcKind(p.pill); if (K) s = (K.spd || 300) * (inp.walk ? 0.5 : 1); } // pill: NPC'nin hızı
   if (p.admSpd > 1) s *= p.admSpd; // admin: hız çarpanı
+  if (p.modSpd) s *= p.modSpd; // JavaScript modu: hız (08d)
   return s;
 }
 function barrierFor(p) { const t = PKMAP ? T_ATK : sideOf(p.team) === 'atk' ? T_ATK : T_DEF; return (tx, ty) => tileAt(tx, ty) !== t; }
@@ -298,6 +300,7 @@ function updateCombat(p, dt) {
   p.crouch = !!inp.crouch && !(p.st.knock > 0);
   if (inp.fp !== p.lastFp) { p.lastFp = inp.fp; p.pend = true; p.pendT = 0.35; }
   if (p.pend) { p.pendT -= dt; if (p.pendT <= 0) p.pend = false; }
+  if (p.pill) { p.scoped = false; return; } // pill: NPC'ye dönüşen silah kullanamaz
   const wid = curW(p), w = WEAPONS[wid];
   p.scoped = !!(w.scope && inp.alt && p.switchT <= 0 && p.reloadT <= 0 && !(p.st.ovl > 0) && canAct(p));
   const fm = p.zoneFire;
@@ -399,10 +402,21 @@ function traceBullet(ox, oy, a, range, team, att, wid, w, rw, pitch, eyeH, ff) {
     const d = rayCircle(ox, oy, ux, uy, dp.x, dp.y, dp.hr || 12);
     if (d !== null && d < end) cands.push({ d, dep: dp });
   }
+  if (S.npcs) for (const n of S.npcs) { // serbest mod NPC'leri (03d)
+    const d = rayCircle(ox, oy, ux, uy, n.x, n.y, PR + 6);
+    if (d !== null && d < end) cands.push({ d, npc: n });
+  }
   cands.sort((A, B) => A.d - B.d);
   let pierced = 0;
   for (const c of cands) {
     const hz = tp === null ? 40 : eh + tp * c.d;
+    if (c.npc) {
+      const K = npcKind(c.npc.k), top = 100 * ((K && K.sz) || 1);
+      if (tp !== null && (hz > top || hz < 0)) continue;
+      npcHit(c.npc, w ? falloff(w, c.d) : 8, att);
+      if (w && w.pierce) { pierced++; continue; }
+      return { x: ox + ux * c.d, y: oy + uy * c.d, z: hz, hit: true };
+    }
     if (c.dep) {
       if (tp !== null && (hz > 40 || hz < 0)) continue;
       damageDep(c.dep, w ? falloff(w, c.d) : 8);

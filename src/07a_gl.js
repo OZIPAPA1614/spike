@@ -19,9 +19,10 @@ precision highp float;
 precision mediump float;
 #endif
 varying vec3 vN; varying vec3 vC; varying vec2 vT; varying vec3 vP;
-uniform vec3 uCam; uniform vec4 uCol; uniform vec3 uEm; uniform float uLit; uniform sampler2D uTex; uniform sampler2D uDet; uniform float uDetS; uniform vec2 uDetO; uniform vec3 uFogC; uniform vec2 uFog; uniform vec3 uL; uniform vec3 uAD; uniform vec3 uLC;
+uniform vec3 uCam; uniform vec4 uCol; uniform vec3 uEm; uniform float uLit; uniform float uCut; uniform sampler2D uTex; uniform sampler2D uDet; uniform float uDetS; uniform vec2 uDetO; uniform vec3 uFogC; uniform vec2 uFog; uniform vec3 uL; uniform vec3 uAD; uniform vec3 uLC;
 void main(){
   vec4 tx = texture2D(uTex, vT);
+  if (tx.a < uCut) discard; // saydam resimli NPC'ler (kesme)
   if (uDetS > 0.0) tx.rgb *= texture2D(uDet, vP.xz * uDetS + uDetO).rgb * 2.0;
   float vD = distance(vP, uCam); // mesafe parça başına (dev zemin üçgenlerinde doğru sis)
   vec3 base = vC * uCol.rgb * tx.rgb;
@@ -79,10 +80,10 @@ function glInit(canvas) {
   gl.linkProgram(pr);
   if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
   gl.useProgram(pr);
-  for (const u of ['uVP', 'uM', 'uR', 'uCam', 'uCol', 'uEm', 'uLit', 'uTex', 'uDet', 'uDetS', 'uDetO', 'uFogC', 'uFog', 'uL', 'uAD', 'uLC']) GLX.L[u] = gl.getUniformLocation(pr, u);
+  for (const u of ['uVP', 'uM', 'uR', 'uCam', 'uCol', 'uEm', 'uLit', 'uCut', 'uTex', 'uDet', 'uDetS', 'uDetO', 'uFogC', 'uFog', 'uL', 'uAD', 'uLC']) GLX.L[u] = gl.getUniformLocation(pr, u);
   for (let i = 0; i < 4; i++) gl.enableVertexAttribArray(i);
   gl.enable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
-  gl.uniform1i(GLX.L.uTex, 0); gl.uniform1i(GLX.L.uDet, 1); gl.uniform1f(GLX.L.uDetS, 0);
+  gl.uniform1i(GLX.L.uTex, 0); gl.uniform1i(GLX.L.uDet, 1); gl.uniform1f(GLX.L.uDetS, 0); gl.uniform1f(GLX.L.uCut, 0);
   GLX.aniso = gl.getExtension('EXT_texture_filter_anisotropic') || gl.getExtension('WEBKIT_EXT_texture_filter_anisotropic');
   buildPrimitives();
   loadTexPack();
@@ -491,7 +492,7 @@ function QR(mesh, x, y, z, R, sx, sy, sz, col, o) {
   for (let i = 0; i < 9; i++) it.R[i] = R[i];
   it.mesh = mesh; it.col = col; it.em = (o && o.em) || ZERO3; it.lit = (o && o.lit === 0) ? 0 : 1; it.tex = (o && o.tex) || null;
   it.add = !!(o && o.add); it.xray = !!(o && o.xray); it.vm = !!(o && o.vm); it.sky = !!(o && o.sky);
-  it.det = (o && o.det) || null; it.detS = (o && o.detS) || 0; it.detO = (o && o.detO) || null;
+  it.det = (o && o.det) || null; it.detS = (o && o.detS) || 0; it.detO = (o && o.detO) || null; it.cut = (o && o.cut) || 0;
   const tr = col[3] < 0.999 || it.add || it.xray;
   if (tr) { it.dist = (x - GLX.cam[0]) ** 2 + (y - GLX.cam[1]) ** 2 + (z - GLX.cam[2]) ** 2; GLX.tq.push(it); } else GLX.oq.push(it);
   return it;
@@ -505,7 +506,7 @@ function Qline(x1, y1, z1, x2, y2, z2, w, col, o) {
   QR('box', (x1 + x2) / 2, (y1 + y2) / 2, (z1 + z2) / 2, rotMat(Math.atan2(dz, dx), Math.atan2(dy, hl), 0, _R), l, w, w, col, o);
 }
 let _boundTex = null;
-let _detOn = true;
+let _detOn = true, _cut = 0;
 function glBindMesh(gl, b) {
   gl.bindBuffer(gl.ARRAY_BUFFER, b);
   gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 44, 0); gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 44, 12);
@@ -525,6 +526,7 @@ function glDrawItem(it) {
   if (it.det) { gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, it.det); gl.activeTexture(gl.TEXTURE0); gl.uniform1f(L.uDetS, it.detS); gl.uniform2fv(L.uDetO, it.detO || ZERO2); _detOn = true; }
   else if (_detOn) { gl.uniform1f(L.uDetS, 0); _detOn = false; }
   if (tx !== _boundTex) { gl.bindTexture(gl.TEXTURE_2D, tx); _boundTex = tx; }
+  if ((it.cut || 0) !== _cut) { _cut = it.cut || 0; gl.uniform1f(L.uCut, _cut); }
   if (m.ch) { for (const c of m.ch) if (c.vis) { glBindMesh(gl, c.b); gl.drawArrays(gl.TRIANGLES, 0, c.n); GLX.stV += c.n; } }
   else { gl.drawArrays(gl.TRIANGLES, 0, m.n); GLX.stV += m.n; }
 }

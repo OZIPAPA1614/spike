@@ -6,15 +6,16 @@
         SÜPERNOVA ('sn'): haritada parlayan enerji bölgesi belirli aralıklarla
           yer değiştirir; bölgede tek başına bulunan takım puan toplar,
           100 puana ilk ulaşan kazanır. Bölge çekişmeliyse kimse puan almaz.
+        SERBEST ('fr', 03d): görev ve süre yok; spawn menüsü, NPC'ler, pill.
         Ortak: bomba / mağaza / yetenek yok, ölünce birkaç saniyede yeniden
         doğulur (kısa doğuş koruması), süre dolarsa önde olan kazanır.
    ===================================================================== */
 const GG_ORDER = ['spectre', 'vandal', 'phantom', 'operator', 'railgun', 'sheriff', 'classic', 'sword'];
 const AR_TIME = 480, AR_COUNT = 5, SN_WIN = 100, SN_RATE = 0.65, SN_MOVE = 40, SN_R = 3.4 * TILE, AR_PROT = 1.8;
-const AR_RESPAWN = { gg: 2.5, sn: 4 };
-function arMode() { return S && S.cfg && (S.cfg.mode === 'gg' || S.cfg.mode === 'sn') ? S.cfg.mode : null; }
+const AR_RESPAWN = { gg: 2.5, sn: 4, fr: 3 };
+function arMode() { return S && S.cfg && (S.cfg.mode === 'gg' || S.cfg.mode === 'sn' || S.cfg.mode === 'fr') ? S.cfg.mode : null; }
 function arOn() { return !!arMode(); }
-const AR_NAMES = { gg: 'SİLAH YARIŞI', sn: 'SÜPERNOVA' };
+const AR_NAMES = { gg: 'SİLAH YARIŞI', sn: 'SÜPERNOVA', fr: 'SERBEST' };
 /* SÜPERNOVA bölge adayları: iki bölge merkezi, harita ortası ve aralarındaki noktalar */
 function snSpots() {
   if (MAPDATA._snSpots) return MAPDATA._snSpots;
@@ -35,6 +36,7 @@ function ggEquip(p) {
 }
 function arLoadout(p) {
   if (arMode() === 'gg') { ggEquip(p); return; }
+  if (arMode() === 'fr') { frLoadout(p); return; }
   p.primary = 'vandal'; p.secondary = 'classic'; p.slot = 1; p.armor = 50;
   p.ammo = { vandal: { mag: WEAPONS.vandal.mag, res: 250 }, classic: { mag: WEAPONS.classic.mag, res: 120 } };
 }
@@ -52,6 +54,7 @@ function arSetup() {
     arLoadout(p); p.respawnAt = 0; p.prot = 0;
   }
   if (m === 'sn') snMoveZone(true);
+  if (m === 'fr') frSetup();
 }
 function snMoveZone(first) {
   const A = S.arena, sp = snSpots();
@@ -75,6 +78,7 @@ function arRespawn(p) {
   setPos(p, f.x, f.y);
   p.ang = Math.atan2(MAPDATA.sites.A.center[1] * TILE - f.y, MAPDATA.sites.A.center[0] * TILE - f.x); p.input = blankInput(); p.input.ang = p.ang; p.input.fp = p.lastFp; p.input.jc = p.lastJc;
   arLoadout(p);
+  if (arMode() === 'fr') modEvent({ e: 'spawn', id: p.id });
   S.corpses = S.corpses.filter(c => c.id !== p.id);
   if (p.ctrl === 'bot') { const ai = newAI(p); ai.buyDone = true; p.ai = ai; }
   emitFx({ t: 'rebirth', x: r1(f.x), y: r1(f.y), x2: r1(f.x), y2: r1(f.y) });
@@ -83,6 +87,7 @@ function arRespawn(p) {
 function arOnKill(t, att, src) {
   const m = arMode();
   t.respawnAt = S.time + AR_RESPAWN[m];
+  if (m === 'fr') { t.pill = ''; modEvent({ e: 'kill', a: att ? att.id : null, v: t.id }); }
   if (m !== 'gg' || S.phase !== 'live') return;
   if (src === 'sword' && t.ggL > 0 && att && att.team !== t.team) { t.ggL--; emit({ k: 'msg', small: t.name + ' kılıçla bir seviye geri düştü' }); }
   if (!att || att === t || att.team === t.team) return;
@@ -106,6 +111,7 @@ function arFinish(team, why) {
 function arScores() {
   const A = S.arena;
   if (A.m === 'sn') return [Math.floor(A.sc[0]), Math.floor(A.sc[1])];
+  if (A.m === 'fr') return [0, 1].map(t => S.players.filter(p => p.team === t).reduce((a, p) => a + p.kills, 0));
   const best = t => Math.max(0, ...S.players.filter(p => p.team === t).map(p => ggLv(p) + 1));
   return [best(0), best(1)];
 }
@@ -127,9 +133,10 @@ function arHostTick(dt) {
   updateOrbs(); updateHeal(dt); footstepsHear(dt);
   S.phaseT -= dt;
   if (S.phase === 'buy') {
-    if (S.phaseT <= 0) { S.phase = 'live'; S.phaseT = AR_TIME; emit({ k: 'go' }); }
+    if (S.phaseT <= 0) { S.phase = 'live'; S.phaseT = m === 'fr' ? 1e9 : AR_TIME; emit({ k: 'go' }); if (m === 'fr') modStartAll(); } // serbest: modlar başlar (08d, host)
   } else if (S.phase === 'live') {
     for (const p of S.players) if (!p.alive && p.respawnAt && S.time >= p.respawnAt) arRespawn(p);
+    if (m === 'fr') { frTick(dt); S.score = arScores(); S.phaseT = 1e9; recordHistory(); return; } // serbest: süre ve bitiş yok
     if (m === 'sn' && A.z) {
       A.zt -= dt;
       const inZ = [0, 0];
@@ -193,6 +200,14 @@ function arDrawMinimap(P, s, me) {
 /* üst çubuk yerine arena paneli */
 function arTopBar(me) {
   const A = S.arena, mt = me ? me.team : 0, et = 1 - mt, cx = W / 2, y = IS_TOUCH ? 46 : 10;
+  if (A.m === 'fr') { // serbest: süre/skor yok, yalnızca mod adı ve kısa yardım
+    panel(cx - 90, y, 180, 44, 0.9);
+    txt('SERBEST', cx, y + 17, 20, PAL.gold, 'center');
+    txt(S.phase === 'buy' ? 'HAZIRLAN' : (S.npcs ? S.npcs.length : 0) + ' NPC · ' + S.players.filter(p => !p.isBot).length + ' OYUNCU', cx, y + 34, 11, PAL.dim, 'center');
+    const info = (IS_TOUCH ? '[SPAWN] düğmesi' : '[Q] SPAWN MENÜSÜ') + ' · silah · NPC · pill' + (me && me.pill && npcKind(me.pill) ? '  ·  ŞU AN: ' + npcKind(me.pill).n.toLocaleUpperCase('tr-TR') : '');
+    ctx.font = 'bold 12px ' + FONT; const tw = ctx.measureText(tl(info)).width + 24; panel(cx - tw / 2, y + 50, tw, 20, 0.8); txt(info, cx, y + 60, 12, PAL.gold, 'center');
+    return;
+  }
   const sc = A.m === 'sn' ? [Math.floor(A.sc[0]), Math.floor(A.sc[1])] : arScores();
   panel(cx - 70, y, 140, 48, 0.9);
   txt(S.phase === 'end' || S.phase === 'over' ? '—' : fmtTime(S.phaseT), cx, y + 21, 26, PAL.white, 'center');

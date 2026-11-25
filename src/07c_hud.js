@@ -10,7 +10,7 @@ const UI = { overlay: false, buyOpen: false, pauseOpen: false, board: false, scr
 const KEYS = {}, MOUSE = { x: 640, y: 360, down: false, right: false, fp: 0 };
 const LOOK = { yaw: 0, pitch: 0 };
 const FONT = '"Bahnschrift","DIN Alternate","Arial Narrow","Roboto Condensed","Segoe UI",Arial,sans-serif';
-const SRC_NAMES = { sword: 'Kılıç', blade: 'Karanlık Kesik', fire: 'Ateş Duvarı', poison: 'Zehir Sisi', mine: 'Tuzak Mayını', turret: 'Mini Taret', shock: 'Şok Oku', orbital: 'Yörünge Lazeri', quake: 'Sarsıntı Dalgası', rift: 'Tektonik Yarık', chain: 'Zincir Yük', overload: 'Aşırı Yük', wolf: 'Gölge Kurdu', bomb: 'BOMBA', nightmare: 'Kabus Alanı', tcollapse: 'Zaman Çöküşü', railgun: 'Railgun' };
+const SRC_NAMES = { npc: 'NPC', pill: 'Pill', mod: 'Mod', sword: 'Kılıç', blade: 'Karanlık Kesik', fire: 'Ateş Duvarı', poison: 'Zehir Sisi', mine: 'Tuzak Mayını', turret: 'Mini Taret', shock: 'Şok Oku', orbital: 'Yörünge Lazeri', quake: 'Sarsıntı Dalgası', rift: 'Tektonik Yarık', chain: 'Zincir Yük', overload: 'Aşırı Yük', wolf: 'Gölge Kurdu', bomb: 'BOMBA', nightmare: 'Kabus Alanı', tcollapse: 'Zaman Çöküşü', railgun: 'Railgun' };
 const REASONS = { elim: 'Rakip takım elendi', time: 'Süre doldu', bomb: 'Bomba patladı', defuse: 'Bomba imha edildi', arena: '' };
 
 function initRender() {
@@ -117,6 +117,10 @@ function handleEvent(ev) {
       } else addFx({ type: 'blood', x: ev.x, y: ev.y, h: ev.hs ? 64 : 42, t: 0.3, dur: 0.3 });
       break;
     }
+    case 'npch': // NPC'ye isabet (serbest mod)
+      if (ev.a === G.myId) { UIS.hit = 0.22; UIS.hitHs = false; AU.play('hit'); UIS.dmgNums.push({ x: ev.x, y: ev.y, txt: String(ev.d), c: '#d7b3ff', t: 0.8, ox: rand(-14, 14) }); }
+      addFx({ type: 'impact', x: ev.x, y: ev.y, h: 60, t: 0.2, dur: 0.2 });
+      break;
     case 'sw': {
       const sp = S.pmap[ev.id];
       if (sp) sp._sw = 0.32;
@@ -189,7 +193,7 @@ function handleEvent(ev) {
       const side = me ? sideOf(me.team) : 'atk';
       if (arOn()) { // arena modları: tek uzun raunt
         const m = arMode();
-        showMsg(AR_NAMES[m], m === 'gg' ? 'Her öldürmede sıradaki silah · kılıçla öldüren kazanır' : 'Parlayan bölgeyi tut · 100 puana ilk ulaşan kazanır', PAL.gold, 3.5);
+        showMsg(AR_NAMES[m], m === 'gg' ? 'Her öldürmede sıradaki silah · kılıçla öldüren kazanır' : m === 'fr' ? 'Görev yok · dolaş · ' + (IS_TOUCH ? '[SPAWN]' : '[Q]') + ' spawn menüsü: silah, NPC, pill' : 'Parlayan bölgeyi tut · 100 puana ilk ulaşan kazanır', PAL.gold, 3.5);
         AU.play('round'); G.spec = null; UIS.deathBy = undefined; UIS.pings.length = 0; cmbReset();
         LOOK.yaw = side === 'atk' ? -Math.PI / 2 : Math.PI / 2; LOOK.pitch = 0;
         if (ev.n === 1 && G.running) cineStart('match');
@@ -379,6 +383,7 @@ function drawMinimap(me, v) {
     const [px, py] = P(pg.x, pg.y); circle(px, py, 3 + (1.3 - pg.t) * 6, null, 'rgba(255,70,85,' + pg.t / 1.3 + ')', 1.5);
   }
   if (arOn()) arDrawMinimap(P, s, me);
+  if (frOn()) frDrawMinimap(P);
   const mt = me ? me.team : 0;
   for (const p of S.players) {
     if (!p.alive) continue;
@@ -459,9 +464,12 @@ function drawBottom(me) {
   txt(ag.name, 214, by + 48, 12, ag.color, 'right');
   // yetenekler
   const bw = 78, bh = 56, gap = 8, x0 = W / 2 - (bw * 3 + gap * 2) / 2;
-  abilityBox(x0, by + 4, bw, bh, 'Q', ag.q.name, me.ch.q, ag.q.max, me.ch.q > 0, false, 0, ag.color);
-  abilityBox(x0 + bw + gap, by + 4, bw, bh, 'E', ag.e.name, me.ch.e, ag.e.max, me.ch.e > 0, false, 0, ag.color);
-  abilityBox(x0 + (bw + gap) * 2, by + 4, bw, bh, 'X', ag.x.name, me.ult, 0, me.ult >= ag.x.pts, true, ag.x.pts, PAL.gold);
+  if (frOn()) abilityBox(W / 2 - bw / 2, by + 4, bw, bh, 'Q', 'SPAWN MENÜSÜ', 0, 0, true, false, 0, PAL.gold); // serbest: Q = spawn menüsü
+  else {
+    abilityBox(x0, by + 4, bw, bh, 'Q', ag.q.name, me.ch.q, ag.q.max, me.ch.q > 0, false, 0, ag.color);
+    abilityBox(x0 + bw + gap, by + 4, bw, bh, 'E', ag.e.name, me.ch.e, ag.e.max, me.ch.e > 0, false, 0, ag.color);
+    abilityBox(x0 + (bw + gap) * 2, by + 4, bw, bh, 'X', ag.x.name, me.ult, 0, me.ult >= ag.x.pts, true, ag.x.pts, PAL.gold);
+  }
   // durum çipleri
   const chips = [];
   const st = me.st;

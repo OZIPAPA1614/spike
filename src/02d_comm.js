@@ -257,6 +257,7 @@ function hostChat(id, text) {
   const p = S && S.pmap[id]; text = chatClean(text); if (!p || !text) return;
   const now = performance.now(); if (now - (p._chatT || 0) < 600) return; p._chatT = now;
   emit({ k: 'chat', id, n: p.name.replace(' (BOT)', ''), tm: p.team, m: text });
+  if (typeof frOn === 'function' && frOn()) modEvent({ e: 'chat', id, text }); // mod sohbet komutları (08d)
 }
 
 /* ---------------- LOBİ SOHBETİ (host üzerinden herkese) ---------------- */
