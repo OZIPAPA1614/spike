@@ -5,7 +5,7 @@
    ===================================================================== */
 let cv = null, ctx = null, glcv = null, W = 1280, H = 720;
 let miniCv = null;
-const UIS = { chat: [], healFlash: 0, ff: null, feed: [], msgs: [], banner: null, hit: 0, hitHs: false, hitKill: 0, dmgFlash: 0, dmgDirs: [], pings: [], shake: 0, ultFeed: [], shroudFlash: 0, nukeFlash: 0, beepT: 0, deathBy: undefined, teamSeen: new Set(), menuT: 0, dmgNums: [] };
+const UIS = { chat: [], healFlash: 0, ff: null, feed: [], msgs: [], banner: null, hit: 0, hitHs: false, hitKill: 0, dmgFlash: 0, dmgDirs: [], pings: [], shake: 0, ultFeed: [], shroudFlash: 0, nukeFlash: 0, beepT: 0, deathBy: undefined, teamSeen: new Set(), menuT: 0, dmgNums: [], killRep: null, deathRep: null };
 const UI = { overlay: false, buyOpen: false, pauseOpen: false, board: false, screen: 'menu' };
 const KEYS = {}, MOUSE = { x: 640, y: 360, down: false, right: false, fp: 0 };
 const LOOK = { yaw: 0, pitch: 0 };
@@ -99,6 +99,7 @@ function handleEvent(ev) {
       break;
     }
     case 'hit': {
+      cmbHit(ev);
       const ta = S.pmap[ev.t], aa = S.pmap[ev.a];
       if (ta && aa && ta !== aa && ta.team === aa.team && ev.d > 0) {
         if (ev.a === G.myId) UIS.ff = { text: 'TAKIM ARKADAŞININ CANINI ALDIN!  −' + ev.d + ' · ' + ta.name, t: 2.6, col: PAL.red };
@@ -137,7 +138,7 @@ function handleEvent(ev) {
       const o = S.pmap[ev.id], b = S.pmap[ev.by];
       if (o && me && o.team === me.team) showMsg(null, o.name + ' YENİDEN DOĞDU (REBOOT · ' + (b ? b.name : '') + ')', PAL.teal);
       else if (o) showMsg(null, 'RAKİP ' + o.name + ' REBOOT İLE DÖNDÜ', PAL.red);
-      if (ev.id === G.myId) { G.spec = null; UIS.deathBy = undefined; showMsg('YENİDEN DOĞDUN', 'Takım arkadaşın seni reboot etti — sadece tabanca ve kılıcın var', PAL.teal, 2.5); }
+      if (ev.id === G.myId) { G.spec = null; UIS.deathBy = undefined; UIS.deathRep = null; showMsg('YENİDEN DOĞDUN', 'Takım arkadaşın seni reboot etti — sadece tabanca ve kılıcın var', PAL.teal, 2.5); }
       addFx({ type: 'ring', x: ev.x, y: ev.y, r0: 10, r1: 120, c: [0.3, 0.75, 1], t: 0.9, dur: 0.9 });
       addFx({ type: 'glow', x: ev.x, y: 50, z: ev.y, r: 160, c: [0.35, 0.8, 1], t: 0.9, dur: 0.9 });
       break;
@@ -157,6 +158,7 @@ function handleEvent(ev) {
         else if (ev.v === G.myId) UIS.ff = { text: (ta ? ta.name : '') + ' SENİ ÖLDÜRDÜ — TAKIM ATEŞİ', t: 3.2, col: PAL.gold };
       }
       if (ev.v === G.myId) { UIS.deathBy = ev.a; G.spec = null; }
+      cmbOnKill(ev);
       const v = S.pmap[ev.v];
       if (v) addFx({ type: 'ring', x: v.x, y: v.y, r0: 10, r1: 50, c: v.team === myTeam() ? COL.teal : COL.red, t: 0.5, dur: 0.5 });
       break;
@@ -188,14 +190,14 @@ function handleEvent(ev) {
       if (arOn()) { // arena modları: tek uzun raunt
         const m = arMode();
         showMsg(AR_NAMES[m], m === 'gg' ? 'Her öldürmede sıradaki silah · kılıçla öldüren kazanır' : 'Parlayan bölgeyi tut · 100 puana ilk ulaşan kazanır', PAL.gold, 3.5);
-        AU.play('round'); G.spec = null; UIS.deathBy = undefined; UIS.pings.length = 0;
+        AU.play('round'); G.spec = null; UIS.deathBy = undefined; UIS.pings.length = 0; cmbReset();
         LOOK.yaw = side === 'atk' ? -Math.PI / 2 : Math.PI / 2; LOOK.pitch = 0;
         if (ev.n === 1 && G.running) cineStart('match');
         break;
       }
       if (ev.n === MATCH_ROUNDS) setTimeout(() => showMsg(null, 'SON RAUNT!', PAL.gold), 900);
       showMsg('RAUNT ' + ev.n + ' / ' + MATCH_ROUNDS, side === 'atk' ? 'SALDIRI — Bombayı A veya B bölgesine kur' : 'SAVUNMA — Bölgeleri koru, bombayı imha et', side === 'atk' ? PAL.red : PAL.teal, 3);
-      AU.play('round'); G.spec = null; UIS.deathBy = undefined; UIS.pings.length = 0;
+      AU.play('round'); G.spec = null; UIS.deathBy = undefined; UIS.pings.length = 0; cmbReset();
       LOOK.yaw = side === 'atk' ? -Math.PI / 2 : Math.PI / 2; LOOK.pitch = 0;
       if (ev.n === 1 && G.running) cineStart('match'); // maç başı sinematik giriş
       break;
@@ -483,6 +485,102 @@ function drawBottom(me) {
   txt('¤ ' + me.credits, W - 226, by + 14, 14, PAL.gold);
   txt((me.primary ? '1 ' + WEAPONS[me.primary].name + '  ' : '') + (me.secondary ? '2 ' + WEAPONS[me.secondary].name + '  ' : '') + '3 Kılıç', W - 226, by + 52, 11, PAL.dim);
 }
+/* ---------- SAVAŞ RAPORU (Valorant tarzı) ----------
+   Her isabet kaydedilir: kim kime, hangi bölgeye (kafa / gövde / bacak; yetenek-kılıç-taret "diğer"), ne kadar.
+   Birini öldürünce: ona nereye kaç isabet ve ne kadar hasar verdiğin (sağda, öldürme akışının altında).
+   Ölünce: seni öldürenin sana nereye ne kadar vurduğu, senin ona verdiğin hasar ve sana vuran diğerleri. */
+const CMB = new Map(); // 'saldıran>hedef' → { a, t, d, n[4], zd[4], src{}, m }
+const CMB_Z = ['KAFA', 'GÖVDE', 'BACAK'];
+function cmbReset() { CMB.clear(); UIS.killRep = null; UIS.deathRep = null; }
+function cmbHit(ev) {
+  if (!ev.a || !ev.t || ev.a === ev.t) return;
+  const k = ev.a + '>' + ev.t; let r = CMB.get(k);
+  if (!r) CMB.set(k, r = { a: ev.a, t: ev.t, d: 0, n: [0, 0, 0, 0], zd: [0, 0, 0, 0], src: {}, m: null });
+  const d = ev.r !== undefined ? ev.r : ev.d, z = ev.bp === 0 || ev.bp === 1 || ev.bp === 2 ? ev.bp : 3;
+  r.d += d; r.zd[z] += d; if (!ev.q) r.n[z]++;
+  if (z === 3 && ev.w) r.src[ev.w] = (r.src[ev.w] || 0) + d;
+  if (ev.ax !== null && ev.ax !== undefined) r.m = Math.round(dist(ev.ax, ev.ay, ev.x, ev.y) / 40);
+}
+function cmbGet(a, t) { const r = CMB.get(a + '>' + t); return r ? { a: r.a, t: r.t, d: r.d, n: r.n.slice(), zd: r.zd.slice(), src: Object.assign({}, r.src), m: r.m } : null; }
+function cmbOnKill(ev) {
+  const me = G.myId;
+  if (ev.a === me && ev.v !== me && !ev.tk) UIS.killRep = { v: ev.v, w: ev.w, rec: cmbGet(me, ev.v), t: 4.5, dur: 4.5 };
+  if (ev.v === me && ev.a && ev.a !== me && !ev.tk) { // bomba / kendi kendine / takım ateşi: rapor yok
+    const others = [];
+    for (const r of CMB.values()) if (r.t === me && r.a !== ev.a && r.d > 0) others.push({ a: r.a, d: r.d });
+    others.sort((x, y) => y.d - x.d);
+    UIS.deathRep = { a: ev.a, w: ev.w, rec: cmbGet(ev.a, me), mine: cmbGet(me, ev.a), others };
+  } else if (ev.v === me) UIS.deathRep = null;
+  for (const [k, r] of CMB) if (r.t === ev.v) CMB.delete(k); // ölenin bu canı bitti: ona verilen hasar sıfırlanır
+}
+function srcName(w) { return WEAPONS[w] ? WEAPONS[w].name : (SRC_NAMES[w] || w || ''); }
+function hitsTxt(n) { return n + ' isabet'; }
+/* insan silüeti: vurulan bölgeler renkli (isabet payına göre koyu), vurulmayanlar soluk */
+function cmbFigure(cx, y, rec, col) {
+  const tot = rec ? rec.n[0] + rec.n[1] + rec.n[2] : 0, a0 = ctx.globalAlpha;
+  const set = z => { const on = rec && rec.n[z] > 0; ctx.fillStyle = on ? col : 'rgba(236,232,225,0.16)'; ctx.globalAlpha = on ? a0 * (0.55 + 0.45 * rec.n[z] / Math.max(1, tot)) : a0; };
+  set(0); ctx.beginPath(); ctx.arc(cx, y + 8, 7.5, 0, Math.PI * 2); ctx.fill();
+  set(1); ctx.fillRect(cx - 11, y + 18, 22, 29); ctx.fillRect(cx - 16, y + 19, 4, 22); ctx.fillRect(cx + 12, y + 19, 4, 22);
+  set(2); ctx.fillRect(cx - 10, y + 49, 9, 28); ctx.fillRect(cx + 1, y + 49, 9, 28);
+  ctx.globalAlpha = a0;
+}
+/* bölge satırları (silüetin yanında): BÖLGE · N isabet · hasar */
+function cmbRows(x, x2, y, rec, col) {
+  const ys = [y + 8, y + 32, y + 63];
+  for (let z = 0; z < 3; z++) {
+    const n = rec ? rec.n[z] : 0, on = n > 0;
+    txt(CMB_Z[z], x, ys[z], 12, on ? PAL.white : PAL.dim);
+    txt(hitsTxt(n), x + 62, ys[z], 12, on ? PAL.white : PAL.dim, 'left', 'normal');
+    txt(on ? String(rec.zd[z]) : '—', x2, ys[z], 14, on ? col : PAL.dim, 'right');
+  }
+}
+function cmbOtherTxt(rec) {
+  const parts = []; for (const w in rec.src) parts.push(srcName(w) + ' ' + rec.src[w]);
+  return parts.join(' · ');
+}
+/* birini öldürünce: sağda, öldürme akışının altında kısa süre */
+function drawKillRep(dt, me) {
+  const k = UIS.killRep; if (!k || !S) return;
+  k.t -= dt; if (k.t <= 0) { UIS.killRep = null; return; }
+  if (me && !me.alive && UIS.deathRep) return; // ölünce ölüm raporu öncelikli
+  const v = S.pmap[k.v], r = k.rec, oth = r && r.zd[3] > 0;
+  const w = 268, h = 128 + (oth ? 20 : 0), x = W - 14 - w, y = (IS_TOUCH ? 50 : 16) + UIS.feed.length * 28 + 6;
+  ctx.save(); ctx.globalAlpha = Math.min(1, k.t / 0.6, (k.dur - k.t) / 0.15);
+  panel(x, y, w, h, 0.9); ctx.fillStyle = PAL.gold; ctx.fillRect(x, y, 3, h);
+  ctx.font = 'bold 11px ' + FONT; const lw = ctx.measureText(tl('ÖLDÜRDÜN')).width;
+  txt('ÖLDÜRDÜN', x + 13, y + 15, 11, PAL.gold);
+  txt(v ? v.name : '?', x + 21 + lw, y + 15, 15, PAL.red);
+  txt((r ? r.d : 0) + ' HASAR', x + w - 12, y + 15, 13, PAL.gold, 'right');
+  txt(srcName(k.w) + (r && r.m !== null ? ' · ' + r.m + ' m' : ''), x + 13, y + 33, 11, PAL.dim, 'left', 'normal');
+  cmbFigure(x + 34, y + 44, r, PAL.gold);
+  cmbRows(x + 66, x + w - 12, y + 44, r, PAL.gold);
+  if (oth) txt('DİĞER · ' + cmbOtherTxt(r), x + 13, y + h - 12, 11, PAL.dim, 'left', 'normal');
+  ctx.restore();
+}
+/* ölünce: ölüm panelinin üstünde, yeniden doğana / raunt bitene kadar */
+function drawDeathRep(me) {
+  const d = UIS.deathRep; if (!d) return;
+  const k = S.pmap[d.a], r = d.rec, oth = r && r.zd[3] > 0, mi = d.mine, os = d.others.slice(0, 3);
+  const w = Math.min(360, W - 20), h = 168 + (oth ? 18 : 0) + (os.length ? 18 : 0), x = -w / 2, y = -h;
+  // ölüm panelinin üstüne oturur; küçük ekranda üst çubuğa taşmasın diye küçülür
+  const sc = Math.min(1, (H - 132 - (IS_TOUCH ? 60 : 74)) / h);
+  ctx.save(); ctx.translate(W / 2, H - 132); ctx.scale(sc, sc);
+  panel(x, y, w, h, 0.9); ctx.fillStyle = PAL.red; ctx.fillRect(x, y, w, 3);
+  txt(k ? k.name + ' SENİ ÖLDÜRDÜ' : 'ÖLDÜN', x + 14, y + 18, 15, PAL.red);
+  txt((r ? r.d : 0) + ' HASAR ALDIN', x + w - 14, y + 18, 13, PAL.red, 'right');
+  txt(srcName(d.w) + (r && r.m !== null ? ' · ' + r.m + ' m' : ''), x + 14, y + 37, 11, PAL.dim, 'left', 'normal');
+  cmbFigure(x + 38, y + 50, r, PAL.red);
+  cmbRows(x + 72, x + w - 14, y + 50, r, PAL.red);
+  let yy = y + 140;
+  if (oth) { txt('DİĞER · ' + cmbOtherTxt(r), x + 14, yy, 11, PAL.dim, 'left', 'normal'); yy += 18; }
+  ctx.fillStyle = 'rgba(236,232,225,0.12)'; ctx.fillRect(x + 12, yy - 8, w - 24, 1);
+  const mz = mi ? [0, 1, 2].filter(z => mi.n[z]).map(z => CMB_Z[z] + ' ' + mi.n[z]).join(' · ') : '';
+  txt('SEN ONA', x + 14, yy + 8, 12, PAL.teal);
+  txt(mi && mi.d ? mi.d + ' HASAR' + (mz ? '  (' + mz + ')' : '') : 'HASAR VEREMEDİN', x + w - 14, yy + 8, 12, mi && mi.d ? PAL.teal : PAL.dim, 'right', mi && mi.d ? 'bold' : 'normal');
+  yy += 24;
+  if (os.length) txt('SANA VURAN DİĞERLERİ · ' + os.map(o => ((S.pmap[o.a] || {}).name || '?') + ' ' + o.d).join(' · '), x + 14, yy, 11, PAL.dim, 'left', 'normal');
+  ctx.restore();
+}
 function drawDeathPanel(me, v) {
   const killer = S.pmap[UIS.deathBy];
   panel(W / 2 - 180, H - 96, 360, 70, 0.9);
@@ -558,10 +656,11 @@ function drawHUD(dt, me, v) {
   drawMinimap(me, v);
   drawFeed(dt);
   if (me) {
-    if (me.alive) { if (IS_TOUCH) drawMobileStats(me); else drawBottom(me); }
-    else drawDeathPanel(me, v);
+    if (me.alive) { UIS.deathRep = null; if (IS_TOUCH) drawMobileStats(me); else drawBottom(me); }
+    else { drawDeathPanel(me, v); drawDeathRep(me); }
     drawHints(me);
   }
+  drawKillRep(dt, me);
   drawCenterMsgs(dt);
   drawFFMsg(dt);
   drawVoiceList(me);

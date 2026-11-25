@@ -409,15 +409,16 @@ function traceBullet(ox, oy, a, range, team, att, wid, w, rw, pitch, eyeH, ff) {
       return { x: ox + ux * c.d, y: oy + uy * c.d, z: hz, hit: true };
     }
     const along = (c.x - ox) * ux + (c.y - oy) * uy, perp = Math.abs((c.x - ox) * uy - (c.y - oy) * ux);
-    let dmg = w ? falloff(w, along) : 8, hs = false;
+    let dmg = w ? falloff(w, along) : 8, hs = false, bp; // bp: isabet bölgesi 0 kafa / 1 gövde / 2 bacak (savaş raporu için)
     if (tp !== null && w) {
       const h = eh + tp * along - liftOf(c.p), cr = c.p.crouch;
       if (h > (cr ? P_TOP_C : P_TOP) || h < 0) continue;
-      if (h >= (cr ? HEAD_LO_C : HEAD_LO)) { if (perp > 9.5) continue; dmg *= w.hs; hs = true; }
-      else if (h < (cr ? LEG_TOP_C : LEG_TOP)) dmg *= 0.85;
+      if (h >= (cr ? HEAD_LO_C : HEAD_LO)) { if (perp > 9.5) continue; dmg *= w.hs; hs = true; bp = 0; }
+      else if (h < (cr ? LEG_TOP_C : LEG_TOP)) { dmg *= 0.85; bp = 2; }
+      else bp = 1;
     }
     if (w && w.oneshot) dmg = Math.max(1, Math.ceil(c.p.hp)); // RAILGUN (damage() 'railgun' kaynağında zırhı yok sayıp öldürür): nereye isabet ederse etsin tek atar
-    damage(c.p, dmg, att, wid, hs);
+    damage(c.p, dmg, att, wid, hs, false, bp);
     if (w && w.pierce) { pierced++; continue; } // RAILGUN: ışın oyuncuların içinden geçer
     return { x: ox + ux * c.d, y: oy + uy * c.d, z: hz, hit: true };
   }
@@ -449,17 +450,21 @@ function switchSlot(p, s) {
 }
 
 /* ---------- HASAR / ÖLÜM ---------- */
-function damage(t, amt, att, src, hs, quiet) {
+function damage(t, amt, att, src, hs, quiet, bp) {
   if (!t || !t.alive || S.phase === 'buy' || S.phase === 'over' || PKMAP) return;
   if (t.prot && S.time < t.prot) return; // arena: yeniden doğuş koruması
   amt = Math.round(amt); if (amt <= 0) return;
   let rem = amt;
-  if (src === 'blade' || src === 'bomb' || src === 'railgun') rem = 9999;
+  const pierce = src === 'blade' || src === 'bomb' || src === 'railgun', real = Math.min(amt, Math.max(0, Math.ceil(t.hp) + (pierce ? 0 : Math.max(0, t.armor)))); // gerçekten giden hasar (can + zırh kadar)
+  if (pierce) rem = 9999;
   else if (t.armor > 0) { const ab = Math.min(t.armor, rem); t.armor -= ab; rem -= ab; }
   t.hp -= rem;
   if (att && att.team !== t.team) att.dmg += amt;
   else if (att && att !== t) att.tk = (att.tk || 0) + amt;
-  emit({ k: 'hit', a: att ? att.id : null, t: t.id, d: amt, hs: hs ? 1 : 0, x: r1(t.x), y: r1(t.y), ax: att ? r1(att.x) : null, ay: att ? r1(att.y) : null, q: quiet ? 1 : 0 });
+  const ev = { k: 'hit', a: att ? att.id : null, t: t.id, d: amt, hs: hs ? 1 : 0, x: r1(t.x), y: r1(t.y), ax: att ? r1(att.x) : null, ay: att ? r1(att.y) : null, q: quiet ? 1 : 0 };
+  if (bp === 0 || bp === 1 || bp === 2) ev.bp = bp; else ev.w = src; // savaş raporu: silah isabetinde bölge, diğerlerinde kaynak
+  if (real !== amt) ev.r = real;
+  emit(ev);
   if (t.ai && att) botOnDamaged(t, att);
   if (t.hp <= 0) {
     if (t.st.clone > 0 && t.rebirth) { doRebirth(t); return; }

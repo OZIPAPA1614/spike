@@ -20,10 +20,14 @@ const EN_EXACT = {
   'Hafif Zırh': 'Light Armor', 'Ağır Zırh': 'Heavy Armor', '+25 zırh': '+25 armor', '+50 zırh': '+50 armor', '✂ İmha Kiti': '✂ Defuse Kit', 'İmha Kiti': 'Defuse Kit',
   'SES AÇIK': 'SOUND ON', 'SES KAPALI': 'SOUND OFF', 'SESİ KAPAT': 'MUTE SOUND', 'SESİ AÇ': 'UNMUTE SOUND', 'seçiyor…': 'picking…', 'Maç sona erdi.': 'Match over.',
   'SALDIRAN': 'ATTACK', 'SAVUNAN': 'DEFENSE', 'CAN': 'HP', 'Ö': 'D', 'TEKRAR': 'AGAIN',
+  'ÖLDÜRDÜN': 'ELIMINATED', 'SEN ONA': 'YOU DEALT', 'ÖLDÜN': 'YOU DIED',
   'AÇIK': 'ON', 'KAPALI': 'OFF', 'DÜŞÜK': 'LOW', 'ORTA': 'MEDIUM', 'YÜKSEK': 'HIGH', 'TÜRKÇE': 'TÜRKÇE', 'ENGLISH': 'ENGLISH', 'AYARLAR': 'SETTINGS'
 };
 /* parça çevirileri (birleştirilmiş metinlerin içinde de geçerli; uzunlar önce denenir) */
 const EN_FRAG = {
+  // savaş raporu
+  ' SENİ ÖLDÜRDÜ': ' KILLED YOU', ' HASAR ALDIN': ' DAMAGE TAKEN', 'HASAR VEREMEDİN': 'NO DAMAGE DEALT', 'SANA VURAN DİĞERLERİ': 'OTHERS WHO HIT YOU',
+  'KAFA': 'HEAD', 'GÖVDE': 'BODY', 'BACAK': 'LEGS', 'DİĞER · ': 'OTHER · ',
   // menü
   'TAKTİKSEL 5v5 · BOMBA · AJANLAR': 'TACTICAL 5v5 · BOMB · AGENTS', 'TEK OYUNCULU · BOTLARA KARŞI': 'SINGLE PLAYER · VS BOTS', 'ODA KUR (HOST)': 'CREATE ROOM (HOST)',
   'ODAYA KATIL (JOIN)': 'JOIN ROOM', 'KONTROLLER & KURALLAR': 'CONTROLS & RULES', 'BAĞLANTI AYARLARI': 'CONNECTION SETTINGS', 'OYUNDAN ÇIK': 'QUIT GAME',
@@ -191,7 +195,7 @@ Object.assign(EN_FRAG, {
 });
 for (const k of Object.keys(EN_FRAG)) { if (k.length < 26 && /^[A-Za-zÇĞİÖŞÜçğıöşü ]+$/.test(k)) { const u = k.toLocaleUpperCase('tr-TR'); if (u !== k && !(u in EN_FRAG)) EN_FRAG[u] = EN_FRAG[k].toUpperCase(); } }
 const EN_RULES = [
-  [/^\+(\d+) CAN$/, '+$1 HP'], [/^RAUNT (\d+)( \/ |\/)(\d+)$/, 'ROUND $1$2$3'], [/^(\d+) sn$/, '$1 s'], [/(\d+) sn\b/g, '$1 s'], [/ \(BOT\)$/, ' (BOT)']
+  [/^\+(\d+) CAN$/, '+$1 HP'], [/^RAUNT (\d+)( \/ |\/)(\d+)$/, 'ROUND $1$2$3'], [/^(\d+) sn$/, '$1 s'], [/(\d+) sn\b/g, '$1 s'], [/ \(BOT\)$/, ' (BOT)'], [/^1 isabet$/, '1 hit'], [/^(\d+) isabet$/, '$1 hits']
 ];
 let _EN_RE = null; const _EN_CACHE = new Map();
 function tl(s) { return LANG === 'tr' ? s : tlEN(s); }
