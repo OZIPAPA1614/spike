@@ -19,6 +19,9 @@ function admOpen() {
   $('admOv').classList.remove('hidden');
   try { unlockPointer(); syncCursor(); } catch (e) { }
   $('admWho').textContent = 'Admin: ' + ACC.nick;
+  // maçtayken oyun içi güçler üstte (telefonda kaydırmadan görünsün), menüde gems üstte
+  const gs = $('admGameSec'), ms = $('admGemSec');
+  if (G.running) ms.parentNode.insertBefore(gs, ms); else gs.parentNode.insertBefore(ms, gs);
   ADM.gm = ''; $('admGameMsg').textContent = '';
   admRender();
 }
@@ -101,6 +104,7 @@ function admInit() {
   $('btnAdmin').onclick = () => admOpen();
   $('btnPauseAdm').onclick = () => admOpen();
   $('admClose').onclick = () => admClose();
+  $('admX').onclick = () => admClose(); // telefonda kaydırmadan kapatmak için
   $('admGive').onclick = () => admGems('give');
   $('admTake').onclick = () => admGems('take');
   $('admZero').onclick = () => admGems('zero');

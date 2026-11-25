@@ -280,6 +280,11 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
 .eco{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:#c9c5bd}
 .eco b{color:var(--gold)}
 #pause .panel,#end .panel{text-align:center;min-width:420px}
+#pause>.panel{max-height:calc(100vh - 16px);overflow-y:auto}
+@media (max-height:500px){#btnAdmin{padding:10px 20px;font-size:14px}
+  #admOv .panel{padding:12px 18px} #admOv h2{font-size:18px;margin-bottom:0} #admOv .sub{font-size:11px;margin-bottom:2px}
+  #admOv h4{margin:6px 0 5px} .admrow{margin:4px 0} .admrow input{padding:7px 10px;font-size:14px} .admrow button,.admgrid button{padding:8px 6px;font-size:12px}
+  .admgrid{gap:6px} #admOv .note{min-height:14px;margin-top:2px;font-size:11px} #admOv .row-btn{margin-top:8px} #admOv .row-btn button{padding:9px}}
 #admOv{z-index:24}
 #admOv .panel{width:min(560px,94vw);max-height:92vh;overflow:auto}
 #admOv .panel:before{background:var(--gold)}
@@ -293,6 +298,7 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
 .admgrid button.on{border-color:var(--gold);color:var(--gold);background:rgba(245,196,81,.1)}
 #admOv .note{min-height:18px;margin-top:4px}
 button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
+#admX{position:absolute;top:10px;right:10px;margin:0;width:38px;height:38px;padding:0;font-size:18px;line-height:1}
 #pause button,#end button{display:block;width:100%;margin-top:10px}
 #endTitle{font-size:72px;font-weight:900;letter-spacing:.2em}
 #endTitle.win{color:var(--teal)} #endTitle.lose{color:var(--red)}
@@ -645,12 +651,16 @@ button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
 
 <div id="admOv" class="overlay hidden">
   <div class="panel">
+    <button id="admX" class="ghost" title="Kapat">✕</button>
     <h2>🛡 ADMİN PANELİ</h2>
     <div class="sub" id="admWho">Yalnızca admin hesabında görünür</div>
+    <div id="admGemSec">
     <h4>OYUNCULARA GEMS</h4>
     <div class="admrow"><input id="admNick" maxlength="16" autocomplete="off" placeholder="Kullanıcı adı"><input id="admAmt" type="number" min="1" max="1000000" step="1" value="1000"></div>
     <div class="admrow"><button id="admGive" class="primary">💎 VER</button><button id="admTake">SİL</button><button id="admZero" class="ghost">SIFIRLA</button></div>
     <div id="admGemMsg" class="note"></div>
+    </div>
+    <div id="admGameSec">
     <h4>OYUN İÇİ GÜÇLER</h4>
     <div class="admgrid">
       <button data-adm="hp">❤ CAN +100</button>
@@ -661,6 +671,7 @@ button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
       <button data-adm="gun" class="store">ADMİN SİLAHI</button>
     </div>
     <div id="admGameMsg" class="note"></div>
+    </div>
     <div class="row-btn"><button id="admClose" class="primary">KAPAT <span class="kh">ESC</span></button></div>
   </div>
 </div>
