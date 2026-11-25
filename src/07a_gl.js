@@ -496,16 +496,6 @@ function QR(mesh, x, y, z, R, sx, sy, sz, col, o) {
   if (tr) { it.dist = (x - GLX.cam[0]) ** 2 + (y - GLX.cam[1]) ** 2 + (z - GLX.cam[2]) ** 2; GLX.tq.push(it); } else GLX.oq.push(it);
   return it;
 }
-/* QM: hazır 4x4 model matrisiyle (iskeletli karakter parçaları) */
-function QM(mesh, M, col, o) {
-  const it = poolItem(), m = it.M, R = it.R;
-  for (let i = 0; i < 16; i++) m[i] = M[i];
-  for (let c = 0; c < 3; c++) { const x = M[c * 4], y = M[c * 4 + 1], z = M[c * 4 + 2], l = 1 / (Math.hypot(x, y, z) || 1); R[c * 3] = x * l; R[c * 3 + 1] = y * l; R[c * 3 + 2] = z * l; }
-  it.mesh = mesh; it.col = col; it.em = (o && o.em) || ZERO3; it.lit = (o && o.lit === 0) ? 0 : 1; it.tex = (o && o.tex) || null;
-  it.add = !!(o && o.add); it.xray = !!(o && o.xray); it.vm = !!(o && o.vm); it.sky = false; it.det = null; it.detS = 0; it.detO = null;
-  if (col[3] < 0.999 || it.add || it.xray) { it.dist = (M[12] - GLX.cam[0]) ** 2 + (M[13] - GLX.cam[1]) ** 2 + (M[14] - GLX.cam[2]) ** 2; GLX.tq.push(it); } else GLX.oq.push(it);
-  return it;
-}
 const _R = new Array(9);
 function Q(mesh, x, y, z, a, pitch, sx, sy, sz, col, o) { return QR(mesh, x, y, z, rotMat(a, pitch, o && o.roll, _R), sx, sy, sz, col, o); }
 /* İki 3D nokta arasında ince kutu (iz, ışın, çizgi) */

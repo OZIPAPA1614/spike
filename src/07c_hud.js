@@ -100,7 +100,6 @@ function handleEvent(ev) {
     }
     case 'hit': {
       const ta = S.pmap[ev.t], aa = S.pmap[ev.a];
-      if (ta) ta._hitT = S.time; // vurulma sarsılması (3B karakter)
       if (ta && aa && ta !== aa && ta.team === aa.team && ev.d > 0) {
         if (ev.a === G.myId) UIS.ff = { text: 'TAKIM ARKADAŞININ CANINI ALDIN!  −' + ev.d + ' · ' + ta.name, t: 2.6, col: PAL.red };
         else if (ev.t === G.myId) UIS.ff = { text: aa.name + ' SENİ VURDU — TAKIM ATEŞİ  −' + ev.d, t: 2.6, col: PAL.gold };
