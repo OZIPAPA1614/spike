@@ -158,8 +158,8 @@ function drawGunModel(wid, x, h, z, R, sc, o, cols, alpha) {
   }
 }
 /* ---------- karakter animasyon durumu ---------- */
-function mdlCharState(p, t, ek, et) {
-  const m = p._md || (p._md = { t: t, ph: 0, px: p.x, py: p.y, w: [0, 0, 0, 0], mv: 0 });
+function mdlCharState(p, t, gun) {
+  const m = p._md || (p._md = { t: t, ph: 0, px: p.x, py: p.y, w: [0, 0, 0, 0], mv: 0, air: 0, pjz: 0 });
   const dt = clamp(t - m.t, 0, 0.1); m.t = t;
   const ch = MDL.ch, dx = p.x - m.px, dy = p.y - m.py; m.px = p.x; m.py = p.y;
   const mvT = clamp((p.spd || 0) / RUN, 0, 1); m.mv += (mvT - m.mv) * Math.min(1, dt * 10);
@@ -170,7 +170,13 @@ function mdlCharState(p, t, ek, et) {
     for (let i = 0; i < 4; i++) m.w[i] += (tw[i] - m.w[i]) * Math.min(1, dt * 8);
   }
   m.ph = (m.ph + dt * (0.35 + m.mv) / 0.8) % 1;
-  const mv = m.mv, ws = m.w, run = (k, i) => [k, m.ph * ch.clips[k].d, mv * ws[i]];
-  const low = [['idle', (t % 1.66), 1 - mv], run('run', 0), run('back', 1), run('left', 2), run('right', 3)];
+  // havada mı (zıplama / düşme): yükseklik değişiyorsa ya da parkur dışında yerden yüksekteyse
+  const jz = p.jz || 0, vz = dt > 0 ? (jz - m.pjz) / dt : 0; m.pjz = jz;
+  const airT = Math.abs(vz) > 40 || (!PKMAP && jz > 6) ? 1 : 0; m.air += (airT - m.air) * Math.min(1, dt * (airT ? 14 : 8));
+  const mv = m.mv * (1 - m.air), ws = m.w, run = (k, i) => [k, m.ph * ch.clips[k].d, mv * ws[i]];
+  // ileri koşu: silahlıyken iki elle silah taşıyarak koşma (aktarılmış animasyon), kılıçlıyken kollar serbest
+  const fwd = gun && ch.clips.runGun ? 'runGun' : 'run';
+  const low = [['idle', (t % 1.66), (1 - m.mv) * (1 - m.air)], run(fwd, 0), run('back', 1), run('left', 2), run('right', 3)];
+  if (m.air > 0.01 && ch.clips.jump) low.push(['jump', 0.35, m.air]);
   return low;
 }

@@ -643,12 +643,21 @@ function drawCharacter(p, rel, alpha, xray, t) {
   const wid = curW(p), pt = p.pitch || 0;
   if (p._sw > 0) p._sw -= 1 / 60;
   // animasyon katmanları
-  const low = mdlCharState(p, t), md = p._md;
+  const gun = wid !== 'sword' && !(p.st.ovl > 0), low = mdlCharState(p, t, gun), md = p._md;
   md.cr = (md.cr || 0) + ((p.crouch ? 1 : 0) - (md.cr || 0)) * 0.25;
   let up, pitch = 0;
   if (em) up = ek === 'wave' ? [['wave', et % 1.66, 1]] : ek === 'cheer' || ek === 'gg' ? [['wave', 0.55, 1]] : [['idle', t % 1.66, 1]];
   else if (wid === 'sword' || p.st.ovl > 0) up = p._sw > 0 ? [['slash', 0.2 + clamp(1 - p._sw / 0.32, 0, 1) * 0.5, 1]] : [['idleSword', t % 1.66, 1]];
-  else { up = [['aim', t % 1.66, 1]]; pitch = pt; }
+  else {
+    // silahla: durunca iki elle nişan, koşarken silahı göğüste taşıyarak koşma; havada zıplama pozu; vurulunca sarsılma
+    const ch2 = MDL.ch, mv = md.mv * (1 - md.air), aimK = ch2.clips.aim2 ? 'aim2' : 'aim';
+    up = [[aimK, t % (ch2.clips[aimK].d || 1.66), (1 - mv * 0.85) * (1 - md.air)]];
+    if (ch2.clips.runGun) up.push(['runGun', md.ph * ch2.clips.runGun.d, mv * 0.85 * (1 - md.air)]);
+    if (md.air > 0.01 && ch2.clips.jump) up.push(['jump', 0.35, md.air]);
+    const ht = p._hitT !== undefined && S ? S.time - p._hitT : 9;
+    if (ht < 0.35 && ch2.clips.hit) up.push(['hit', 0.08 + ht * 0.6, 0.7 * (1 - ht / 0.35)]);
+    pitch = pt;
+  }
   const st = { low, up, pitch, crouch: md.cr, R, x: p.x, y: p.y, lift, cols, alpha, o, xray, accGlow: cs && cs.glow && !xray ? { em: [visC[0] * 0.7, visC[1] * 0.7, visC[2] * 0.7] } : null };
   const W = mdlDrawChar(p, st);
   if (!xray) {
@@ -709,7 +718,9 @@ function drawCorpse(c, ally) {
   let t0 = MDL.cT.get(key); if (t0 === undefined) { if (MDL.cT.size > 300) MDL.cT.clear(); t0 = now; MDL.cT.set(key, t0); }
   const pl = S && S.pmap ? S.pmap[c.id] : null, ag = pl ? (AGCOL[pl.agent] || COL.white) : (ally ? COL.teal : COL.red), k = 0.6;
   const cols = { suit: [ag[0] * k, ag[1] * k, ag[2] * k, 1], legs: [COL.dark[0] * 1.1, COL.dark[1] * 1.1, COL.dark[2] * 1.1, 1], pack: [COL.dark[0] * 1.3, COL.dark[1] * 1.3, COL.dark[2] * 1.3, 1], acc: [ag[0] * k, ag[1] * k, ag[2] * k, 1] };
-  mdlDrawChar(c, { low: [['death', clamp(now - t0, 0, 5), 1]], up: null, pitch: 0, crouch: 0, R, x: c.x, y: c.y, lift: 0, cols, alpha: 1, o: null });
+  // ölme animasyonu: dört farklı düşüş (oyuncuya ve raunda göre değişir)
+  const DK = ['death', 'death2', 'death3', 'death4'].filter(k => MDL.ch.clips[k]), hh = (c.id.charCodeAt(0) * 7 + c.id.charCodeAt(c.id.length - 1) * 13 + (S ? S.round : 0) * 5) % DK.length;
+  mdlDrawChar(c, { low: [[DK[hh] || 'death', clamp(now - t0, 0, 5), 1]], up: null, pitch: 0, crouch: 0, R, x: c.x, y: c.y, lift: 0, cols, alpha: 1, o: null });
 }
 
 /* ---------- birinci şahıs silah görünümü ---------- */
