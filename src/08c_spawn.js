@@ -31,7 +31,7 @@ function frMenuToggle(force) {
   else if (G.running && !UI.pauseOpen && !UI.admOpen) { try { lockPointer(); } catch (e) { } }
   try { syncCursor(); } catch (e) { }
 }
-function frKindInfo(K) { return (K.snd ? '🔊 ' : '') + (K.hp ? 'can ' + K.hp : 'ölümsüz') + ' · hız ' + Math.round((K.spd || 300) / RUN * 100) + '%'; }
+function frKindInfo(K) { return (K.snd || Object.values(NPC_KINDS).includes(K) ? '🔊 ' : '') + (K.hp ? 'can ' + K.hp : 'ölümsüz') + ' · hız ' + Math.round((K.spd || 300) / RUN * 100) + '%'; }
 function frMenuRender() {
   for (const b of $('frTabs').querySelectorAll('button')) b.classList.toggle('on', b.dataset.tab === FRM.tab);
   const me = S && S.pmap[G.myId], body = $('frBody'), T = FRM.tab;

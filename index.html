@@ -11178,10 +11178,48 @@ function sndBuffer(snd) {
   return b;
 }
 const NPCS = { buf: {}, live: new Map() };
+/* hazır NPC'lerin kovalama müzikleri (kodla üretilir, 8 sn'lik döngü, 24 kHz) */
+function npcSynth(k) {
+  const sr = 24000, L = sr * 8, d = new Float32Array(L), TA = Math.PI * 2;
+  const note = n => 440 * Math.pow(2, (n - 69) / 12);
+  const add = (t0, dur, f, amp, wave, dec, vib) => { // tek nota (zarf + dalga)
+    const i0 = Math.floor(t0 * sr), n = Math.floor(dur * sr);
+    let ph = 0;
+    for (let i = 0; i < n && i0 + i < L; i++) {
+      const t = i / sr, ff = f * (vib ? 1 + Math.sin(t * 5.5 * TA) * vib : 1); ph += ff / sr;
+      const x = ph % 1, w = wave === 'sq' ? (x < 0.5 ? 1 : -1) : wave === 'tri' ? 4 * Math.abs(x - 0.5) - 1 : Math.sin(ph * TA);
+      const env = Math.min(1, t / 0.01) * Math.exp(-t * (dec || 3));
+      d[i0 + i] += w * amp * env;
+    }
+  };
+  if (k === 'grin') { // ürkütücü müzik kutusu
+    const seq = [69, 72, 76, 81, 80, 76, 72, 71, 69, 72, 76, 79, 77, 74, 71, 68];
+    for (let i = 0; i < 32; i++) add(i * 0.25, 0.6, note(seq[i % 16] + 12), 0.28, 'tri', 5);
+    for (let i = 0; i < 4; i++) add(i * 2, 2.2, note(45 + (i % 2 ? 3 : 0)), 0.18, 'sin', 0.8);
+  } else if (k === 'eye') { // alçak uğultu + kalp atışı
+    for (let i = 0; i < L; i++) { const t = i / sr; d[i] += (Math.sin(TA * 55 * t) + Math.sin(TA * 55.7 * t)) * 0.12 + Math.sin(TA * 880 * t) * 0.02 * (0.5 + 0.5 * Math.sin(t * 0.8 * TA)); }
+    for (let i = 0; i < 10; i++) { add(i * 0.8, 0.25, 62, 0.6, 'sin', 14); add(i * 0.8 + 0.22, 0.25, 58, 0.45, 'sin', 16); }
+  } else if (k === 'cube') { // 8-bit kovalama
+    const bass = [36, 36, 43, 43, 45, 45, 41, 41], mel = [72, 74, 76, 79, 76, 74, 72, 67];
+    for (let i = 0; i < 64; i++) { const b = bass[Math.floor(i / 8) % 8]; add(i * 0.125, 0.12, note(b + (i % 2 ? 12 : 0)), 0.16, 'sq', 18); }
+    for (let i = 0; i < 16; i++) add(i * 0.5, 0.4, note(mel[i % 8]), 0.1, 'sq', 6);
+  } else if (k === 'ghost') { // titrek theremin
+    const path = [64, 67, 71, 70, 66, 63, 61, 62]; let ph = 0;
+    for (let i = 0; i < L; i++) { const t = i / sr, s = t / 1, a = Math.floor(s) % 8, b = (a + 1) % 8, fr = s - Math.floor(s), m = path[a] + (path[b] - path[a]) * fr * fr * (3 - 2 * fr); ph += note(m) * (1 + Math.sin(t * 6 * TA) * 0.012) / sr; d[i] += Math.sin(ph * TA) * 0.3; }
+  } else { // karpuz: zıp zıp neşeli
+    const seq = [72, 76, 79, 76, 74, 77, 81, 77, 72, 76, 79, 84, 83, 79, 74, 71];
+    for (let i = 0; i < 32; i++) add(i * 0.25, 0.2, note(seq[i % 16]), 0.22, 'sq', 12);
+    for (let i = 0; i < 16; i++) add(i * 0.5, 0.18, note(i % 2 ? 43 : 36), 0.3, 'tri', 10);
+  }
+  let pk = 1e-4; for (let i = 0; i < L; i++) pk = Math.max(pk, Math.abs(d[i]));
+  const g = 0.8 / pk * (k === 'ghost' ? 0.5 : 1); for (let i = 0; i < L; i++) d[i] *= g; // sürekli ses (theremin) daha kısık
+  const b = AU.ctx.createBuffer(1, L, sr); b.getChannelData(0).set(d); return b;
+}
+function npcHasSnd(k) { const K = npcKind(k); return !!(K && (K.snd || NPC_KINDS[k])); }
 function npcSndBuf(k) {
-  const K = npcKind(k); if (!K || !K.snd || !AU.ctx) return null;
+  const K = npcKind(k); if (!K || !AU.ctx || !(K.snd || NPC_KINDS[k])) return null;
   if (NPCS.buf[k] !== undefined) return NPCS.buf[k];
-  let b = null; try { b = sndBuffer(K.snd); } catch (e) { b = null; }
+  let b = null; try { b = K.snd ? sndBuffer(K.snd) : npcSynth(k); } catch (e) { b = null; }
   return (NPCS.buf[k] = b);
 }
 function _npcStopV(v) { try { const t = AU.ctx.currentTime; v.g.gain.setTargetAtTime(0, t, 0.05); v.s.stop(t + 0.3); } catch (e) { } }
@@ -11190,12 +11228,12 @@ function npcAudioTick() {
   const live = NPCS.live;
   if (!AU.ctx || !S || !G.running || !frOn()) { if (live.size) npcAudioStop(); return; }
   const L = audioListener(), em = [];
-  for (const n of S.npcs || []) { const K = npcKind(n.k); if (K && K.snd) { const x = n.rx !== undefined ? n.rx : n.x, y = n.ry !== undefined ? n.ry : n.y; em.push({ key: n.id, k: n.k, x, y, d: dist(L.x, L.y, x, y) }); } }
-  for (const p of S.players) if (p.alive && p.pill) { const K = npcKind(p.pill); if (K && K.snd) em.push({ key: 'p:' + p.id, k: p.pill, x: p.x, y: p.y, d: dist(L.x, L.y, p.x, p.y) }); }
+  for (const n of S.npcs || []) if (npcHasSnd(n.k)) { const x = n.rx !== undefined ? n.rx : n.x, y = n.ry !== undefined ? n.ry : n.y; em.push({ key: n.id, k: n.k, x, y, d: dist(L.x, L.y, x, y) }); }
+  for (const p of S.players) if (p.alive && p.pill && npcHasSnd(p.pill)) em.push({ key: 'p:' + p.id, k: p.pill, x: p.x, y: p.y, d: dist(L.x, L.y, p.x, p.y) });
   em.sort((a, b) => a.d - b.d);
   const keep = new Set(), now = AU.ctx.currentTime;
   for (const e of em.slice(0, 4)) {
-    if (e.d > 2400) break;
+    if (e.d > 6500) break; // GMod'daki gibi uzaktan da duyulsun
     let v = live.get(e.key);
     if (!v || v.k !== e.k) {
       if (v) _npcStopV(v);
@@ -11207,7 +11245,7 @@ function npcAudioTick() {
       v = { s, g, pn, k: e.k }; live.set(e.key, v);
     }
     keep.add(e.key);
-    v.g.gain.setTargetAtTime((L.deaf ? 0.05 : 1) * 1.1 / (1 + e.d / 260), now, 0.08);
+    v.g.gain.setTargetAtTime((L.deaf ? 0.05 : 1) * 1.25 / (1 + e.d / 650), now, 0.08);
     if (v.pn) v.pn.pan.setTargetAtTime(e.d > 8 ? clamp(Math.sin(angDiff(L.ang || 0, Math.atan2(e.y - L.y, e.x - L.x))), -1, 1) * 0.8 : 0, now, 0.08);
   }
   for (const [key, v] of live) if (!keep.has(key)) { _npcStopV(v); live.delete(key); }
@@ -12924,7 +12962,7 @@ function frMenuToggle(force) {
   else if (G.running && !UI.pauseOpen && !UI.admOpen) { try { lockPointer(); } catch (e) { } }
   try { syncCursor(); } catch (e) { }
 }
-function frKindInfo(K) { return (K.snd ? '🔊 ' : '') + (K.hp ? 'can ' + K.hp : 'ölümsüz') + ' · hız ' + Math.round((K.spd || 300) / RUN * 100) + '%'; }
+function frKindInfo(K) { return (K.snd || Object.values(NPC_KINDS).includes(K) ? '🔊 ' : '') + (K.hp ? 'can ' + K.hp : 'ölümsüz') + ' · hız ' + Math.round((K.spd || 300) / RUN * 100) + '%'; }
 function frMenuRender() {
   for (const b of $('frTabs').querySelectorAll('button')) b.classList.toggle('on', b.dataset.tab === FRM.tab);
   const me = S && S.pmap[G.myId], body = $('frBody'), T = FRM.tab;
