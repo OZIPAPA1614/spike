@@ -3,7 +3,7 @@
 
 Kullanım (depo kökünden):  python3 tests/check.py [--quick]
   1) src/ derlenir ve yayındaki index.html ile karşılaştırılır (biri index.html'i elle değiştirdiyse yakalar)
-  2) index.html tarayıcıda açılır: menüler, mağaza (skinler, öldürme efektleri, kasa açma), ayarlar, dil
+  2) index.html tarayıcıda açılır: menüler, mağaza (desenli skinler, öldürme efektleri, kasa açma), ayarlar, dil
   3) Her haritada botlarla maç oynatılır (--quick değilse 2 haritada TAM maç)
   3b) PARKUR modu: botlarla 5 raunt (--quick: 1 raunt)
   3c) SİLAH YARIŞI ve SÜPERNOVA: botlarla maç (--quick: 4 dk)
@@ -201,21 +201,36 @@ try:
     # ---------- 3d) ÖLDÜRME EFEKTLERİ: hepsini baştan sona çiz; 'kill' olayı öldürenin efektini başlatır ----------
     before = len(errs)
     try:
-        r = M.evaluate("""() => { const A=['vex','ignis','mist','aegis','pulse'], B=['chrono','terra','vital','volt','phantom'], roster=[];
+        M.evaluate("""() => { const A=['vex','ignis','mist','aegis','pulse'], B=['chrono','terra','vital','volt','phantom'], roster=[];
             A.forEach((a,j)=>roster.push({id:j?'x'+j:'h',name:a,team:0,agent:a,bot:j>0,cos:{kf:'k05',cs:'c21'}})); B.forEach((a,j)=>roster.push({id:'y'+j,name:a,team:1,agent:a,bot:true,cos:{cs:'c2'+(j+5)}}));
-            NET.mode='off'; G.myId='h'; launchGame(roster, {teamSize:5, fill:true, diff:'normal', map:0}); CINE.on=false; G.paused=true;
-            const me=S.pmap.h, v=S.pmap.y0, out={drawn:0, hidden:0};
-            for (const k of KFXS) { kfxClear(); v.x = me.x + Math.cos(LOOK.yaw)*150; v.y = me.y + Math.sin(LOOK.yaw)*150; const f = kfxStart(k.id, v, me);
-              if (!f) continue; if (kfxHides(v.id)) out.hidden++;
-              for (let t = 0; t <= k.dur + 0.1; t += 0.12) { S.time = f.t0 + t; render(1/60); } out.drawn++; }
+            NET.mode='off'; G.myId='h'; launchGame(roster, {teamSize:5, fill:true, diff:'normal', map:0}); CINE.on=false; G.paused=true; window.__kr = {drawn:0, hidden:0}; }""")
+        for kid in M.evaluate("() => KFXS.map(k => k.id)"): # her efekt ayrı adımda (tek görevde yüzlerce kare yazılımsal GPU'yu zaman aşımına sokar)
+            M.evaluate("""(kid) => { const k = KFX[kid], me=S.pmap.h, v=S.pmap.y0, out=window.__kr; kfxClear(); v.x = me.x + Math.cos(LOOK.yaw)*150; v.y = me.y + Math.sin(LOOK.yaw)*150; const f = kfxStart(k.id, v, me);
+              if (!f) return; if (kfxHides(v.id)) out.hidden++;
+              for (let t = 0; t <= k.dur + 0.1; t += 0.2) { S.time = f.t0 + t; render(1/60); } out.drawn++; }""", kid)
+            M.wait_for_timeout(30)
+        r = M.evaluate("""() => { const me=S.pmap.h, v=S.pmap.y0, out=window.__kr;
             kfxClear(); S.time += 1; S.phase = 'live'; S.phaseT = 100; damage(v, 999, me, 'vandal');
             const kf = KFXA.find(f => f.id === v.id); out.kill = kf ? kf.k : null; out.alive = v.alive;
-            S.time += 5; render(1/60); out.left = KFXA.length; return out; }""")
+            S.time += 5; render(1/60); out.left = KFXA.length; out.lost = GLX.gl.isContextLost(); return out; }""")
         if r['drawn'] != M.evaluate("() => KFXS.length") or r['hidden'] != r['drawn']: fail(f'öldürme efektleri çizilemedi {r}')
         elif r['kill'] != 'k05' or r['alive']: fail(f'öldürünce öldürme efekti başlamadı {r}')
         elif r['left']: fail(f'öldürme efekti süresi bitince silinmedi {r}')
+        elif r['lost']: fail(f'öldürme efektleri çizilirken WebGL bağlamı kayboldu {r}')
         elif len(errs) == before: ok(f"öldürme efektleri: {r['drawn']} efekt baştan sona çizildi, öldürünce efekt başlıyor")
     except Exception as e: fail('öldürme efektleri: ' + str(e)[:300])
+    # ---------- 3e) SİLAH DESENLERİ: her desenli skinin dokusu üretilir, elde ve 3. şahısta desenle çizilir ----------
+    before = len(errs)
+    try:
+        r = M.evaluate("""() => { const me=S.pmap.h, o=S.pmap.x1; for (const q of [me, o]) { q.alive=true; q.primary='vandal'; q.ammo.vandal={mag:25,res:50}; q.slot=1; }
+            o.x = me.x + Math.cos(LOOK.yaw)*90; o.y = me.y + Math.sin(LOOK.yaw)*90;
+            const L = WSKINS.filter(s => s.pat), out = { n: L.length, cv: 0, tex: 0, uniq: new Set() };
+            for (const s of L) { const c = patCanvas(s); if (c && c.width === PAT_S) { out.cv++; out.uniq.add(c.toDataURL().length + s.pat); }
+              me.wsk = o.wsk = s.id; S.time += 0.3; render(1/60); if (gunColsFor('vandal', me, S.time).tex) out.tex++; }
+            out.uniq = out.uniq.size; out.lost = GLX.gl.isContextLost(); return out; }""")
+        if r['n'] < 30 or r['cv'] != r['n'] or r['tex'] != r['n'] or r['uniq'] < r['n'] - 2 or r['lost']: fail(f'silah desenleri üretilemedi / çizilemedi {r}')
+        elif len(errs) == before: ok(f"silah desenleri: {r['n']} desenli skin dokusuyla çizildi")
+    except Exception as e: fail('silah desenleri: ' + str(e)[:300])
     report_errs(errs, 'menü + bot maçları')
     ctx.close()
 

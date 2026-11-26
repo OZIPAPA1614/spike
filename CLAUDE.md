@@ -32,6 +32,9 @@ The owner writes in Turkish: reply to them in Turkish and write commit messages 
   `src/02h_shop.js`; CS-style cases (bought with gems in the store, opened at once, odds shown, duplicates refund 35%)
   in `src/02j_cases.js`; kill effects (Arsenal-style, drawn where the victim died, everyone sees them) in
   `src/07i_killfx.js`. Items with `ex: 1` drop only from cases. Profile fields: `ws/cs/kf` owned, `wsk/csk/kfx` equipped.
+  Weapon skin patterns (camo, carbon, scales, flames, circuits…; seeded 128 px tiles, `pat/pc/pk/pg/flow` in `WPAT`)
+  are generated in `src/02k_patterns.js`; gun models get box-projected UVs (`src/07g_models.js`), the shader has
+  `uTE` (pattern glow) and `uTO` (flowing pattern offset).
 - SERBEST (free roam, mode `fr`): `src/03d_free.js` (host: NPCs, pills, free weapons), `src/07h_npc.js`
   (drawing), `src/08c_spawn.js` (Q spawn menu), `src/08d_mods.js` (player JavaScript mods, run only on
   the host inside a Web Worker; they may act only through the checked `nova` API), `src/06b_pak.js`

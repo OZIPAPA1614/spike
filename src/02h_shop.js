@@ -65,6 +65,23 @@ const WSKINS = [
   { id: 'w43', n: 'Buz Kristali', ex: 1, val: 4500, c: ['#bff4ff', '#2a5a7a', '#ffffff'], glow: 1, pulse: 1, duo: '#5ac8ff' },
   { id: 'w44', n: 'Neon Rüya', ex: 1, val: 4500, c: ['#ff3ec8', '#120614', '#3ef1ff'], glow: 1, pulse: 1, duo: '#7b4dff' }
 ];
+/* SİLAH DESENLERİ (02k): pat desen türü · pc ek renkler · pk desen paleti [ana, koyu, vurgu] (skin renginden farklıysa)
+   pg desenin parlak çizgileri ışık verir · flow [u, v] desen akar (v > 0 yukarı) */
+const WPAT = {
+  w02: { pat: 'camo', pc: ['#9a8358'] }, w03: { pat: 'camo', pc: ['#5a4228'] }, w04: { pat: 'digi', pc: ['#4d4d2a'] }, w05: { pat: 'digi', pc: ['#c9d2d9'] },
+  w06: { pat: 'waves', pc: ['#1d8f9a', '#e8fbff'] }, w07: { pat: 'petal', pc: ['#ffffff', '#ffd166'] }, w08: { pat: 'bands', pc: ['#ff4d6d'] }, w09: { pat: 'brushed' },
+  w10: { pat: 'crack', pg: 0.9, pc: ['#d8c8ff'] }, w11: { pat: 'scale' }, w12: { pat: 'splat', pg: 0.8 }, w13: { pat: 'crack', pk: ['#bfe9ff', '#7fb8d8', '#3d6f8c'], pc: ['#ffffff'] },
+  w14: { pat: 'crack', pg: 1, flow: [0.03, 0.05], pc: ['#ffe14a'] }, w15: { pat: 'grid', pg: 0.9 }, w16: { pat: 'bolt', pg: 0.9 }, w17: { pat: 'circuit', pg: 0.9 },
+  w18: { pat: 'leaf' }, w19: { pat: 'damask' }, w21: { pat: 'carbon' }, w22: { pat: 'rust' }, w23: { pat: 'waves', pc: ['#b8894a', '#fff0c2'], flow: [0.05, 0] },
+  w24: { pat: 'hex' }, w25: { pat: 'facet' }, w26: { pat: 'facet' }, w27: { pat: 'facet' }, w28: { pat: 'facet' },
+  w29: { pat: 'aurora', pg: 0.8, flow: [0.06, 0], pc: ['#9a5cff'] }, w30: { pat: 'crack', pg: 1, flow: [0, 0.07], pc: ['#ffd23a'] }, w31: { pat: 'smoke', flow: [0.05, 0.04], pc: ['#ffffff'] },
+  w32: { pat: 'plasma', pg: 0.7, flow: [0.07, 0.05], pc: ['#3a0f6a'] }, w33: { pat: 'hazard', pg: 0.6 }, w34: { pat: 'splat', pg: 0.6 }, w35: { pat: 'circuit', pg: 1, flow: [0.12, 0], pc: ['#ffffff'] },
+  w36: { pat: 'scale', pg: 0.6 }, w37: { pat: 'flame', pg: 0.9, flow: [0, 0.4], pk: ['#3a1400', '#7a2a00', '#ffb627'], pc: ['#fff6c2'] }, w38: { pat: 'damask', pg: 0.7 },
+  w39: { pat: 'hex', pk: ['#ffffff', '#888888', '#3a3a48'] }, w40: { pat: 'stars', flow: [0.03, 0.01] },
+  w41: { pat: 'flame', pg: 1, flow: [0, 0.5], pk: ['#2a0800', '#7a1500', '#ff4a1a'], pc: ['#ffe14a'] }, w42: { pat: 'stars', pg: 0.6, flow: [0.02, 0.01], pc: ['#5a1b8a', '#1a3a8a', '#8a1b5a'] },
+  w43: { pat: 'flake', pk: ['#bff4ff', '#5ac8ff', '#5ac8ff'], pc: ['#ffffff'] }, w44: { pat: 'tiger', pg: 0.8, pk: ['#160818', '#000000', '#ff3ec8'], pc: ['#3ef1ff'] }
+};
+for (const s of WSKINS) if (WPAT[s.id]) Object.assign(s, WPAT[s.id]);
 /* karakter skinleri: gövde/kollar, bacaklar, kask, vizör (ışıklı), sırt çantası, şapka */
 const CSKINS = [
   { id: 'c01', n: 'Gece Ajanı', price: 100, suit: '#1c2026', legs: '#0e1013', helm: '#14171c', visor: '#ff4655', pack: '#0e1013', hat: null },
@@ -155,7 +172,7 @@ function itemRar(it) {
 }
 /* iki renk arası (RGB dizileri) */
 function mixRGB(a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k, 1]; }
-const skAnim = sk => !!(sk && (sk.rb || sk.duo || sk.pulse));
+const skAnim = sk => !!(sk && (sk.rb || sk.duo || sk.pulse || sk.flow));
 const pulseK = t => 0.75 + 0.55 * Math.sin(t * 4.2);
 const duoK = t => 0.5 + 0.5 * Math.sin(t * 1.7);
 const GEM_REWARD = { win: 150, draw: 70, lose: 30, kill: 5, killCap: 30 };
@@ -316,7 +333,7 @@ function gunPartsFor(wid, p, t) {
     const l = lumOf(hexRGB(q[2]));
     const isAcc = i > 0 && l >= 0.16 && i % 2 === 1;
     const col = i === 0 ? main : l < 0.16 ? dark : isAcc ? acc : main;
-    return [q[0], q[1], col, isAcc ? gl : 0];
+    return [q[0], q[1], col, isAcc ? gl : 0, col === main ? 1 : 0];
   });
   if (!anim) _SKC[wid + sk.id] = out;
   return out;
@@ -338,16 +355,18 @@ const STORE = { tab: 'sw', raf: 0, cs: 'cs1' };
 function _hx(c) { return '#' + c.slice(0, 3).map(v => Math.round(clamp(v, 0, 1) * 255).toString(16).padStart(2, '0')).join(''); }
 function _shade(hex, k) { const c = hexRGB(hex); return _hx([c[0] * k, c[1] * k, c[2] * k]); }
 /* yandan görünüş: GUNM parçaları (x ileri, y yukarı) */
-function previewGun(cv, parts, glowCol) {
+function previewGun(cv, parts, glowCol, pat, fo) {
   const g = cv.getContext('2d'), W2 = cv.width, H2 = cv.height; g.clearRect(0, 0, W2, H2);
   let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
   for (const [s, o] of parts) { x0 = Math.min(x0, o[0] - s[0] / 2); x1 = Math.max(x1, o[0] + s[0] / 2); y0 = Math.min(y0, o[1] - s[1] / 2); y1 = Math.max(y1, o[1] + s[1] / 2); }
   const sc = Math.min((W2 - 16) / (x1 - x0), (H2 - 16) / (y1 - y0)), cx = W2 / 2 - (x0 + x1) / 2 * sc, cy = H2 / 2 + (y0 + y1) / 2 * sc;
   const order = parts.map((q, i) => [q, i]).sort((a, b) => a[0][1][2] - b[0][1][2]);
-  for (const [[s, o, c, gl]] of order) {
+  let fill = null;
+  if (pat) { try { fill = g.createPattern(pat, 'repeat'); const k = 20 * sc / PAT_S, tl = 20 * sc; fill.setTransform(new DOMMatrix([k, 0, 0, k, cx - (fo ? fo[0] * tl : 0), cy - (fo ? fo[1] * tl : 0)])); } catch (e) { fill = null; } }
+  for (const [[s, o, c, gl, mn]] of order) {
     const col = Array.isArray(c) ? _hx(c) : c;
     if (gl) { g.shadowColor = glowCol || col; g.shadowBlur = 10; } else g.shadowBlur = 0;
-    g.fillStyle = col; g.fillRect(cx + (o[0] - s[0] / 2) * sc, cy - (o[1] + s[1] / 2) * sc, s[0] * sc, s[1] * sc);
+    g.fillStyle = fill && mn ? fill : col; g.fillRect(cx + (o[0] - s[0] / 2) * sc, cy - (o[1] + s[1] / 2) * sc, s[0] * sc, s[1] * sc);
     g.shadowBlur = 0; g.fillStyle = 'rgba(255,255,255,0.12)'; g.fillRect(cx + (o[0] - s[0] / 2) * sc, cy - (o[1] + s[1] / 2) * sc, s[0] * sc, Math.max(1, s[1] * sc * 0.18));
   }
 }
@@ -410,7 +429,7 @@ function uiGemsChanged() {
 }
 /* silah skini önizlemesi (yandan tüfek + mermi izi); t: zaman (nabız / renk geçişi için) */
 function previewWs(cv, id, t) {
-  const s = WSK[id]; previewGun(cv, gunPartsFor('vandal', { wsk: id }, t || 0), s ? s.c[2] : null); if (s && s.rb) previewRainbow(cv);
+  const s = WSK[id]; previewGun(cv, gunPartsFor('vandal', { wsk: id }, t || 0), s ? s.c[2] : null, s && s.pat ? patCanvas(s) : null, patFlow(s, t || 0)); if (s && s.rb) previewRainbow(cv);
   if (!s) return;
   const g = cv.getContext('2d'), y = cv.height * 0.28, x0 = cv.width * 0.62, x1 = cv.width - 6, col = s.c[2];
   const gr = g.createLinearGradient(x0, 0, x1, 0); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, col);
@@ -456,9 +475,10 @@ function uiStoreRender() {
     cards.push(card({ k: tab, id: '', n: kf ? 'Efektsiz' : 'Varsayılan', ds: kf ? 'Öldürme efekti yok' : 'Skin yok', eq: !eqId, btn: !eqId ? 'KUŞANILDI' : 'KUŞAN', dis: !eqId }));
     for (const s of K.list) {
       const own = p[tab].includes(s.id), eq = eqId === s.id, R = itemRar(s), anim = kf || (tab === 'ws' && skAnim(s));
-      const tr = kf ? s.ds + ' · ' : s.rb ? 'Renk değiştiren · ' : s.pulse ? 'Nabız ışıklı · ' : s.glow ? 'Işıklı · ' : '';
-      if (s.ex && !own) { cards.push(card({ k: tab, id: s.id, n: s.n, ds: kf ? s.ds : tr + '🎁 Yalnızca kasadan', rc: R.c, rn: R.n, anim, lock: true, btn: '🎁 KASALARDA', dis: true })); continue; }
-      cards.push(card({ k: tab, id: s.id, n: s.n, ds: kf ? (own ? tr + 'Sahipsin' : s.ds) : tr + (own ? 'Sahipsin' : '💎 ' + s.price), eq, rc: R.c, rn: R.n, anim,
+      // açıklama (fiyat düğmede yazar): desen / ışık türü ya da efektin ne yaptığı
+      const dsc = kf ? s.ds : s.pat ? PAT_N[s.pat] + (s.flow ? ' · akan' : s.rb ? ' · gökkuşağı' : '') : s.rb ? 'Renk değiştiren' : s.pulse ? 'Nabız ışıklı' : s.glow ? 'Işıklı' : tab === 'ws' ? 'Düz renk' : '';
+      if (s.ex && !own) { cards.push(card({ k: tab, id: s.id, n: s.n, ds: dsc || '🎁 Yalnızca kasadan', rc: R.c, rn: R.n, anim, lock: true, btn: '🎁 KASALARDA', dis: true })); continue; }
+      cards.push(card({ k: tab, id: s.id, n: s.n, ds: own ? (dsc ? dsc + ' · ✓' : 'Sahipsin') : dsc || '💎 ' + s.price, eq, rc: R.c, rn: R.n, anim,
         primary: !own && p.gems >= s.price, btn: eq ? 'KUŞANILDI' : own ? 'KUŞAN' : 'SATIN AL 💎 ' + s.price, dis: eq || (!own && p.gems < s.price) }));
     }
   }

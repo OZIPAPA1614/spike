@@ -15,8 +15,10 @@ function _mdlMesh(name, part) {
     const ax = V[a] * k, ay = V[a + 1] * k, az = V[a + 2] * k, bx = V[b] * k, by = V[b + 1] * k, bz = V[b + 2] * k, cx = V[c] * k, cy = V[c + 1] * k, cz = V[c + 2] * k;
     const ux = bx - ax, uy = by - ay, uz = bz - az, vx = cx - ax, vy = cy - ay, vz = cz - az;
     let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx; const l = Math.hypot(nx, ny, nz) || 1; nx /= l; ny /= l; nz /= l;
-    const col = pal[PI[t / 3]] || [1, 1, 1];
-    gv(g, ax, ay, az, nx, ny, nz, col, 0, 0); gv(g, bx, by, bz, nx, ny, nz, col, 0, 0); gv(g, cx, cy, cz, nx, ny, nz, col, 0, 0);
+    const col = pal[PI[t / 3]] || [1, 1, 1], ax2 = Math.abs(nx), ay2 = Math.abs(ny), az2 = Math.abs(nz), US = 1 / 20; // desen dokusu: 20 birimde bir döşeme
+    const uv = (x, y, z) => az2 >= ax2 && az2 >= ay2 ? [x * US, -y * US] : ay2 >= ax2 ? [x * US, z * US] : [z * US, -y * US];
+    const ua = uv(ax, ay, az), ub = uv(bx, by, bz), uc = uv(cx, cy, cz);
+    gv(g, ax, ay, az, nx, ny, nz, col, ua[0], ua[1]); gv(g, bx, by, bz, nx, ny, nz, col, ub[0], ub[1]); gv(g, cx, cy, cz, nx, ny, nz, col, uc[0], uc[1]);
     y0 = Math.min(y0, ay, by, cy); y1 = Math.max(y1, ay, by, cy);
   }
   mkMesh(name, g);
@@ -55,16 +57,25 @@ function gunColsFor(wid, p, t) {
   }
   const anim = skAnim(sk), tt = t || 0;
   if (!anim && _SKC['gs' + wid + sk.id]) return _SKC['gs' + wid + sk.id];
-  const o = { main: sk.rb ? rbCol(tt) : sk.duo ? mixRGB(hexRGB(sk.c[0]), hexRGB(sk.duo), duoK(tt)) : hexRGB(sk.c[0]), dark: hexRGB(sk.c[1]), acc: sk.rb ? rbCol(tt, 0.5) : hexRGB(sk.c[2]),
-    glow: sk.glow ? 0.65 * (sk.pulse ? pulseK(tt) : 1) : 0, glowMain: sk.pulse && sk.glow ? 0.12 * pulseK(tt) : 0 };
+  const tex = sk.pat ? patTex(sk) : null; // desenli skin: ana gövde desen dokusuyla (renkler dokuda)
+  const o = { main: sk.rb ? rbCol(tt) : tex ? [1, 1, 1, 1] : sk.duo ? mixRGB(hexRGB(sk.c[0]), hexRGB(sk.duo), duoK(tt)) : hexRGB(sk.c[0]), dark: hexRGB(sk.c[1]), acc: sk.rb ? rbCol(tt, 0.5) : hexRGB(sk.c[2]),
+    glow: sk.glow ? 0.65 * (sk.pulse ? pulseK(tt) : 1) : 0, glowMain: sk.pulse && sk.glow && !tex ? 0.12 * pulseK(tt) : 0,
+    tex, te: tex && sk.pg ? 0.6 * sk.pg * (sk.pulse ? pulseK(tt) : 1) : 0, to: tex ? patFlow(sk, tt) : null };
   if (!anim) _SKC['gs' + wid + sk.id] = o;
   return o;
+}
+/* desen dokusu (GL, skin başına bir kez) */
+const _PATT = {};
+function patTex(sk) {
+  if (_PATT[sk.id]) return _PATT[sk.id];
+  const cv = patCanvas(sk); if (!cv || !GLX.gl) return null;
+  return (_PATT[sk.id] = mkTex(cv, true));
 }
 function drawGunModel(wid, x, h, z, R, sc, o, cols, alpha) {
   const G = mdlGun(wid), A = alpha === undefined ? 1 : alpha;
   for (const pt of G.parts) {
-    const c = cols[pt.r] || pt.c, gl = pt.r === 'acc' ? cols.glow : pt.r === 'main' ? cols.glowMain : 0;
-    const oo = gl ? Object.assign({}, o || {}, { em: [c[0] * gl, c[1] * gl, c[2] * gl] }) : o;
+    const c = cols[pt.r] || pt.c, gl = pt.r === 'acc' ? cols.glow : pt.r === 'main' ? cols.glowMain : 0, pm = pt.r === 'main' && cols.tex;
+    const oo = gl || pm ? Object.assign({}, o || {}, gl ? { em: [c[0] * gl, c[1] * gl, c[2] * gl] } : null, pm ? { tex: cols.tex, te: cols.te, to: cols.to } : null) : o;
     QR(pt.mesh, x, h, z, R, sc, sc, sc, [c[0], c[1], c[2], A], oo);
   }
 }
