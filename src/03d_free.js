@@ -9,7 +9,7 @@
           dolaşır, silah kullanamaz. İNSANA DÖN ile geri döner.
         Her şeyi host yönetir; istemciler isteklerini 'act' ile gönderir.
    ===================================================================== */
-const FR_MAXNPC = 24, FR_MAXK = 8, FR_TOUCH = PR * 2 + 8;
+const FR_MAXNPC = 24, FR_MAXK = 16, FR_TOUCH = PR * 2 + 8;
 /* hazır NPC'ler (resimleri 07h'de kodla çizilir). hp: 0 = ölümsüz */
 const NPC_KINDS = {
   grin: { n: 'Sırıtkan', spd: 330, hp: 0, dmg: 999, sz: 1.15 },
@@ -27,6 +27,10 @@ function npcIdOf(img) { let h = 2166136261; for (let i = 0; i < img.length; i +=
 /* ---------- istekler (host): yerelde doğrudan, istemciden 'act' ile ---------- */
 function frAct(p, d) {
   if (!frOn() || !p || !d) return;
+  if ((d.a === 'npc' || (d.a === 'pill' && d.k)) && !frKnow(String(d.k || ''))) { // içerik henüz yükleniyorsa sıraya al (06b)
+    if (PAK.inb[d.k]) (S.frQ || (S.frQ = [])).push({ pid: p.id, d, t: S.time });
+    return;
+  }
   switch (d.a) {
     case 'frw': frGive(p, String(d.w || '')); break;
     case 'npc': frSpawnNpc(p, String(d.k || '')); break;
@@ -67,17 +71,30 @@ function frPill(p, k) {
   emitFx({ t: 'rebirth', x: r1(p.x), y: r1(p.y), x2: r1(p.x), y2: r1(p.y) });
   if (k) emit({ k: 'msg', to: p.id, small: 'PİLL: ' + npcKind(k).n + ' oldun · dokunduğun rakibi vurursun · spawn menüsünden İNSANA DÖN' });
 }
-/* oyuncunun kendi resmiyle yaptığı NPC türü (resim küçük, data: adresi) */
+/* oyuncunun kendi resmi (ve sesi) ile yaptığı NPC türü — host / tek oyunculu */
 function frRegKind(d) {
-  const img = String(d.img || ''), n = String(d.n || '').trim().slice(0, 16);
-  if (!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(img) || img.length > 60000 || !n) return;
-  const id = npcIdOf(img), K = S.npcK || (S.npcK = {});
-  if (!K[id]) {
-    const ids = Object.keys(K);
-    if (ids.length >= FR_MAXK) delete K[ids[0]]; // en eskisini çıkar
-  }
-  const hp = d.hp | 0;
-  K[id] = { n, img, spd: clamp(d.spd | 0 || 320, 150, 520), hp: hp > 0 ? clamp(hp, 50, 5000) : 0, dmg: clamp(d.dmg | 0 || 999, 5, 999), sz: clamp(+d.sz || 1.1, 0.6, 2) };
+  const v = pakValid({ n: String(d.n || '').slice(0, 16), img: d.img, snd: d.snd, spd: clamp(d.spd | 0 || 320, 150, 520), hp: d.hp, dmg: d.dmg, sz: clamp(+d.sz || 1.1, 0.6, 2) });
+  if (!v) return;
+  const id = kindIdOf(v);
+  frAddKind(id, v); pakPut(id, v);
+}
+/* NPC türünü maça ekle (sınır dolarsa en eski oyuncu NPC'si çıkar) */
+function frAddKind(id, v) {
+  const K = S.npcK || (S.npcK = {});
+  if (!K[id]) { const ids = Object.keys(K).filter(k => !K[k].mod); if (ids.length >= FR_MAXK) delete K[ids[0]]; }
+  K[id] = v;
+}
+/* tür biliniyor mu? Bilinmiyorsa odaya yüklenmiş içerikten ekle */
+function frKnow(k) {
+  if (!k || npcKind(k)) return !!k;
+  if (PAK.k[k]) { frAddKind(k, PAK.k[k]); return true; }
+  return false;
+}
+/* içerik yüklendi: sıradaki NPC / pill isteklerini uygula */
+function frPakReady(id) {
+  if (!S || !S.frQ || !frOn()) return;
+  const q = S.frQ; S.frQ = [];
+  for (const r of q) { const p = S.pmap[r.pid]; if (p && S.time - r.t < 30) { if (r.d.k === id || PAK.k[r.d.k]) frAct(p, r.d); else S.frQ.push(r); } }
 }
 /* mermi NPC'ye değdi: ölümsüzse mermiyi durdurur, değilse can düşer */
 function npcHit(n, dmg, att) {

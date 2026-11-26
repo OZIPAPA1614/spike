@@ -461,6 +461,7 @@ function uiRenderLobby() {
   }
   uiRenderLobbyChat();
   uiLobbyPub();
+  pakUi(); // içerik indirme durumu (06b)
 }
 /* açık sunucu durumu: oyuncu sayısı + otomatik başlama geri sayımı */
 function uiLobbyPub() {
@@ -622,7 +623,7 @@ function uiStartGame() {
 }
 function uiBackToMenu(msg) {
   const wasOver = S && S.phase === 'over';
-  G.running = false; G.paused = false; S = null; toggleEmote(false); cineStop(false); modStopAll(); if (FRM.open) frMenuToggle(false);
+  G.running = false; G.paused = false; S = null; toggleEmote(false); cineStop(false); modStopAll(); npcAudioStop(); if (FRM.open) frMenuToggle(false);
   document.body.classList.remove('pk'); if (PKMAP) loadMap(0); // parkurdan çıkınca menü arka planı normal haritaya döner
   if (CHAT.open) chatClose(false); UIS.chat.length = 0;
   document.body.classList.remove('ingame', 'ovl'); $('touch').classList.add('hidden');

@@ -60,14 +60,14 @@ function npcCanvas(k) {
 }
 /* NPC'nin önizleme resmi (spawn menüsü için) */
 function npcPreview(k) {
-  const K = npcKind(k); if (!K) return '';
+  const K = npcKind(k); if (!K || K.wait) return '';
   if (K.img) return K.img;
   return NPCV.prev[k] || (NPCV.prev[k] = npcCanvas(k).toDataURL('image/png'));
 }
 /* doku: hazırlar tuvalden, kendi resimler data: adresinden (yüklenene kadar beyaz) */
 function npcTex(k) {
   const t = NPCV.tex[k]; if (t) return t.t;
-  const K = npcKind(k); if (!K || !GLX.ok) return null;
+  const K = npcKind(k); if (!K || !GLX.ok || K.wait) return null; // resmi henüz inmediyse beyaz (06b)
   if (!K.img) { NPCV.tex[k] = { t: mkTex(npcCanvas(k), false) }; return NPCV.tex[k].t; }
   const rec = NPCV.tex[k] = { t: null }, im = new Image();
   im.onload = () => { try { rec.t = mkTex(im, false); } catch (e) { } };
@@ -108,4 +108,75 @@ function drawNpcs(t) {
 function frDrawMinimap(P) {
   if (!S || !S.npcs) return;
   for (const n of S.npcs) { const [px, py] = P(n.rx !== undefined ? n.rx : n.x, n.ry !== undefined ? n.ry : n.y); circle(px, py, 3.5, '#b46cff', 'rgba(20,0,30,0.9)', 1); }
+}
+/* ---------- NPC SESİ: 15 sn, tek kanal, 12 kHz IMA-ADPCM (4 bit) → "ima12k:<base64>" ----------
+   Kendi NPC'nin sesi kovalarken döngüde çalar; yaklaştıkça yükselir (en yakın 4 NPC). */
+const IMA_STEP = [7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 19, 21, 23, 25, 28, 31, 34, 37, 41, 45, 50, 55, 60, 66, 73, 80, 88, 97, 107, 118, 130, 143, 157, 173, 190, 209, 230, 253, 279, 307, 337, 371, 408, 449, 494, 544, 598, 658, 724, 796, 876, 963, 1060, 1166, 1282, 1411, 1552, 1707, 1878, 2066, 2272, 2499, 2749, 3024, 3327, 3660, 4026, 4428, 4871, 5358, 5894, 6484, 7132, 7845, 8630, 9493, 10442, 11487, 12635, 13899, 15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794, 32767];
+const IMA_IDX = [-1, -1, -1, -1, 2, 4, 6, 8, -1, -1, -1, -1, 2, 4, 6, 8];
+function adpcmEnc(pcm) {
+  const out = new Uint8Array(Math.ceil(pcm.length / 2)); let pred = 0, idx = 0;
+  for (let i = 0; i < pcm.length; i++) {
+    const step = IMA_STEP[idx]; let diff = pcm[i] - pred, code = 0;
+    if (diff < 0) { code = 8; diff = -diff; }
+    let vd = step >> 3;
+    if (diff >= step) { code |= 4; diff -= step; vd += step; }
+    if (diff >= step >> 1) { code |= 2; diff -= step >> 1; vd += step >> 1; }
+    if (diff >= step >> 2) { code |= 1; vd += step >> 2; }
+    pred = clamp(pred + ((code & 8) ? -vd : vd), -32768, 32767); idx = clamp(idx + IMA_IDX[code], 0, 88);
+    if (i & 1) out[i >> 1] |= code << 4; else out[i >> 1] = code;
+  }
+  return out;
+}
+function adpcmDec(bytes, n) {
+  const out = new Float32Array(n); let pred = 0, idx = 0;
+  for (let i = 0; i < n; i++) {
+    const code = (i & 1) ? bytes[i >> 1] >> 4 : bytes[i >> 1] & 15, step = IMA_STEP[idx];
+    let vd = step >> 3; if (code & 4) vd += step; if (code & 2) vd += step >> 1; if (code & 1) vd += step >> 2;
+    pred = clamp(pred + ((code & 8) ? -vd : vd), -32768, 32767); idx = clamp(idx + IMA_IDX[code], 0, 88);
+    out[i] = pred / 32768;
+  }
+  return out;
+}
+function b64Bytes(s) { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+function bytesB64(u) { let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
+/* 15 sn'lik sesi oynatılabilir tampona çevir (her tarayıcıda çalışsın diye 24 kHz'e çıkarılır) */
+function sndBuffer(snd) {
+  const u = b64Bytes(snd.slice(7)), n = u.length * 2, f = adpcmDec(u, n), b = AU.ctx.createBuffer(1, n * 2, 24000), d = b.getChannelData(0);
+  for (let i = 0; i < n; i++) { const a = f[i], c = i + 1 < n ? f[i + 1] : a; d[i * 2] = a; d[i * 2 + 1] = (a + c) / 2; }
+  return b;
+}
+const NPCS = { buf: {}, live: new Map() };
+function npcSndBuf(k) {
+  const K = npcKind(k); if (!K || !K.snd || !AU.ctx) return null;
+  if (NPCS.buf[k] !== undefined) return NPCS.buf[k];
+  let b = null; try { b = sndBuffer(K.snd); } catch (e) { b = null; }
+  return (NPCS.buf[k] = b);
+}
+function _npcStopV(v) { try { const t = AU.ctx.currentTime; v.g.gain.setTargetAtTime(0, t, 0.05); v.s.stop(t + 0.3); } catch (e) { } }
+function npcAudioStop() { for (const v of NPCS.live.values()) _npcStopV(v); NPCS.live.clear(); }
+function npcAudioTick() {
+  const live = NPCS.live;
+  if (!AU.ctx || !S || !G.running || !frOn()) { if (live.size) npcAudioStop(); return; }
+  const L = audioListener(), em = [];
+  for (const n of S.npcs || []) { const K = npcKind(n.k); if (K && K.snd) { const x = n.rx !== undefined ? n.rx : n.x, y = n.ry !== undefined ? n.ry : n.y; em.push({ key: n.id, k: n.k, x, y, d: dist(L.x, L.y, x, y) }); } }
+  for (const p of S.players) if (p.alive && p.pill) { const K = npcKind(p.pill); if (K && K.snd) em.push({ key: 'p:' + p.id, k: p.pill, x: p.x, y: p.y, d: dist(L.x, L.y, p.x, p.y) }); }
+  em.sort((a, b) => a.d - b.d);
+  const keep = new Set(), now = AU.ctx.currentTime;
+  for (const e of em.slice(0, 4)) {
+    if (e.d > 2400) break;
+    let v = live.get(e.key);
+    if (!v || v.k !== e.k) {
+      if (v) _npcStopV(v);
+      const b = npcSndBuf(e.k); if (!b) continue;
+      const s = AU.ctx.createBufferSource(); s.buffer = b; s.loop = true;
+      const g = AU.ctx.createGain(); g.gain.value = 0;
+      let pn = null; if (AU.ctx.createStereoPanner) { pn = AU.ctx.createStereoPanner(); g.connect(pn); pn.connect(AU.master); } else g.connect(AU.master);
+      s.connect(g); s.start(0, Math.random() * b.duration);
+      v = { s, g, pn, k: e.k }; live.set(e.key, v);
+    }
+    keep.add(e.key);
+    v.g.gain.setTargetAtTime((L.deaf ? 0.05 : 1) * 1.1 / (1 + e.d / 260), now, 0.08);
+    if (v.pn) v.pn.pan.setTargetAtTime(e.d > 8 ? clamp(Math.sin(angDiff(L.ang || 0, Math.atan2(e.y - L.y, e.x - L.x))), -1, 1) * 0.8 : 0, now, 0.08);
+  }
+  for (const [key, v] of live) if (!keep.has(key)) { _npcStopV(v); live.delete(key); }
 }

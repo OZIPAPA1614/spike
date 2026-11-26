@@ -82,7 +82,7 @@ function netShutdown() {
 /* ---------------- HOST ---------------- */
 function hostCreate(name, onReady, onErr) {
   if (!netAvailable()) { onErr('PeerJS kütüphanesi yüklenemedi (internet bağlantısı gerekli).'); return; }
-  NET.mode = 'host'; G.myId = 'h'; NET.pc = 0;
+  NET.mode = 'host'; G.myId = 'h'; NET.pc = 0; pakReset(); pakAddSaved();
   NET.lobby = { players: [{ id: 'h', name, team: 0, bot: false, uid: FR.uid, cos: SHOP.cos() }], cfg: { teamSize: 5, fill: true, diff: 'normal', map: 0, ff: true }, inGame: false };
   if (!rtcAvailable()) { onErr(netBlockedMsg('Bu tarayıcı WebRTC desteklemiyor.')); return; }
   let opened = false, failed = false;
@@ -138,12 +138,14 @@ function hostRecv(conn, d) {
       const t0 = NET.lobby.players.filter(p => p.team === 0).length, t1 = NET.lobby.players.filter(p => p.team === 1).length;
       NET.lobby.players.push({ id, name: String(d.name || 'Oyuncu').slice(0, 16), team: t0 <= t1 ? (t0 < t1 ? 0 : 1) : 1, bot: false, uid: String(d.uid || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 40), cos: cosClean(d.cos) });
       netSend(conn, { t: 'welcome', id });
+      setTimeout(() => pakSendAll(conn), 300); // içerik (özel NPC resim/ses) — 06b
       broadcastLobby();
       setTimeout(vcBroadcastDir, 400);
       uiToast((d.name || 'Oyuncu') + ' lobiye katıldı');
       break;
     }
     case 'ping': netSend(conn, { t: 'pong', c: d.c }); break;
+    case 'pk0': case 'pk1': pakRecv(conn, d); break; // istemcinin yüklediği içerik (06b)
     case 'vt': if (conn._pid) vcHostSet(conn._pid, d.vm ? 1 : 0, d.vt ? 1 : 0); break;
     case 'chat': if (G.running && S && conn._pid) hostChat(conn._pid, d.m); break;
     case 'lchat': if (conn._pid) lobbyChatHost(conn._pid, d.m); break;
@@ -303,7 +305,7 @@ function makeSnapshot() {
     sp: { state: S.bomb.state, carrier: S.bomb.carrier, x: r1(S.bomb.x), y: r1(S.bomb.y), t: r2(S.bomb.t), site: S.bomb.site, defuser: S.bomb.defuser, prog: r2(S.bomb.prog), half: S.bomb.half },
     ob: S.orbs, cp: S.corpses, cd: S.cards || [], rb: (S.rb || []).map(r => r2(r.cd)), hl: (S.heal || []).map(h => h.cd > 0 ? 1 : 0), ev: S.evq.slice(),
     pk: S.pk ? { bk: S.pk.bk, fin: S.pk.fin, w: S.pk.winner, c: S.pk.champ, t0: r2(S.pk.t0) } : 0,
-    np: S.npcs ? S.npcs.map(n => [n.id, n.k, r1(n.x), r1(n.y), Math.ceil(n.hp || 0)]) : 0, nk: S.npcK || 0,
+    np: S.npcs ? S.npcs.map(n => [n.id, n.k, r1(n.x), r1(n.y), Math.ceil(n.hp || 0)]) : 0, nk: pakMeta(S.npcK),
     am: S.arena ? { m: S.arena.m, sc: S.arena.sc.map(r1), z: S.arena.z, zi: S.arena.zi, zt: r1(S.arena.zt), own: S.arena.own, win: S.arena.win } : 0
   };
 }
@@ -398,7 +400,7 @@ function clientJoin(code, name, onOk, onErr, onStatus) {
     c.on('open', () => { if (!mine()) return; stage = 'hello'; st('Bağlandı, lobiye giriliyor…'); netSend(c, { t: 'hello', name, uid: FR.uid, cos: SHOP.cos() }); });
     c.on('data', d => {
       if (NET.conn !== c) return;
-      if (d && d.t === 'welcome') { if (done) return; done = true; NET.connecting = false; clearTimeout(to); NET.pendingFail = null; G.myId = d.id; onOk(); }
+      if (d && d.t === 'welcome') { if (done) return; done = true; NET.connecting = false; clearTimeout(to); NET.pendingFail = null; G.myId = d.id; pakReset(); onOk(); setTimeout(pakUploadSaved, 300); }
       else if (d && d.t === 'deny') { fail(d.why); return; }
       clientRecv(d);
     });
@@ -487,6 +489,7 @@ function clientRecv(d) {
       uiStartGame();
       break;
     case 's': clientApplySnap(d.s); break;
+    case 'pk0': case 'pk1': pakRecv(NET.conn, d); break; // odanın içeriği (06b)
     case 'vdir': VC.setDir(d.d); break;
     case 'lchat': lobbyChatAdd(d); break;
     case 'pong': NET.ping = Math.round(performance.now() - d.c); break;
@@ -551,7 +554,7 @@ function clientApplySnap(d) {
   if ('cp' in d) S.corpses = s.cp;
   if ('am' in d) S.arena = s.am || null;
   if ('np' in d) frClientNpcs(s.np || []);
-  if ('nk' in d) S.npcK = s.nk || {};
+  if ('nk' in d) S.npcK = pakMergeKinds(s.nk); // değerler anlık görüntüden, resim/ses içerikten (06b)
   if ('cd' in d) S.cards = s.cd || [];
   if ('rb' in d) S.rb = (s.rb || []).map(cd => ({ cd }));
   if ('hl' in d || !S.heal) S.heal = (MAPDATA.heal || []).map((h, i) => ({ id: h.id, x: h.x, y: h.y, cd: s.hl && s.hl[i] ? 1 : 0 }));

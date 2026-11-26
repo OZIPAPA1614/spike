@@ -412,6 +412,43 @@ try:
     except Exception as e: fail('SERBEST çok oyunculu: ' + str(e)[:300])
     report_errs(errs, 'serbest çok oyunculu')
     ctx.close()
+
+    # ---------- 8b) SERBEST içerik paylaşımı (GMod gibi): odaya girerken özel NPC resim + sesleri iner ----------
+    errs = []
+    ch = b.new_context(viewport={'width': 560, 'height': 340}); cc = b.new_context(viewport={'width': 560, 'height': 340})
+    try:
+        H = page(ch, 'İÇERİK-HOST', errs, 'IcerikHost'); C = page(cc, 'İÇERİK-İSTEMCİ', errs, 'IcerikMisafir')
+        mk = """(a) => { const c = document.createElement('canvas'); c.width = c.height = 32; const g = c.getContext('2d'); g.fillStyle = a.col; g.fillRect(0, 0, 32, 32);
+            const o = { n: a.n, img: c.toDataURL('image/png'), spd: 300, hp: 0, dmg: 999, sz: 1.1 };
+            if (a.snd) { const pcm = new Int16Array(12000 * 15); for (let i = 0; i < pcm.length; i++) pcm[i] = Math.round(8000 * Math.sin(i * 0.11)); o.snd = 'ima12k:' + bytesB64(adpcmEnc(pcm)); }
+            localStorage.setItem('spk_npcs', JSON.stringify([o])); return kindIdOf(o); }"""
+        ka = H.evaluate(mk, {'n': 'Host NPC', 'col': '#c33'}); kb = C.evaluate(mk, {'n': 'Misafir Sesli', 'col': '#3c3', 'snd': True})
+        H.click('#btnPlay'); H.click('#btnHost')
+        if not until(H, "() => UI.screen==='scr-lobby' && (document.getElementById('lbCode').textContent||'').replace(/-/g,'').length>=5", 60): fail('İÇERİK: oda açılamadı')
+        code = H.inner_text('#lbCode')
+        C.click('#btnPlay'); C.click('#btnJoin'); C.fill('#inCode', code); C.click('#btnConnect')
+        if not until(C, "() => UI.screen==='scr-lobby'", 80): fail('İÇERİK: istemci odaya katılamadı')
+        ok1 = until(H, f"() => !!(PAK.k['{ka}'] && PAK.k['{kb}'] && PAK.k['{kb}'].snd)", 40) and until(C, f"() => !!(PAK.k['{ka}'] && PAK.k['{kb}']) && !Object.keys(PAK.inb).length", 40)
+        lb = C.inner_text('#lbPak')
+        H.select_option('#lbMode', 'fr'); H.select_option('#lbSize', '1'); H.wait_for_timeout(500); H.click('#btnLobbyStart')
+        until(C, "() => UI.screen==='scr-select'", 60)
+        C.click('.agent[data-id="vex"]'); C.wait_for_timeout(200); C.click('#btnLock')
+        H.click('.agent[data-id="mist"]'); H.wait_for_timeout(200); H.click('#btnLock')
+        if not until(C, "() => !!(G.running && S && S.cfg && S.cfg.mode==='fr')", 80): fail('İÇERİK: maç başlamadı')
+        H.evaluate("() => { cineStop(false); S.phase='live'; S.phaseT=1e9; }"); C.evaluate("() => { cineStop(false); if (UI.pauseOpen) togglePause(false); }")
+        H.wait_for_timeout(500)
+        C.evaluate(f"() => {{ const it = frKinds().find(x => x.k === '{kb}'); frEnsure(it); frRequest({{ a: 'npc', k: '{kb}' }}); }}")
+        H.evaluate(f"() => {{ frAct(S.pmap.h, {{ a: 'npc', k: '{ka}' }}); S.npcs.forEach(n => {{ n.hitT = S.time + 999; }}); }}")
+        H.wait_for_timeout(1200)
+        hs = H.evaluate("() => S.npcs.map(n => n.k).sort()")
+        cs = C.evaluate(f"() => [S.npcs.length, !!(npcKind('{ka}') && npcKind('{ka}').img), !!(npcKind('{kb}') && npcKind('{kb}').snd), !!npcSndBuf('{kb}')]")
+        if not ok1: fail('İÇERİK: lobide özel NPC\'ler iki yöne de inmedi')
+        elif 'hazır' not in lb: fail(f'İÇERİK: lobide indirme durumu görünmüyor: {lb!r}')
+        elif hs != sorted([ka, kb]) or cs != [2, True, True, True]: fail(f'İÇERİK: maçta özel NPC\'ler eksik: host {hs} istemci {cs}')
+        else: ok('SERBEST içerik: odaya girerken host ve misafirin özel NPC resim + sesleri karşılıklı iniyor, maçta ikisi de görünüyor')
+    except Exception as e: fail('İÇERİK: ' + str(e)[:300])
+    report_errs(errs, 'içerik paylaşımı')
+    ch.close(); cc.close()
     b.close()
 finally:
     sig.kill(); fb.kill(); srv.shutdown()

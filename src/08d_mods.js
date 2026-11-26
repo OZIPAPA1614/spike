@@ -128,6 +128,7 @@ function modMsg(rec, d) {
     const k = 'm' + rec.i + '_' + id, K = S.npcK || (S.npcK = {});
     K[k] = { n: String(x.name).slice(0, 20), img, spd: clamp(+x.speed || 320, 60, 900), hp: x.hp > 0 ? clamp(+x.hp, 1, 100000) : 0, dmg: clamp(+x.damage || 999, 0, 9999), sz: clamp(+x.size || 1.1, 0.3, 4), mod: 1 };
     rec.kinds[id] = k; delete NPCV.tex[k]; delete NPCV.prev[k];
+    pakPut(k, K[k]); // odadakilere resmi gönder (06b)
     if (FRM.open) frMenuRender();
     return;
   }

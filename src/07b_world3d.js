@@ -780,6 +780,7 @@ function drawWorldDynamic(v, me, t) {
   if (PKMAP) drawPkDynamic(t, me);
   if (arOn()) arDrawWorld(me, t);
   if (S.npcs) drawNpcs(t); // serbest mod NPC'leri (07h)
+  npcAudioTick(); // NPC kovalama sesleri (07h)
   // geçici duvarlar
   for (const w of S.twalls) for (const i of w.tiles) {
     const x = (i % MW + 0.5) * TILE, z = (((i / MW) | 0) + 0.5) * TILE;

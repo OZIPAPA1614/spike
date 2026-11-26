@@ -309,6 +309,10 @@ body.pk #tbQ,body.pk #tbE,body.pk #tbX,body.pk #tbBuy,body.pk #tbScope,body.pk #
 .modc .admrow{width:100%} .modc .admrow button{padding:6px 4px;font-size:11px}
 .modlog{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;max-height:120px;overflow:auto;background:rgba(0,0,0,.3);padding:6px;margin-top:6px;color:var(--dim)}
 .modlog .bad{color:#ff6b78}
+.sndbox{margin-top:10px;padding:10px;border:1px solid rgba(245,196,81,.35);background:rgba(245,196,81,.05)}
+.sndt{display:flex;justify-content:space-between;font-size:12px;letter-spacing:.06em;color:var(--white)}
+.sndbox input[type=range]{width:100%;margin:8px 0;padding:0}
+.sndsel{flex:1;align-self:center;font-size:12px;color:var(--gold);letter-spacing:.06em}
 @media (max-height:500px){#frOv .panel{padding:12px 16px} #frOv h2{font-size:18px} .frgrid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px} .frc img{width:52px;height:52px} .frc{padding:5px}}
 #admOv .panel{width:min(560px,94vw);max-height:92vh;overflow:auto}
 #admOv .panel:before{background:var(--gold)}
@@ -469,6 +473,7 @@ button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
     <div id="lbChat"><div id="lbChatLog"></div><div class="lbcrow"><input id="lbChatIn" maxlength="120" autocomplete="off" enterkeyhint="send" placeholder="Lobiye mesaj yaz, Enter ile gönder"><button id="lbChatSend">GÖNDER</button><button id="lbMic" class="ghost">🎤 BAS-KONUŞ (0)</button></div></div>
     <div id="lbPub" class="pubbar hidden"></div>
     <div class="note" id="lbCfgText"></div>
+    <div class="note" id="lbPak"></div>
     <div id="lbNet" class="netstat"></div>
     <div id="lbHostCtl" class="row-btn"><button id="btnLobbyLeave" class="ghost">ODAYI KAPAT</button><button id="btnLobbyStart" class="primary">MAÇI BAŞLAT</button></div>
     <div id="lbWait" class="row-btn"><button data-back="scr-play" class="ghost">AYRIL</button><div class="note" style="flex:2;align-self:center">Host'un maçı başlatması bekleniyor...</div></div>
@@ -5325,7 +5330,7 @@ function snColCss(me) { const c = snZoneCol(me); return 'rgb(' + c.map(v => Math
           dolaşır, silah kullanamaz. İNSANA DÖN ile geri döner.
         Her şeyi host yönetir; istemciler isteklerini 'act' ile gönderir.
    ===================================================================== */
-const FR_MAXNPC = 24, FR_MAXK = 8, FR_TOUCH = PR * 2 + 8;
+const FR_MAXNPC = 24, FR_MAXK = 16, FR_TOUCH = PR * 2 + 8;
 /* hazır NPC'ler (resimleri 07h'de kodla çizilir). hp: 0 = ölümsüz */
 const NPC_KINDS = {
   grin: { n: 'Sırıtkan', spd: 330, hp: 0, dmg: 999, sz: 1.15 },
@@ -5343,6 +5348,10 @@ function npcIdOf(img) { let h = 2166136261; for (let i = 0; i < img.length; i +=
 /* ---------- istekler (host): yerelde doğrudan, istemciden 'act' ile ---------- */
 function frAct(p, d) {
   if (!frOn() || !p || !d) return;
+  if ((d.a === 'npc' || (d.a === 'pill' && d.k)) && !frKnow(String(d.k || ''))) { // içerik henüz yükleniyorsa sıraya al (06b)
+    if (PAK.inb[d.k]) (S.frQ || (S.frQ = [])).push({ pid: p.id, d, t: S.time });
+    return;
+  }
   switch (d.a) {
     case 'frw': frGive(p, String(d.w || '')); break;
     case 'npc': frSpawnNpc(p, String(d.k || '')); break;
@@ -5383,17 +5392,30 @@ function frPill(p, k) {
   emitFx({ t: 'rebirth', x: r1(p.x), y: r1(p.y), x2: r1(p.x), y2: r1(p.y) });
   if (k) emit({ k: 'msg', to: p.id, small: 'PİLL: ' + npcKind(k).n + ' oldun · dokunduğun rakibi vurursun · spawn menüsünden İNSANA DÖN' });
 }
-/* oyuncunun kendi resmiyle yaptığı NPC türü (resim küçük, data: adresi) */
+/* oyuncunun kendi resmi (ve sesi) ile yaptığı NPC türü — host / tek oyunculu */
 function frRegKind(d) {
-  const img = String(d.img || ''), n = String(d.n || '').trim().slice(0, 16);
-  if (!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(img) || img.length > 60000 || !n) return;
-  const id = npcIdOf(img), K = S.npcK || (S.npcK = {});
-  if (!K[id]) {
-    const ids = Object.keys(K);
-    if (ids.length >= FR_MAXK) delete K[ids[0]]; // en eskisini çıkar
-  }
-  const hp = d.hp | 0;
-  K[id] = { n, img, spd: clamp(d.spd | 0 || 320, 150, 520), hp: hp > 0 ? clamp(hp, 50, 5000) : 0, dmg: clamp(d.dmg | 0 || 999, 5, 999), sz: clamp(+d.sz || 1.1, 0.6, 2) };
+  const v = pakValid({ n: String(d.n || '').slice(0, 16), img: d.img, snd: d.snd, spd: clamp(d.spd | 0 || 320, 150, 520), hp: d.hp, dmg: d.dmg, sz: clamp(+d.sz || 1.1, 0.6, 2) });
+  if (!v) return;
+  const id = kindIdOf(v);
+  frAddKind(id, v); pakPut(id, v);
+}
+/* NPC türünü maça ekle (sınır dolarsa en eski oyuncu NPC'si çıkar) */
+function frAddKind(id, v) {
+  const K = S.npcK || (S.npcK = {});
+  if (!K[id]) { const ids = Object.keys(K).filter(k => !K[k].mod); if (ids.length >= FR_MAXK) delete K[ids[0]]; }
+  K[id] = v;
+}
+/* tür biliniyor mu? Bilinmiyorsa odaya yüklenmiş içerikten ekle */
+function frKnow(k) {
+  if (!k || npcKind(k)) return !!k;
+  if (PAK.k[k]) { frAddKind(k, PAK.k[k]); return true; }
+  return false;
+}
+/* içerik yüklendi: sıradaki NPC / pill isteklerini uygula */
+function frPakReady(id) {
+  if (!S || !S.frQ || !frOn()) return;
+  const q = S.frQ; S.frQ = [];
+  for (const r of q) { const p = S.pmap[r.pid]; if (p && S.time - r.t < 30) { if (r.d.k === id || PAK.k[r.d.k]) frAct(p, r.d); else S.frQ.push(r); } }
 }
 /* mermi NPC'ye değdi: ölümsüzse mermiyi durdurur, değilse can düşer */
 function npcHit(n, dmg, att) {
@@ -6622,7 +6644,7 @@ function netShutdown() {
 /* ---------------- HOST ---------------- */
 function hostCreate(name, onReady, onErr) {
   if (!netAvailable()) { onErr('PeerJS kütüphanesi yüklenemedi (internet bağlantısı gerekli).'); return; }
-  NET.mode = 'host'; G.myId = 'h'; NET.pc = 0;
+  NET.mode = 'host'; G.myId = 'h'; NET.pc = 0; pakReset(); pakAddSaved();
   NET.lobby = { players: [{ id: 'h', name, team: 0, bot: false, uid: FR.uid, cos: SHOP.cos() }], cfg: { teamSize: 5, fill: true, diff: 'normal', map: 0, ff: true }, inGame: false };
   if (!rtcAvailable()) { onErr(netBlockedMsg('Bu tarayıcı WebRTC desteklemiyor.')); return; }
   let opened = false, failed = false;
@@ -6678,12 +6700,14 @@ function hostRecv(conn, d) {
       const t0 = NET.lobby.players.filter(p => p.team === 0).length, t1 = NET.lobby.players.filter(p => p.team === 1).length;
       NET.lobby.players.push({ id, name: String(d.name || 'Oyuncu').slice(0, 16), team: t0 <= t1 ? (t0 < t1 ? 0 : 1) : 1, bot: false, uid: String(d.uid || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 40), cos: cosClean(d.cos) });
       netSend(conn, { t: 'welcome', id });
+      setTimeout(() => pakSendAll(conn), 300); // içerik (özel NPC resim/ses) — 06b
       broadcastLobby();
       setTimeout(vcBroadcastDir, 400);
       uiToast((d.name || 'Oyuncu') + ' lobiye katıldı');
       break;
     }
     case 'ping': netSend(conn, { t: 'pong', c: d.c }); break;
+    case 'pk0': case 'pk1': pakRecv(conn, d); break; // istemcinin yüklediği içerik (06b)
     case 'vt': if (conn._pid) vcHostSet(conn._pid, d.vm ? 1 : 0, d.vt ? 1 : 0); break;
     case 'chat': if (G.running && S && conn._pid) hostChat(conn._pid, d.m); break;
     case 'lchat': if (conn._pid) lobbyChatHost(conn._pid, d.m); break;
@@ -6843,7 +6867,7 @@ function makeSnapshot() {
     sp: { state: S.bomb.state, carrier: S.bomb.carrier, x: r1(S.bomb.x), y: r1(S.bomb.y), t: r2(S.bomb.t), site: S.bomb.site, defuser: S.bomb.defuser, prog: r2(S.bomb.prog), half: S.bomb.half },
     ob: S.orbs, cp: S.corpses, cd: S.cards || [], rb: (S.rb || []).map(r => r2(r.cd)), hl: (S.heal || []).map(h => h.cd > 0 ? 1 : 0), ev: S.evq.slice(),
     pk: S.pk ? { bk: S.pk.bk, fin: S.pk.fin, w: S.pk.winner, c: S.pk.champ, t0: r2(S.pk.t0) } : 0,
-    np: S.npcs ? S.npcs.map(n => [n.id, n.k, r1(n.x), r1(n.y), Math.ceil(n.hp || 0)]) : 0, nk: S.npcK || 0,
+    np: S.npcs ? S.npcs.map(n => [n.id, n.k, r1(n.x), r1(n.y), Math.ceil(n.hp || 0)]) : 0, nk: pakMeta(S.npcK),
     am: S.arena ? { m: S.arena.m, sc: S.arena.sc.map(r1), z: S.arena.z, zi: S.arena.zi, zt: r1(S.arena.zt), own: S.arena.own, win: S.arena.win } : 0
   };
 }
@@ -6938,7 +6962,7 @@ function clientJoin(code, name, onOk, onErr, onStatus) {
     c.on('open', () => { if (!mine()) return; stage = 'hello'; st('Bağlandı, lobiye giriliyor…'); netSend(c, { t: 'hello', name, uid: FR.uid, cos: SHOP.cos() }); });
     c.on('data', d => {
       if (NET.conn !== c) return;
-      if (d && d.t === 'welcome') { if (done) return; done = true; NET.connecting = false; clearTimeout(to); NET.pendingFail = null; G.myId = d.id; onOk(); }
+      if (d && d.t === 'welcome') { if (done) return; done = true; NET.connecting = false; clearTimeout(to); NET.pendingFail = null; G.myId = d.id; pakReset(); onOk(); setTimeout(pakUploadSaved, 300); }
       else if (d && d.t === 'deny') { fail(d.why); return; }
       clientRecv(d);
     });
@@ -7027,6 +7051,7 @@ function clientRecv(d) {
       uiStartGame();
       break;
     case 's': clientApplySnap(d.s); break;
+    case 'pk0': case 'pk1': pakRecv(NET.conn, d); break; // odanın içeriği (06b)
     case 'vdir': VC.setDir(d.d); break;
     case 'lchat': lobbyChatAdd(d); break;
     case 'pong': NET.ping = Math.round(performance.now() - d.c); break;
@@ -7091,7 +7116,7 @@ function clientApplySnap(d) {
   if ('cp' in d) S.corpses = s.cp;
   if ('am' in d) S.arena = s.am || null;
   if ('np' in d) frClientNpcs(s.np || []);
-  if ('nk' in d) S.npcK = s.nk || {};
+  if ('nk' in d) S.npcK = pakMergeKinds(s.nk); // değerler anlık görüntüden, resim/ses içerikten (06b)
   if ('cd' in d) S.cards = s.cd || [];
   if ('rb' in d) S.rb = (s.rb || []).map(cd => ({ cd }));
   if ('hl' in d || !S.heal) S.heal = (MAPDATA.heal || []).map((h, i) => ({ id: h.id, x: h.x, y: h.y, cd: s.hl && s.hl[i] ? 1 : 0 }));
@@ -7176,6 +7201,120 @@ function clientPredictFire(me, inp, dt) {
     UIS.shake = Math.max(UIS.shake, w.dmg > 100 ? 4 : 1);
   }
 }
+
+/* =====================================================================
+   06b · İÇERİK PAYLAŞIMI (Garry's Mod'daki gibi odaya girerken indirme)
+        Kendi NPC'lerin (resim + ses) ve modların yaptığı NPC'ler odadaki herkese
+        bir kez, parça parça (16 KB) gönderilir:
+          · odaya katılınca: host'un içeriği sana iner, seninki host'a ve
+            oradan diğer oyunculara gider (lobide "İÇERİK İNDİRİLİYOR")
+          · maçta yeni NPC yapılınca / mod NPC tanımlayınca da aynı yol
+        Anlık görüntüde yalnızca NPC'nin adı ve değerleri gider; resim ve ses
+        buradan gelir. İstemciden gelen içerik host'ta denetlenir.
+   ===================================================================== */
+const PAK = { k: {}, inb: {}, up: {}, CH: 16000 };
+/* NPC kimliği resim + sesten (aynı içerik = aynı kimlik) */
+function kindIdOf(c) { return npcIdOf(String(c.img || '') + String(c.snd || '')); }
+/* gelen içeriği denetle (ad, resim, isteğe bağlı ses, değerler) */
+function pakValid(o) {
+  if (!o || typeof o !== 'object') return null;
+  const img = String(o.img || ''), snd = o.snd ? String(o.snd) : '', n = String(o.n || '').trim().slice(0, 20);
+  if (!n || !/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(img) || img.length > 80000) return null;
+  if (snd && (!/^ima12k:[A-Za-z0-9+/=]+$/.test(snd) || snd.length > 260000)) return null;
+  const hp = +o.hp || 0;
+  return { n, img, snd: snd || undefined, spd: clamp(+o.spd || 320, 60, 900), hp: hp > 0 ? clamp(hp, 1, 100000) : 0, dmg: clamp(+o.dmg || 999, 0, 9999), sz: clamp(+o.sz || 1.1, 0.3, 4), mod: o.mod ? 1 : undefined };
+}
+/* bir içeriği bağlantıya parça parça gönder (kanal dolmasın diye yavaşça) */
+function pakSend(conn, id) {
+  const o = PAK.k[id]; if (!conn || !o) return;
+  conn._pk = conn._pk || {}; if (conn._pk[id]) return; conn._pk[id] = 1;
+  const s = JSON.stringify(o), N = Math.ceil(s.length / PAK.CH), q = conn._pq || (conn._pq = []);
+  q.push({ t: 'pk0', id, N, L: s.length, n: o.n });
+  for (let i = 0; i < N; i++) q.push({ t: 'pk1', id, i, d: s.slice(i * PAK.CH, (i + 1) * PAK.CH) });
+  pakPump(conn);
+}
+function pakPump(conn) {
+  if (conn._pumpT) return;
+  const step = () => {
+    conn._pumpT = 0;
+    const dc = conn.dataChannel;
+    while (conn._pq && conn._pq.length && conn.open && (!dc || dc.bufferedAmount < 192 * 1024)) netSend(conn, conn._pq.shift());
+    if (conn._pq && conn._pq.length && conn.open) conn._pumpT = setTimeout(step, 50);
+  };
+  step();
+}
+/* host: tüm içeriği bir oyuncuya; yeni içeriği herkese (gönderen hariç) */
+function pakSendAll(conn) { for (const id in PAK.k) pakSend(conn, id); }
+function pakBroadcast(id, except) { for (const pid in NET.conns) if (NET.conns[pid] !== except) pakSend(NET.conns[pid], id); }
+/* host: kendi kayıtlı NPC'lerini içeriğe ekle (lobi kurulunca / kaydedince) */
+function pakAddSaved() {
+  for (const c of frSaved()) { const v = pakValid(c), id = kindIdOf(c); if (v && !PAK.k[id]) { PAK.k[id] = v; if (NET.mode === 'host') pakBroadcast(id); } }
+}
+/* host ya da tek oyunculu: içerik kaydı (oyuncu NPC'si, mod NPC'si); odadakilere de gider */
+function pakPut(id, v) {
+  PAK.k[id] = v;
+  if (NET.mode === 'host') pakBroadcast(id);
+}
+/* istemci: kendi kayıtlı NPC'lerini host'a yükle (odaya katılınca) */
+function pakUploadSaved() {
+  if (NET.mode !== 'client' || !NET.conn) return;
+  for (const c of frSaved()) { const v = pakValid(c), id = kindIdOf(c); if (v) { PAK.k[id] = PAK.k[id] || v; pakSend(NET.conn, id); } }
+}
+/* parça geldi (host'ta istemciden, istemcide host'tan) */
+function pakRecv(conn, d) {
+  if (d.t === 'pk0') {
+    if (!(d.N > 0 && d.N <= 20 && d.L > 0 && d.L <= 360000) || typeof d.id !== 'string' || d.id.length > 40) return;
+    if (PAK.k[d.id]) { PAK.inb[d.id] = { N: d.N, got: 0, parts: [], have: true }; return; }
+    PAK.inb[d.id] = { N: d.N, got: 0, parts: [], n: String(d.n || '').slice(0, 20), from: conn };
+    pakUi();
+    return;
+  }
+  const b = PAK.inb[d.id]; if (!b || !(d.i >= 0 && d.i < b.N) || b.parts[d.i] !== undefined) return;
+  b.parts[d.i] = String(d.d || ''); b.got++;
+  if (b.got < b.N) { if (b.got % 4 === 0) pakUi(); return; }
+  delete PAK.inb[d.id];
+  if (b.have) { pakUi(); return; }
+  let o = null; try { o = JSON.parse(b.parts.join('')); } catch (e) { }
+  const v = pakValid(o);
+  if (!v) { pakUi(); return; }
+  const host = NET.mode === 'host';
+  if (host && kindIdOf(v) !== d.id) { pakUi(); return; } // istemciden gelen kimlik içerikle uyuşmalı
+  PAK.k[d.id] = v;
+  if (host) { pakBroadcast(d.id, conn); if (typeof frPakReady === 'function') frPakReady(d.id); }
+  else pakApply(d.id);
+  pakUi();
+}
+/* istemci: maçtaki NPC türüne indirilen resmi/sesi ekle */
+function pakApply(id) {
+  if (S && S.npcK && S.npcK[id]) { const v = PAK.k[id]; Object.assign(S.npcK[id], { img: v.img, snd: v.snd, wait: undefined }); }
+  if (typeof NPCV !== 'undefined') { delete NPCV.tex[id]; delete NPCV.prev[id]; }
+  if (typeof NPCS !== 'undefined') delete NPCS.buf[id];
+}
+/* istemci: anlık görüntüdeki NPC türleri (yalnızca değerler) + indirilen içerik */
+function pakMergeKinds(meta) {
+  const out = {};
+  for (const k in meta || {}) { const m = meta[k], v = PAK.k[k]; out[k] = Object.assign({}, m, v ? { img: v.img, snd: v.snd } : { wait: 1 }); }
+  return out;
+}
+/* host: anlık görüntüye resim/ses olmadan */
+function pakMeta(K) {
+  if (!K) return 0;
+  const o = {}; for (const k in K) { const v = K[k]; o[k] = { n: v.n, spd: v.spd, hp: v.hp, dmg: v.dmg, sz: v.sz, mod: v.mod }; }
+  return o;
+}
+/* lobide indirme durumu */
+function pakStatus() {
+  const ids = Object.keys(PAK.inb).filter(i => !PAK.inb[i].have);
+  let got = 0, tot = 0; for (const i of ids) { got += PAK.inb[i].got; tot += PAK.inb[i].N; }
+  return { n: Object.keys(PAK.k).length, dl: ids.length, pct: tot ? Math.round(got / tot * 100) : 100, names: ids.map(i => PAK.inb[i].n).filter(Boolean) };
+}
+function pakUi() {
+  const el = typeof $ === 'function' && $('lbPak'); if (!el) return;
+  const s = pakStatus();
+  el.textContent = s.dl ? 'İÇERİK İNDİRİLİYOR %' + s.pct + (s.names.length ? ' · ' + s.names.slice(0, 3).join(', ') : '') : s.n ? 'Odadaki içerik hazır: ' + s.n + ' özel NPC' : '';
+  el.style.color = s.dl ? 'var(--gold)' : 'var(--teal)';
+}
+function pakReset() { PAK.k = {}; PAK.inb = {}; PAK.up = {}; }
 
 /* =====================================================================
    07a · WEBGL MOTORU (harici kütüphane yok)
@@ -8550,6 +8689,7 @@ function drawWorldDynamic(v, me, t) {
   if (PKMAP) drawPkDynamic(t, me);
   if (arOn()) arDrawWorld(me, t);
   if (S.npcs) drawNpcs(t); // serbest mod NPC'leri (07h)
+  npcAudioTick(); // NPC kovalama sesleri (07h)
   // geçici duvarlar
   for (const w of S.twalls) for (const i of w.tiles) {
     const x = (i % MW + 0.5) * TILE, z = (((i / MW) | 0) + 0.5) * TILE;
@@ -10495,14 +10635,14 @@ function npcCanvas(k) {
 }
 /* NPC'nin önizleme resmi (spawn menüsü için) */
 function npcPreview(k) {
-  const K = npcKind(k); if (!K) return '';
+  const K = npcKind(k); if (!K || K.wait) return '';
   if (K.img) return K.img;
   return NPCV.prev[k] || (NPCV.prev[k] = npcCanvas(k).toDataURL('image/png'));
 }
 /* doku: hazırlar tuvalden, kendi resimler data: adresinden (yüklenene kadar beyaz) */
 function npcTex(k) {
   const t = NPCV.tex[k]; if (t) return t.t;
-  const K = npcKind(k); if (!K || !GLX.ok) return null;
+  const K = npcKind(k); if (!K || !GLX.ok || K.wait) return null; // resmi henüz inmediyse beyaz (06b)
   if (!K.img) { NPCV.tex[k] = { t: mkTex(npcCanvas(k), false) }; return NPCV.tex[k].t; }
   const rec = NPCV.tex[k] = { t: null }, im = new Image();
   im.onload = () => { try { rec.t = mkTex(im, false); } catch (e) { } };
@@ -10543,6 +10683,77 @@ function drawNpcs(t) {
 function frDrawMinimap(P) {
   if (!S || !S.npcs) return;
   for (const n of S.npcs) { const [px, py] = P(n.rx !== undefined ? n.rx : n.x, n.ry !== undefined ? n.ry : n.y); circle(px, py, 3.5, '#b46cff', 'rgba(20,0,30,0.9)', 1); }
+}
+/* ---------- NPC SESİ: 15 sn, tek kanal, 12 kHz IMA-ADPCM (4 bit) → "ima12k:<base64>" ----------
+   Kendi NPC'nin sesi kovalarken döngüde çalar; yaklaştıkça yükselir (en yakın 4 NPC). */
+const IMA_STEP = [7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 19, 21, 23, 25, 28, 31, 34, 37, 41, 45, 50, 55, 60, 66, 73, 80, 88, 97, 107, 118, 130, 143, 157, 173, 190, 209, 230, 253, 279, 307, 337, 371, 408, 449, 494, 544, 598, 658, 724, 796, 876, 963, 1060, 1166, 1282, 1411, 1552, 1707, 1878, 2066, 2272, 2499, 2749, 3024, 3327, 3660, 4026, 4428, 4871, 5358, 5894, 6484, 7132, 7845, 8630, 9493, 10442, 11487, 12635, 13899, 15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794, 32767];
+const IMA_IDX = [-1, -1, -1, -1, 2, 4, 6, 8, -1, -1, -1, -1, 2, 4, 6, 8];
+function adpcmEnc(pcm) {
+  const out = new Uint8Array(Math.ceil(pcm.length / 2)); let pred = 0, idx = 0;
+  for (let i = 0; i < pcm.length; i++) {
+    const step = IMA_STEP[idx]; let diff = pcm[i] - pred, code = 0;
+    if (diff < 0) { code = 8; diff = -diff; }
+    let vd = step >> 3;
+    if (diff >= step) { code |= 4; diff -= step; vd += step; }
+    if (diff >= step >> 1) { code |= 2; diff -= step >> 1; vd += step >> 1; }
+    if (diff >= step >> 2) { code |= 1; vd += step >> 2; }
+    pred = clamp(pred + ((code & 8) ? -vd : vd), -32768, 32767); idx = clamp(idx + IMA_IDX[code], 0, 88);
+    if (i & 1) out[i >> 1] |= code << 4; else out[i >> 1] = code;
+  }
+  return out;
+}
+function adpcmDec(bytes, n) {
+  const out = new Float32Array(n); let pred = 0, idx = 0;
+  for (let i = 0; i < n; i++) {
+    const code = (i & 1) ? bytes[i >> 1] >> 4 : bytes[i >> 1] & 15, step = IMA_STEP[idx];
+    let vd = step >> 3; if (code & 4) vd += step; if (code & 2) vd += step >> 1; if (code & 1) vd += step >> 2;
+    pred = clamp(pred + ((code & 8) ? -vd : vd), -32768, 32767); idx = clamp(idx + IMA_IDX[code], 0, 88);
+    out[i] = pred / 32768;
+  }
+  return out;
+}
+function b64Bytes(s) { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+function bytesB64(u) { let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
+/* 15 sn'lik sesi oynatılabilir tampona çevir (her tarayıcıda çalışsın diye 24 kHz'e çıkarılır) */
+function sndBuffer(snd) {
+  const u = b64Bytes(snd.slice(7)), n = u.length * 2, f = adpcmDec(u, n), b = AU.ctx.createBuffer(1, n * 2, 24000), d = b.getChannelData(0);
+  for (let i = 0; i < n; i++) { const a = f[i], c = i + 1 < n ? f[i + 1] : a; d[i * 2] = a; d[i * 2 + 1] = (a + c) / 2; }
+  return b;
+}
+const NPCS = { buf: {}, live: new Map() };
+function npcSndBuf(k) {
+  const K = npcKind(k); if (!K || !K.snd || !AU.ctx) return null;
+  if (NPCS.buf[k] !== undefined) return NPCS.buf[k];
+  let b = null; try { b = sndBuffer(K.snd); } catch (e) { b = null; }
+  return (NPCS.buf[k] = b);
+}
+function _npcStopV(v) { try { const t = AU.ctx.currentTime; v.g.gain.setTargetAtTime(0, t, 0.05); v.s.stop(t + 0.3); } catch (e) { } }
+function npcAudioStop() { for (const v of NPCS.live.values()) _npcStopV(v); NPCS.live.clear(); }
+function npcAudioTick() {
+  const live = NPCS.live;
+  if (!AU.ctx || !S || !G.running || !frOn()) { if (live.size) npcAudioStop(); return; }
+  const L = audioListener(), em = [];
+  for (const n of S.npcs || []) { const K = npcKind(n.k); if (K && K.snd) { const x = n.rx !== undefined ? n.rx : n.x, y = n.ry !== undefined ? n.ry : n.y; em.push({ key: n.id, k: n.k, x, y, d: dist(L.x, L.y, x, y) }); } }
+  for (const p of S.players) if (p.alive && p.pill) { const K = npcKind(p.pill); if (K && K.snd) em.push({ key: 'p:' + p.id, k: p.pill, x: p.x, y: p.y, d: dist(L.x, L.y, p.x, p.y) }); }
+  em.sort((a, b) => a.d - b.d);
+  const keep = new Set(), now = AU.ctx.currentTime;
+  for (const e of em.slice(0, 4)) {
+    if (e.d > 2400) break;
+    let v = live.get(e.key);
+    if (!v || v.k !== e.k) {
+      if (v) _npcStopV(v);
+      const b = npcSndBuf(e.k); if (!b) continue;
+      const s = AU.ctx.createBufferSource(); s.buffer = b; s.loop = true;
+      const g = AU.ctx.createGain(); g.gain.value = 0;
+      let pn = null; if (AU.ctx.createStereoPanner) { pn = AU.ctx.createStereoPanner(); g.connect(pn); pn.connect(AU.master); } else g.connect(AU.master);
+      s.connect(g); s.start(0, Math.random() * b.duration);
+      v = { s, g, pn, k: e.k }; live.set(e.key, v);
+    }
+    keep.add(e.key);
+    v.g.gain.setTargetAtTime((L.deaf ? 0.05 : 1) * 1.1 / (1 + e.d / 260), now, 0.08);
+    if (v.pn) v.pn.pan.setTargetAtTime(e.d > 8 ? clamp(Math.sin(angDiff(L.ang || 0, Math.atan2(e.y - L.y, e.x - L.x))), -1, 1) * 0.8 : 0, now, 0.08);
+  }
+  for (const [key, v] of live) if (!keep.has(key)) { _npcStopV(v); live.delete(key); }
 }
 
 /* =====================================================================
@@ -11008,6 +11219,7 @@ function uiRenderLobby() {
   }
   uiRenderLobbyChat();
   uiLobbyPub();
+  pakUi(); // içerik indirme durumu (06b)
 }
 /* açık sunucu durumu: oyuncu sayısı + otomatik başlama geri sayımı */
 function uiLobbyPub() {
@@ -11169,7 +11381,7 @@ function uiStartGame() {
 }
 function uiBackToMenu(msg) {
   const wasOver = S && S.phase === 'over';
-  G.running = false; G.paused = false; S = null; toggleEmote(false); cineStop(false); modStopAll(); if (FRM.open) frMenuToggle(false);
+  G.running = false; G.paused = false; S = null; toggleEmote(false); cineStop(false); modStopAll(); npcAudioStop(); if (FRM.open) frMenuToggle(false);
   document.body.classList.remove('pk'); if (PKMAP) loadMap(0); // parkurdan çıkınca menü arka planı normal haritaya döner
   if (CHAT.open) chatClose(false); UIS.chat.length = 0;
   document.body.classList.remove('ingame', 'ovl'); $('touch').classList.add('hidden');
@@ -11668,7 +11880,7 @@ function admInit() {
         Kendi NPC'lerin bu cihazda saklanır; odada kullanınca resim diğer
         oyunculara da gider.
    ===================================================================== */
-const FRM = { open: false, tab: 'w', img: null };
+const FRM = { open: false, tab: 'w', img: null, audio: null, sndName: '', sndStart: 0, prev: null };
 function frSaved() { try { const a = JSON.parse(localStorage.getItem('spk_npcs') || '[]'); return Array.isArray(a) ? a.filter(c => c && c.img && c.n) : []; } catch (e) { return []; } }
 function frSaveList(a) { try { localStorage.setItem('spk_npcs', JSON.stringify(a.slice(0, FR_MAXK))); } catch (e) { uiToast('Kaydedilemedi: tarayıcı depolaması dolu', true); } }
 /* menüde görünen tüm NPC türleri: hazırlar + odadakiler (mod / oyuncu) + bu cihazda kayıtlı olanlar */
@@ -11676,12 +11888,14 @@ function frKinds() {
   const out = [], seen = {};
   for (const k in NPC_KINDS) { out.push({ k, K: NPC_KINDS[k] }); seen[k] = 1; }
   for (const k in (S && S.npcK) || {}) if (!seen[k]) { out.push({ k, K: S.npcK[k] }); seen[k] = 1; }
-  for (const c of frSaved()) { const k = npcIdOf(c.img); if (!seen[k]) { out.push({ k, K: c, local: c }); seen[k] = 1; } }
+  for (const c of frSaved()) { const k = kindIdOf(c); if (!seen[k]) { out.push({ k, K: c, local: c }); seen[k] = 1; } }
   return out;
 }
 /* bu cihazdaki kendi NPC'n odada henüz yoksa önce host'a gönder */
 function frEnsure(it) {
-  if (it.local && !(S.npcK && S.npcK[it.k])) frRequest({ a: 'npck', n: it.local.n, img: it.local.img, spd: it.local.spd, hp: it.local.hp, dmg: it.local.dmg, sz: it.local.sz });
+  if (!it.local || (S.npcK && S.npcK[it.k])) return;
+  if (G.mode === 'client') { const v = pakValid(it.local); if (v) { PAK.k[it.k] = PAK.k[it.k] || v; pakSend(NET.conn, it.k); } } // resim + ses parça parça host'a (06b)
+  else frRequest({ a: 'npck', n: it.local.n, img: it.local.img, snd: it.local.snd, spd: it.local.spd, hp: it.local.hp, dmg: it.local.dmg, sz: it.local.sz });
 }
 function frMenuToggle(force) {
   const open = force === undefined ? !FRM.open : !!force;
@@ -11693,7 +11907,7 @@ function frMenuToggle(force) {
   else if (G.running && !UI.pauseOpen && !UI.admOpen) { try { lockPointer(); } catch (e) { } }
   try { syncCursor(); } catch (e) { }
 }
-function frKindInfo(K) { return (K.hp ? 'can ' + K.hp : 'ölümsüz') + ' · hız ' + Math.round((K.spd || 300) / RUN * 100) + '%'; }
+function frKindInfo(K) { return (K.snd ? '🔊 ' : '') + (K.hp ? 'can ' + K.hp : 'ölümsüz') + ' · hız ' + Math.round((K.spd || 300) / RUN * 100) + '%'; }
 function frMenuRender() {
   for (const b of $('frTabs').querySelectorAll('button')) b.classList.toggle('on', b.dataset.tab === FRM.tab);
   const me = S && S.pmap[G.myId], body = $('frBody'), T = FRM.tab;
@@ -11712,9 +11926,9 @@ function frMenuRender() {
     h += '<div class="frform"><div class="fprev">' + (FRM.img ? '<img alt="" src="' + FRM.img + '">' : '<span>RESİM</span>') + '</div><div class="ffields">' +
       '<input id="frcName" maxlength="16" placeholder="NPC adı" autocomplete="off">' +
       '<div class="admrow"><select id="frcSpd"><option value="220">Yavaş</option><option value="330" selected>Normal</option><option value="450">Hızlı</option></select><select id="frcHp"><option value="0">Ölümsüz</option><option value="300">Can 300</option><option value="800">Can 800</option></select></div>' +
-      '<div class="admrow"><label class="filebtn">RESİM SEÇ<input id="frcFile" type="file" accept="image/*"></label><button id="frcSave" class="primary">KAYDET</button></div></div></div>' +
-      '<div id="frcMsg" class="note"></div>';
-    h += '<h4 class="frh">KAYITLI NPC\'LERİN (' + saved.length + '/' + FR_MAXK + ')</h4>' + (saved.length ? '<div class="frgrid">' + saved.map((c, i) => '<div class="frc"><img alt="" src="' + esc(c.img) + '"><b>' + esc(c.n) + '</b><small>' + esc(frKindInfo(c)) + '</small><button class="ghost frdel" data-d="' + i + '">SİL</button></div>').join('') + '</div>' : '<div class="note">Henüz yok. Bir resim seçip kaydet; NPC\'LER ve PİLLER sekmesinde çıkar.</div>');
+      '<div class="admrow"><label class="filebtn">RESİM SEÇ<input id="frcFile" type="file" accept="image/*"></label><label class="filebtn">🔊 SES SEÇ<input id="frcSnd" type="file" accept="audio/*"></label><button id="frcSave" class="primary">KAYDET</button></div></div></div>' +
+      '<div id="frcSndBox"></div><div id="frcMsg" class="note"></div>';
+    h += '<h4 class="frh">KAYITLI NPC\'LERİN (' + saved.length + '/8)</h4>' + (saved.length ? '<div class="frgrid">' + saved.map((c, i) => '<div class="frc"><img alt="" src="' + esc(c.img) + '"><b>' + esc(c.n) + '</b><small>' + esc(frKindInfo(c)) + '</small><button class="ghost frdel" data-d="' + i + '">SİL</button></div>').join('') + '</div>' : '<div class="note">Henüz yok. Bir resim seçip kaydet; NPC\'LER ve PİLLER sekmesinde çıkar.</div>');
     h += '<div class="note" style="color:var(--dim)">Resim bu cihazda saklanır. Odada kullanırsan odadaki herkes görür.</div>';
   } else if (T === 'm') {
     h += typeof modMenuHtml === 'function' ? modMenuHtml() : '<div class="note">Mod sistemi yakında.</div>';
@@ -11731,6 +11945,7 @@ function frMenuRender() {
   if ($('frClr')) $('frClr').onclick = () => { frRequest({ a: 'npcclr' }); setTimeout(() => FRM.open && frMenuRender(), 150); };
   if ($('frHuman')) $('frHuman').onclick = () => { frRequest({ a: 'pill', k: '' }); frMenuToggle(false); };
   if ($('frcFile')) $('frcFile').onchange = e => frPickImage(e.target.files && e.target.files[0]);
+  if ($('frcSnd')) { $('frcSnd').onchange = e => frPickSound(e.target.files && e.target.files[0]); frSndBox(); }
   if ($('frcSave')) $('frcSave').onclick = frSaveCustom;
   for (const b of body.querySelectorAll('[data-d]')) b.onclick = () => { const a = frSaved(); a.splice(+b.dataset.d, 1); frSaveList(a); frMenuRender(); };
   if (T === 'm' && typeof modMenuBind === 'function') modMenuBind(body);
@@ -11756,14 +11971,65 @@ function frPickImage(f) {
   };
   rd.readAsDataURL(f);
 }
-function frSaveCustom() {
+async function frSaveCustom() {
   const n = ($('frcName').value || '').trim().slice(0, 16), m = $('frcMsg');
   if (!FRM.img) { m.textContent = 'Önce RESİM SEÇ ile bir resim seç'; return; }
   if (!n) { m.textContent = 'NPC\'ye bir ad ver'; return; }
   const a = frSaved();
-  if (a.length >= FR_MAXK) { m.textContent = 'En fazla ' + FR_MAXK + ' kayıtlı NPC olabilir — birini sil'; return; }
-  a.push({ n, img: FRM.img, spd: +$('frcSpd').value, hp: +$('frcHp').value, dmg: 999, sz: 1.15 });
-  frSaveList(a); FRM.img = null; FRM.tab = 'n'; frMenuRender(); uiToast(n + ' kaydedildi');
+  if (a.length >= 8) { m.textContent = 'En fazla 8 kayıtlı NPC olabilir — birini sil'; return; }
+  let snd;
+  if (FRM.audio) { m.textContent = 'Ses kesiliyor…'; try { snd = await frSndCut(); } catch (e) { m.textContent = 'Ses kesilemedi: ' + e.message; return; } }
+  a.push({ n, img: FRM.img, snd, spd: +$('frcSpd').value, hp: +$('frcHp').value, dmg: 999, sz: 1.15 });
+  frSaveList(a); frSndStop(); FRM.img = null; FRM.audio = null; FRM.tab = 'n'; frMenuRender(); uiToast(n + ' kaydedildi');
+  if (NET.mode === 'host') pakAddSaved(); else if (NET.mode === 'client') pakUploadSaved(); // odadakiler de görsün (06b)
+}
+/* ---- ses: dosya seç → 15 sn'lik parçayı seç → dinle → kaydederken kes ---- */
+const fmtSec = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+async function frPickSound(f) {
+  const msg = t => { const el = $('frcMsg'); if (el) el.textContent = t; };
+  if (!f) return;
+  AU.init(); AU.resume();
+  if (!AU.ctx) { msg('Bu tarayıcı sesi desteklemiyor'); return; }
+  if (f.size > 30e6) { msg('Ses dosyası çok büyük (en fazla 30 MB)'); return; }
+  msg('Ses açılıyor…');
+  try {
+    const ab = await f.arrayBuffer();
+    const buf = await new Promise((res, rej) => { const p = AU.ctx.decodeAudioData(ab, res, rej); if (p && p.then) p.then(res, rej); });
+    frSndStop(); FRM.audio = buf; FRM.sndName = f.name; FRM.sndStart = 0; frSndBox(); msg('');
+  } catch (e) { msg('Bu ses dosyası açılamadı (mp3, m4a, wav, ogg dene)'); }
+}
+function frSndBox() {
+  const b = $('frcSndBox'); if (!b) return;
+  const a = FRM.audio; if (!a) { b.innerHTML = ''; return; }
+  const mx = Math.max(0, a.duration - 15), st = Math.min(FRM.sndStart, mx), en = Math.min(a.duration, st + 15);
+  b.innerHTML = '<div class="sndbox"><div class="sndt"><b>🔊 ' + esc(FRM.sndName).slice(0, 40) + '</b><span>' + fmtSec(a.duration) + '</span></div>' +
+    '<input type="range" id="frcSndPos" min="0" max="' + mx.toFixed(1) + '" step="0.5" value="' + st.toFixed(1) + '"' + (mx ? '' : ' disabled') + '>' +
+    '<div class="admrow"><span id="frcSndT" class="sndsel">' + fmtSec(st) + ' – ' + fmtSec(en) + ' (15 sn)</span><button id="frcSndPlay" class="ghost">' + (FRM.prev ? '■ DUR' : '▶ DİNLE') + '</button><button id="frcSndDel" class="ghost">✕ SESİ KALDIR</button></div></div>';
+  $('frcSndPos').oninput = e => { FRM.sndStart = +e.target.value; const s = FRM.sndStart; $('frcSndT').textContent = fmtSec(s) + ' – ' + fmtSec(Math.min(a.duration, s + 15)) + ' (15 sn)'; if (FRM.prev) frSndPlay(); };
+  $('frcSndPlay').onclick = () => { if (FRM.prev) frSndStop(); else frSndPlay(); frSndBox(); };
+  $('frcSndDel').onclick = () => { frSndStop(); FRM.audio = null; frSndBox(); };
+}
+function frSndStop() { if (FRM.prev) { try { FRM.prev.stop(); } catch (e) { } FRM.prev = null; } }
+function frSndPlay() {
+  frSndStop(); if (!FRM.audio || !AU.ctx) return;
+  AU.resume();
+  const s = AU.ctx.createBufferSource(); s.buffer = FRM.audio; s.connect(AU.master);
+  s.start(0, FRM.sndStart, Math.min(15, FRM.audio.duration - FRM.sndStart));
+  s.onended = () => { if (FRM.prev === s) { FRM.prev = null; frSndBox(); } };
+  FRM.prev = s;
+}
+/* seçilen 15 sn'yi tek kanala indir, 12 kHz'e düşür, sesi dengele, uçlarını yumuşat, ADPCM ile sıkıştır */
+async function frSndCut() {
+  const a = FRM.audio, st = FRM.sndStart, dur = Math.min(15, a.duration - st), sr = a.sampleRate, n = Math.max(1, Math.floor(dur * sr));
+  const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const oc = new OAC(1, n, sr), src = oc.createBufferSource(); src.buffer = a; src.connect(oc.destination); src.start(0, st, dur);
+  const r = await new Promise((res, rej) => { oc.oncomplete = e => res(e.renderedBuffer); const p = oc.startRendering(); if (p && p.then) p.then(res, rej); });
+  const x = r.getChannelData(0), ratio = sr / 12000, m = Math.floor(x.length / ratio), y = new Float32Array(m), half = Math.max(1, Math.floor(ratio / 2));
+  let peak = 1e-4;
+  for (let j = 0; j < m; j++) { const c = Math.floor(j * ratio); let s = 0, k = 0; for (let i = Math.max(0, c - half); i <= Math.min(x.length - 1, c + half); i++) { s += x[i]; k++; } y[j] = s / k; peak = Math.max(peak, Math.abs(y[j])); }
+  const g = Math.min(4, 0.85 / peak), fade = Math.floor(12000 * 0.15), pcm = new Int16Array(m);
+  for (let j = 0; j < m; j++) { const f = Math.min(1, j / fade, (m - 1 - j) / fade); pcm[j] = clamp(Math.round(y[j] * g * f * 32767), -32768, 32767); }
+  return 'ima12k:' + bytesB64(adpcmEnc(pcm));
 }
 function frMenuInit() {
   for (const b of $('frTabs').querySelectorAll('button')) b.onclick = () => { FRM.tab = b.dataset.tab; frMenuRender(); };
@@ -11901,6 +12167,7 @@ function modMsg(rec, d) {
     const k = 'm' + rec.i + '_' + id, K = S.npcK || (S.npcK = {});
     K[k] = { n: String(x.name).slice(0, 20), img, spd: clamp(+x.speed || 320, 60, 900), hp: x.hp > 0 ? clamp(+x.hp, 1, 100000) : 0, dmg: clamp(+x.damage || 999, 0, 9999), sz: clamp(+x.size || 1.1, 0.3, 4), mod: 1 };
     rec.kinds[id] = k; delete NPCV.tex[k]; delete NPCV.prev[k];
+    pakPut(k, K[k]); // odadakilere resmi gönder (06b)
     if (FRM.open) frMenuRender();
     return;
   }
