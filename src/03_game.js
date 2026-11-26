@@ -40,7 +40,7 @@ function makePlayer(o) {
     plantT: 0, defT: 0, hasBomb: false, kit: false, crouch: false, kills: 0, deaths: 0, dmg: 0, jz: 0, jvz: 0, lastJc: 0, rbT: 0, cards: [], tk: 0, reqT: 0,
     input: blankInput(), rt: 0, netMv: 0, rebirth: null, ai: null, dotAcc: {}, roundBuys: {}, beamT: 0, hist: []
   };
-  { const c = cosClean(o.cos); p.swt = c.sw; p.wsk = c.ws; p.csk = c.cs; } // kozmetik: kılıç seviyesi + skinler
+  { const c = cosClean(o.cos); p.swt = c.sw; p.wsk = c.ws; p.csk = c.cs; p.kfx = c.kf; } // kozmetik: kılıç seviyesi + skinler + öldürme efekti
   if (p.ctrl === 'bot') p.ai = newAI(p);
   return p;
 }

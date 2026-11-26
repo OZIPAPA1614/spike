@@ -163,6 +163,7 @@ function handleEvent(ev) {
       }
       if (ev.v === G.myId) { UIS.deathBy = ev.a; G.spec = null; }
       cmbOnKill(ev);
+      kfxOnKill(ev); // öldürme efekti (07i)
       const v = S.pmap[ev.v];
       if (v) addFx({ type: 'ring', x: v.x, y: v.y, r0: 10, r1: 50, c: v.team === myTeam() ? COL.teal : COL.red, t: 0.5, dur: 0.5 });
       break;
@@ -190,6 +191,7 @@ function handleEvent(ev) {
       showMsg(ev.big, ev.small, ev.big ? PAL.gold : PAL.white);
       break;
     case 'round': {
+      kfxClear();
       const side = me ? sideOf(me.team) : 'atk';
       if (arOn()) { // arena modları: tek uzun raunt
         const m = arMode();

@@ -168,6 +168,42 @@ button.store:hover:not(:disabled){background:rgba(94,242,255,.12);border-color:#
 .sc .ds{font-size:11px;color:var(--dim);min-height:14px;letter-spacing:.03em}
 .sc button{padding:7px 4px;font-size:11px;letter-spacing:.08em}
 @media (max-height:700px){.st-grid{max-height:52vh}.sc canvas{aspect-ratio:180/80}}
+.st-tabs{flex-wrap:wrap}
+.st-tabs button{min-width:120px}
+.st-tabs button.crtab{border-color:rgba(255,210,58,.6);color:#ffd23a}
+.st-tabs button.crtab.on{background:#c99a12;border-color:#ffd23a;color:#fff}
+.sc{border-bottom:3px solid var(--rc,rgba(236,232,225,.1))}
+.sc .rr{font-size:10px;letter-spacing:.14em;color:var(--rc);font-weight:700;margin-bottom:-3px}
+.sc.case{cursor:pointer}
+.sc.case canvas{background:radial-gradient(ellipse at 50% 60%,color-mix(in srgb,var(--rc) 22%,transparent),rgba(0,0,0,0) 70%),#0b131b}
+#stCase{margin-top:10px;background:rgba(0,0,0,.18);border:1px solid rgba(236,232,225,.1);padding:10px 12px}
+#stCase .cdh{font-size:13px;letter-spacing:.12em;color:var(--dim)} #stCase .cdh b{color:#fff;font-size:15px}
+.codds{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0 4px;font-size:12px;letter-spacing:.06em}
+.codds span{display:flex;align-items:center;gap:6px;color:var(--rc);font-weight:700}
+.codds i{width:10px;height:10px;background:var(--rc);display:inline-block;box-shadow:0 0 6px var(--rc)}
+.citems{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px;margin-top:8px;max-height:min(24vh,220px);overflow-y:auto}
+.ci{background:rgba(255,255,255,.035);border-bottom:3px solid var(--rc);padding:4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;text-align:center}
+.ci canvas{width:100%;height:auto;aspect-ratio:120/64;background:#0b131b}
+.ci small{font-size:9px;color:var(--dim);letter-spacing:.06em} .ci.own small{color:var(--teal)}
+#caseOv{z-index:26;background:rgba(4,7,11,.8)}
+.cpanel{width:min(900px,96vw);text-align:center;max-height:96vh;overflow-y:auto}
+#caseOv .panel:before{background:#ffd23a}
+.reelwrap{position:relative;overflow:hidden;margin:12px 0;background:#0a1118;border:1px solid rgba(236,232,225,.12);padding:8px 0}
+.reel{display:flex;gap:8px;will-change:transform;padding-left:0}
+.rt{flex:0 0 120px;background:rgba(255,255,255,.04);border-bottom:4px solid var(--rc);display:flex;flex-direction:column;align-items:center;padding:4px 0 3px;font-size:11px;letter-spacing:.03em;box-shadow:inset 0 -18px 22px -18px var(--rc)}
+.rt canvas{width:120px;height:64px}
+.rt span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:114px}
+.reelmark{position:absolute;left:50%;top:0;bottom:0;width:3px;margin-left:-1.5px;background:#ffd23a;box-shadow:0 0 10px #ffd23a}
+.reelmark:before,.reelmark:after{content:"";position:absolute;left:-6px;border:7.5px solid transparent}
+.reelmark:before{top:0;border-top-color:#ffd23a} .reelmark:after{bottom:0;border-bottom-color:#ffd23a}
+#caseRes{margin:6px auto 4px;padding:10px;border:1px solid var(--rc);background:radial-gradient(ellipse at 50% 40%,color-mix(in srgb,var(--rc) 28%,transparent),rgba(0,0,0,0) 70%);max-width:420px;animation:crpop .45s ease-out}
+#caseRes canvas{width:min(300px,80vw);height:auto;aspect-ratio:300/160}
+#caseRes .crr{color:var(--rc);font-size:12px;letter-spacing:.16em;font-weight:700}
+#caseRes .crn{font-size:24px;font-weight:900;letter-spacing:.06em;margin:2px 0}
+#caseRes .crs{font-size:13px;color:var(--dim);letter-spacing:.04em}
+#caseRes.gold{box-shadow:0 0 30px rgba(255,210,58,.45)}
+@keyframes crpop{0%{transform:scale(.85);opacity:0}60%{transform:scale(1.04);opacity:1}100%{transform:scale(1)}}
+@media (max-height:500px){.rt{flex-basis:96px}.rt canvas{width:96px;height:51px}#caseRes canvas{width:180px}#caseRes .crn{font-size:18px}.cpanel{padding:10px 14px}.cpanel h2{font-size:18px;margin-bottom:0}#caseOv.done .reelwrap{display:none}#caseOv .row-btn{margin-top:8px}#caseOv .row-btn button{padding:9px 6px}}
 #btnFriends b{background:var(--red);color:#fff;border-radius:9px;padding:1px 7px;font-size:11px;margin-left:6px}
 .slot .fadd{cursor:pointer;font-size:10px;letter-spacing:.1em;color:var(--teal);border:1px solid rgba(30,227,207,.5);padding:2px 6px;white-space:nowrap}
 .slot .fadd.done{color:var(--dim);border-color:rgba(236,232,225,.2);cursor:default}
@@ -645,8 +681,9 @@ button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
   <div class="panel" style="width:min(980px,96vw)">
     <div class="st-head"><h2>MAĞAZA</h2><div class="gems"><span class="gi">💎</span> <b id="stGems">0</b> <span>GEMS</span></div></div>
     <div class="sub">Maç bittikçe gems kazanırsın: galibiyet 150 · beraberlik 70 · yenilgi 30 · öldürme başına +5 · Silah skinleri mermiye de renk ve iz verir</div>
-    <div id="stTabs" class="st-tabs"><button data-tab="sw" class="on">KILIÇLAR</button><button data-tab="ws">SİLAH SKİNLERİ</button><button data-tab="cs">KARAKTER SKİNLERİ</button></div>
+    <div id="stTabs" class="st-tabs"><button data-tab="sw" class="on">KILIÇLAR</button><button data-tab="ws">SİLAH SKİNLERİ</button><button data-tab="cs">KARAKTER SKİNLERİ</button><button data-tab="kf">ÖLDÜRME EFEKTLERİ</button><button data-tab="cr" class="crtab">🎁 KASALAR</button></div>
     <div id="stGrid" class="st-grid"></div>
+    <div id="stCase" class="hidden"></div>
     <div class="row-btn"><button data-back class="primary">GERİ</button></div>
   </div>
 </div>
@@ -711,6 +748,15 @@ button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
     <div id="admGameMsg" class="note"></div>
     </div>
     <div class="row-btn"><button id="admClose" class="primary">KAPAT <span class="kh">ESC</span></button></div>
+  </div>
+</div>
+
+<div id="caseOv" class="overlay hidden">
+  <div class="panel cpanel">
+    <h2 id="caseTitle">KASA</h2>
+    <div class="reelwrap"><div id="caseReel" class="reel"></div><div class="reelmark"></div></div>
+    <div id="caseRes" class="hidden"></div>
+    <div class="row-btn"><button id="caseSkip" class="ghost">ATLA</button><button id="caseEquip" class="primary hidden">KUŞAN</button><button id="caseAgain" class="store hidden">TEKRAR AÇ</button><button id="caseClose" class="ghost hidden">KAPAT <span class="kh">ESC</span></button></div>
   </div>
 </div>
 

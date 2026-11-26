@@ -746,6 +746,7 @@ function cycleSpec() {
 function onKeyDown(e) {
   const tag = e.target && e.target.tagName;
   if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+  if (e.code === 'Escape' && UI.caseOpen) { caseClose(); return; }
   if (e.code === 'Escape' && UI.admOpen) { admClose(); return; }
   if (e.code === 'Escape' && UI.frOpen) { frMenuToggle(false); return; }
   if (e.code === 'Escape' && UI.setOpen) { closeSettings(); return; }

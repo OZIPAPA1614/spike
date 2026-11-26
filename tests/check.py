@@ -3,7 +3,7 @@
 
 Kullanım (depo kökünden):  python3 tests/check.py [--quick]
   1) src/ derlenir ve yayındaki index.html ile karşılaştırılır (biri index.html'i elle değiştirdiyse yakalar)
-  2) index.html tarayıcıda açılır: menüler, mağaza, ayarlar, dil
+  2) index.html tarayıcıda açılır: menüler, mağaza (skinler, öldürme efektleri, kasa açma), ayarlar, dil
   3) Her haritada botlarla maç oynatılır (--quick değilse 2 haritada TAM maç)
   3b) PARKUR modu: botlarla 5 raunt (--quick: 1 raunt)
   3c) SİLAH YARIŞI ve SÜPERNOVA: botlarla maç (--quick: 4 dk)
@@ -104,10 +104,27 @@ try:
     M = page(ctx, 'MENÜ', errs, 'Kontrol')
     try:
         M.click('#btnStore'); M.wait_for_timeout(300)
-        for tab in ('sw', 'ws', 'cs'):
-            M.click(f'#stTabs button[data-tab={tab}]'); M.wait_for_timeout(200)
+        for tab, want in (('sw', 5), ('ws', 40), ('cs', 40), ('kf', 12), ('cr', 3)):
+            M.click(f'#stTabs button[data-tab={tab}]'); M.wait_for_timeout(250)
             n = M.evaluate("() => document.querySelectorAll('#stGrid .sc').length")
-            if n < 5: fail(f'mağaza sekmesi {tab}: yalnızca {n} kart')
+            if n < want: fail(f'mağaza sekmesi {tab}: yalnızca {n} kart')
+        # öldürme efekti satın al + kuşan; kasaya özel eşya satın alınamaz
+        r = M.evaluate("() => { SHOP.prof.gems = 20000; SHOP.save(); const a = SHOP.buy('kf', 'k04'), b = SHOP.buy('ws', 'w41'); return [a, b, SHOP.prof.kfx, SHOP.cos().kf, SHOP.prof.gems]; }")
+        if r[:4] != ['ok', 'ex', 'k04', 'k04'] or r[4] != 20000 - 1600: fail(f'mağaza: öldürme efekti alma / kasaya özel eşya kuralı bozuk {r}')
+        # KASA: arayüzden aç, atla, sonuç; gems düşer, eşya envantere girer (kopyaysa iade)
+        M.click('#stTabs button[data-tab=cr]'); M.wait_for_timeout(250)
+        g0 = M.evaluate("() => SHOP.prof.gems")
+        M.click('#stGrid .sc.case >> nth=0 >> button'); M.wait_for_timeout(700)
+        if not M.evaluate("() => UI.caseOpen && CASEUI.spin && !$('caseOv').classList.contains('hidden')"): fail('kasa açılış ekranı / dönen şerit başlamadı')
+        M.click('#caseSkip'); M.wait_for_timeout(300)
+        r = M.evaluate("() => { const r = CASEUI.res; return { vis: !$('caseRes').classList.contains('hidden'), own: SHOP.owns(r.kind, r.id), dup: r.dup, ref: r.refund, gems: SHOP.prof.gems, spin: CASEUI.spin }; }")
+        price = M.evaluate("() => CASEM.cs1.price")
+        if not r['vis'] or r['spin'] or not r['own'] or r['gems'] != g0 - price + (r['ref'] if r['dup'] else 0): fail(f'kasa sonucu hatalı {r} (önce {g0})')
+        M.keyboard.press('Escape'); M.wait_for_timeout(200)
+        if M.evaluate("() => UI.caseOpen || !$('caseOv').classList.contains('hidden')"): fail('kasa ekranı ESC ile kapanmadı')
+        st = M.evaluate("() => { const save = JSON.stringify(SHOP.prof); SHOP.prof.gems = 1e9; const n = {}; let bad = 0; for (const c of CASES) for (let i = 0; i < 600; i++) { const r = SHOP.openCase(c.id); if (r.r !== 'ok' || !SHOP.owns(r.kind, r.id)) bad++; n[r.rar] = (n[r.rar] || 0) + 1; } SHOP.prof = SHOP.fix(JSON.parse(save)); SHOP.save(); return { n, bad, sum: CASES.map(c => Math.round(caseOdds(c).reduce((a, o) => a + o.p, 0))) }; }")
+        if st['bad'] or any(s != 100 for s in st['sum']) or not st['n'].get('gold'): fail(f'kasa olasılıkları / açılışları hatalı {st}')
+        else: ok(f"kasalar: arayüzden açıldı, 1800 açılışta nadirlik dağılımı {st['n']}")
         M.click('#scr-store [data-back]'); M.wait_for_timeout(200)
         M.click('#btnSettings'); M.wait_for_timeout(200); M.evaluate("() => closeSettings && closeSettings()")
         M.click('#btnSettings'); M.wait_for_timeout(200); M.click('#btnFriends'); M.wait_for_timeout(200); M.click('#scr-friends [data-back]'); M.wait_for_timeout(200)
@@ -123,7 +140,7 @@ try:
     M.evaluate("""() => { window.__start = (mi, i) => {
         const A=['vex','ignis','mist','aegis','pulse'], B=['chrono','terra','vital','volt','phantom'];
         const t0 = i%2 ? B : A, t1 = i%2 ? A : B, roster=[];
-        t0.forEach((a,j)=>roster.push({id:j?'x'+j:'h',name:a,team:0,agent:a,bot:j>0,cos:j%2?{sw:4,ws:'w20',cs:'c20'}:undefined}));
+        t0.forEach((a,j)=>roster.push({id:j?'x'+j:'h',name:a,team:0,agent:a,bot:j>0,cos:j%2?(j===1?{sw:4,ws:'w20',cs:'c20',kf:'k04'}:{sw:4,ws:'w42',cs:'c43',kf:'k13'}):{ws:'w40',cs:'c40',kf:['k03','k11'][j%4>>1]}}));
         t1.forEach((a,j)=>roster.push({id:'y'+j,name:a,team:1,agent:a,bot:true}));
         NET.mode='off'; G.myId='h'; launchGame(roster, {teamSize:5, fill:true, diff:['kolay','normal','zor'][i%3], map:mi});
         const me=S.pmap.h; me.ctrl='bot'; me.isBot=true; me.ai=newAI(me); G.paused=true; }; }""")
@@ -181,6 +198,24 @@ try:
             elif not QUICK and r['phase'] != 'over': fail(f"{name}: maç {sim} sn'de bitmedi ({r})")
             elif len(errs) == before: ok(f"{name}: botlarla {'TAM maç' if r['phase'] == 'over' else str(sim) + ' sn'} · {r['kills']} öldürme · " + (f"en yüksek seviye {r['lv'] + 1}/8" if mode == 'gg' else f"puan {r['sc']}"))
         except Exception as e: fail(f'{name} bot maçı: ' + str(e)[:300])
+    # ---------- 3d) ÖLDÜRME EFEKTLERİ: hepsini baştan sona çiz; 'kill' olayı öldürenin efektini başlatır ----------
+    before = len(errs)
+    try:
+        r = M.evaluate("""() => { const A=['vex','ignis','mist','aegis','pulse'], B=['chrono','terra','vital','volt','phantom'], roster=[];
+            A.forEach((a,j)=>roster.push({id:j?'x'+j:'h',name:a,team:0,agent:a,bot:j>0,cos:{kf:'k05',cs:'c21'}})); B.forEach((a,j)=>roster.push({id:'y'+j,name:a,team:1,agent:a,bot:true,cos:{cs:'c2'+(j+5)}}));
+            NET.mode='off'; G.myId='h'; launchGame(roster, {teamSize:5, fill:true, diff:'normal', map:0}); CINE.on=false; G.paused=true;
+            const me=S.pmap.h, v=S.pmap.y0, out={drawn:0, hidden:0};
+            for (const k of KFXS) { kfxClear(); v.x = me.x + Math.cos(LOOK.yaw)*150; v.y = me.y + Math.sin(LOOK.yaw)*150; const f = kfxStart(k.id, v, me);
+              if (!f) continue; if (kfxHides(v.id)) out.hidden++;
+              for (let t = 0; t <= k.dur + 0.1; t += 0.12) { S.time = f.t0 + t; render(1/60); } out.drawn++; }
+            kfxClear(); S.time += 1; S.phase = 'live'; S.phaseT = 100; damage(v, 999, me, 'vandal');
+            const kf = KFXA.find(f => f.id === v.id); out.kill = kf ? kf.k : null; out.alive = v.alive;
+            S.time += 5; render(1/60); out.left = KFXA.length; return out; }""")
+        if r['drawn'] != M.evaluate("() => KFXS.length") or r['hidden'] != r['drawn']: fail(f'öldürme efektleri çizilemedi {r}')
+        elif r['kill'] != 'k05' or r['alive']: fail(f'öldürünce öldürme efekti başlamadı {r}')
+        elif r['left']: fail(f'öldürme efekti süresi bitince silinmedi {r}')
+        elif len(errs) == before: ok(f"öldürme efektleri: {r['drawn']} efekt baştan sona çizildi, öldürünce efekt başlıyor")
+    except Exception as e: fail('öldürme efektleri: ' + str(e)[:300])
     report_errs(errs, 'menü + bot maçları')
     ctx.close()
 
@@ -234,6 +269,8 @@ try:
     ctx = b.new_context(viewport={'width': 560, 'height': 340}, permissions=['microphone'])
     H = page(ctx, 'HOST', errs, 'HostKontrol'); C = page(ctx, 'İSTEMCİ', errs, 'MisafirKontrol')
     try:
+        H.evaluate("() => { const p = SHOP.prof; p.kf.push('k04'); p.kfx = 'k04'; p.cs.push('c26'); p.csk = 'c26'; SHOP.save(); }")
+        C.evaluate("() => { const p = SHOP.prof; p.kf.push('k11'); p.kfx = 'k11'; p.ws.push('w37'); p.wsk = 'w37'; p.cs.push('c27'); p.csk = 'c27'; SHOP.save(); }")
         H.click('#btnPlay'); H.click('#btnHost')
         if not until(H, "() => UI.screen==='scr-lobby' && (document.getElementById('lbCode').textContent||'').replace(/-/g,'').length>=5", 60): fail('oda açılamadı')
         code = H.inner_text('#lbCode')
@@ -261,7 +298,11 @@ try:
         H.evaluate("() => { window.__vp=0; const o=VC.play.bind(VC); VC.play=(id,d)=>{ window.__vp++; o(id,d); }; const h=S.pmap.h, c=S.pmap.p1; setPos(c, h.x+40, h.y); }")
         C.keyboard.down('Digit0'); C.wait_for_timeout(1800); C.keyboard.up('Digit0')
         if not H.evaluate("() => window.__vp > 0"): fail('sesli sohbet paketi host\'a ulaşmadı')
-        ok('çok oyunculu: oda, katılma, maç, hareket, snapshot, sohbet, ses')
+        cz = [H.evaluate("() => [S.pmap.p1.kfx, S.pmap.p1.wsk, S.pmap.p1.csk]"), C.evaluate("() => [S.pmap.h.kfx, S.pmap.h.csk]")]
+        if cz != [['k11', 'w37', 'c27'], ['k04', 'c26']]: fail(f'kozmetikler (skin / öldürme efekti) odada eşitlenmedi {cz}')
+        H.evaluate("() => damage(S.pmap.p1, 999, S.pmap.h, 'vandal')")
+        if not until(C, "() => KFXA.some(f => f.id === G.myId && f.k === 'k04')", 20): fail('istemci kendisini öldürenin öldürme efektini görmedi')
+        ok('çok oyunculu: oda, katılma, maç, hareket, snapshot, sohbet, ses, skin ve öldürme efekti eşitlemesi')
     except Exception as e: fail('çok oyunculu: ' + str(e)[:300])
     report_errs(errs, 'çok oyunculu')
     ctx.close()

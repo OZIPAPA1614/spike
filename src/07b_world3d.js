@@ -547,7 +547,8 @@ function drawCharacter(p, rel, alpha, xray, t) {
   // karakter skini (yoksa ajan renkleri) — takım şeridi her zaman takım renginde kalır
   const cs = charSkin(p, t), suitC = cs ? cs.suit : ag, suitK = cs ? 1 : 0.75, legC = cs ? cs.legs : COL.dark, legK = cs ? 1 : 1.2;
   const visC = cs ? cs.visor : ag, helmC = cs ? cs.helm : ag, helmK = cs ? 1 : 0.55, packC = cs ? cs.pack : COL.dark, packK = cs ? 1 : 1.4;
-  const glo = (c, k) => xray ? o : { em: [c[0] * k, c[1] * k, c[2] * k] };
+  const pk = cs ? cs.pk || 1 : 1, glo = (c, k) => xray ? o : { em: [c[0] * k * pk, c[1] * k * pk, c[2] * k * pk] };
+  const partM = (mesh, fx, h, sz, sx, sy, szz, col, extra) => { const off = xf(R, fx, h + lift, sz); QR(mesh, p.x + off[0], off[1], p.y + off[2], R, sx, sy, szz, col, extra || o); };
   // bacaklar (eğilince kısa ve bükük)
   const cr = !!p.crouch, dy = cr ? -21 : 0, hx = cr ? 3 : 0;
   if (cr) { part(5, 6, -5, 16, 12, 8, C(legC, legK)); part(-4, 7, 5, 10, 14, 8, C(legC, legK)); }
@@ -575,6 +576,38 @@ function drawCharacter(p, rel, alpha, xray, t) {
         part(hx + 6.8, 75 + H0, 0, 0.6, 1.6, 1.6, [1, 0.27, 0.33, alpha], glo([1, 0.27, 0.33], 0.6)); break; }
       case 'halo': { const hp = xf(R, hx, 83 + H0 + lift, 0); Q('ring', p.x + hp[0], hp[1], p.y + hp[2], t * 1.5, 0, 9, 1, 9, [ac[0], ac[1], ac[2], 0.95 * alpha], { add: true, lit: 0 }); break; }
       case 'band': part(hx, 69 + H0, 0, 13.2, 2.2, 13.2, C(ac)); part(hx - 8, 67.5 + H0, 2, 6, 1.5, 1.5, C(ac)); break;
+      case 'pumpkin': { // kabak kafa: turuncu küre, sap, ışıklı göz ve ağız
+        partM('sphere', hx, 67 + H0, 0, 24, 21, 24, C(hd));
+        partM('sphere', hx, 67 + H0, 0, 16, 21.4, 25.5, C(hd, 0.8));
+        part(hx, 78.5 + H0, 0, 2.4, 4.5, 2.4, C([0.25, 0.5, 0.18, 1]));
+        for (const s of [-1, 1]) part(hx + 11.6, 70 + H0, 4 * s, 1, 3, 3, [ac[0], ac[1], ac[2], alpha], glo(ac, 0.9));
+        part(hx + 11.6, 63.6 + H0, 0, 1, 1.8, 8, [ac[0], ac[1], ac[2], alpha], glo(ac, 0.9)); break;
+      }
+      case 'cowboy': partM('cyl', hx, 73.6 + H0, 0, 24, 1.2, 24, C(hd)); partM('cyl', hx, 77 + H0, 0, 12.5, 6.5, 12.5, C(hd)); partM('cyl', hx, 74.8 + H0, 0, 12.9, 1.5, 12.9, C(ac)); break;
+      case 'santa': {
+        const red = [0.78, 0.06, 0.18, 1], wh = [1, 1, 1, 1];
+        partM('cyl', hx, 74 + H0, 0, 14, 2.6, 14, C(wh)); partM('cone', hx - 1.5, 80.5 + H0, 0, 12, 12, 12, C(red)); partM('sphere', hx - 4, 86.5 + H0, 0, 4, 4, 4, C(wh)); break;
+      }
+      case 'bunny': for (const s of [-1, 1]) { part(hx - 1, 81 + H0, 3.6 * s, 2.6, 15, 3.8, C(hd)); part(hx + 0.4, 81 + H0, 3.6 * s, 0.6, 11, 2, C(ac)); } break;
+      case 'tophat': partM('cyl', hx, 73.6 + H0, 0, 18, 1.2, 18, C(hd, 0.8)); partM('cyl', hx, 80 + H0, 0, 11.5, 12, 11.5, C(hd)); partM('cyl', hx, 75.4 + H0, 0, 11.9, 2, 11.9, [ac[0], ac[1], ac[2], alpha], glo(ac, 0.5)); break;
+      case 'astro': partM('cyl', hx, 57.6 + H0, 0, 15, 2.4, 15, C(hd)); partM('sphere', hx, 66.5 + H0, 0, 26, 26, 26, [0.75, 0.92, 1, 0.2 * alpha], { add: true, lit: 0 }); break;
+      case 'wings': { // sırtta üç tüylü kanat, yavaşça çırpar
+        const fl = 1 + Math.sin(t * 3.2 + (p.id ? p.id.charCodeAt(0) : 0)) * 0.12;
+        for (const s of [-1, 1]) for (let i = 0; i < 3; i++) {
+          const z = (10 + i * 7.5) * fl * s, hh = 52 + i * 5 + dy, ht = 17 - i * 3;
+          part(-9.5 - i * 0.6, hh, z, 2, ht, 8.5, C(hd)); part(-9.6 - i * 0.6, hh + ht / 2 - 1, z, 2.2, 2, 8.7, [ac[0], ac[1], ac[2], alpha], glo(ac, 0.5));
+        }
+        break;
+      }
+      case 'flame': { // alev saç: titreyen ışıklı koniler
+        const hp = xf(R, hx, 80 + H0 + lift, 0);
+        for (let i = 0; i < 3; i++) {
+          const fz = (i - 1) * 4, fh = 10 + Math.sin(t * 17 + i * 2.1) * 2.5 + (i === 1 ? 4 : 0), off = xf(R, 0, 0, fz);
+          Q('cone', p.x + hp[0] + off[0], hp[1] + fh / 2 - 4, p.y + hp[2] + off[2], 0, 0, 7, fh, 7, [ac[0], ac[1], ac[2], 0.85 * alpha], { add: true, lit: 0 });
+          Q('cone', p.x + hp[0] + off[0], hp[1] + fh / 3 - 4, p.y + hp[2] + off[2], 0, 0, 4, fh * 0.6, 4, [1, 0.95, 0.5, 0.7 * alpha], { add: true, lit: 0 });
+        }
+        break;
+      }
     }
   }
   // kollar ve silah
@@ -828,6 +861,7 @@ function drawWorldDynamic(v, me, t) {
   }
   // cesetler
   for (const c of S.corpses) {
+    if (kfxHides(c.id)) continue; // öldürme efekti oynuyor (07i)
     const ally = c.team === mt;
     if (!ally && !(v.alive && losClear(v.x, v.y, c.x, c.y, true))) continue;
     drawCorpse(c, ally);
@@ -1183,6 +1217,7 @@ function render3D(dt, me, v) {
       else if (p.st.reveal > 0) drawCharacter(p, 'enemy', 1, true, t);
     }
     drawFX(dt);
+    drawKillFx(me, v);
     if (v.alive && !CAM.on) drawViewmodel(v, dt, t);
   }
   glFlush();

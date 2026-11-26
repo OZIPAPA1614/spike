@@ -168,6 +168,42 @@ button.store:hover:not(:disabled){background:rgba(94,242,255,.12);border-color:#
 .sc .ds{font-size:11px;color:var(--dim);min-height:14px;letter-spacing:.03em}
 .sc button{padding:7px 4px;font-size:11px;letter-spacing:.08em}
 @media (max-height:700px){.st-grid{max-height:52vh}.sc canvas{aspect-ratio:180/80}}
+.st-tabs{flex-wrap:wrap}
+.st-tabs button{min-width:120px}
+.st-tabs button.crtab{border-color:rgba(255,210,58,.6);color:#ffd23a}
+.st-tabs button.crtab.on{background:#c99a12;border-color:#ffd23a;color:#fff}
+.sc{border-bottom:3px solid var(--rc,rgba(236,232,225,.1))}
+.sc .rr{font-size:10px;letter-spacing:.14em;color:var(--rc);font-weight:700;margin-bottom:-3px}
+.sc.case{cursor:pointer}
+.sc.case canvas{background:radial-gradient(ellipse at 50% 60%,color-mix(in srgb,var(--rc) 22%,transparent),rgba(0,0,0,0) 70%),#0b131b}
+#stCase{margin-top:10px;background:rgba(0,0,0,.18);border:1px solid rgba(236,232,225,.1);padding:10px 12px}
+#stCase .cdh{font-size:13px;letter-spacing:.12em;color:var(--dim)} #stCase .cdh b{color:#fff;font-size:15px}
+.codds{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0 4px;font-size:12px;letter-spacing:.06em}
+.codds span{display:flex;align-items:center;gap:6px;color:var(--rc);font-weight:700}
+.codds i{width:10px;height:10px;background:var(--rc);display:inline-block;box-shadow:0 0 6px var(--rc)}
+.citems{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px;margin-top:8px;max-height:min(24vh,220px);overflow-y:auto}
+.ci{background:rgba(255,255,255,.035);border-bottom:3px solid var(--rc);padding:4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;text-align:center}
+.ci canvas{width:100%;height:auto;aspect-ratio:120/64;background:#0b131b}
+.ci small{font-size:9px;color:var(--dim);letter-spacing:.06em} .ci.own small{color:var(--teal)}
+#caseOv{z-index:26;background:rgba(4,7,11,.8)}
+.cpanel{width:min(900px,96vw);text-align:center;max-height:96vh;overflow-y:auto}
+#caseOv .panel:before{background:#ffd23a}
+.reelwrap{position:relative;overflow:hidden;margin:12px 0;background:#0a1118;border:1px solid rgba(236,232,225,.12);padding:8px 0}
+.reel{display:flex;gap:8px;will-change:transform;padding-left:0}
+.rt{flex:0 0 120px;background:rgba(255,255,255,.04);border-bottom:4px solid var(--rc);display:flex;flex-direction:column;align-items:center;padding:4px 0 3px;font-size:11px;letter-spacing:.03em;box-shadow:inset 0 -18px 22px -18px var(--rc)}
+.rt canvas{width:120px;height:64px}
+.rt span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:114px}
+.reelmark{position:absolute;left:50%;top:0;bottom:0;width:3px;margin-left:-1.5px;background:#ffd23a;box-shadow:0 0 10px #ffd23a}
+.reelmark:before,.reelmark:after{content:"";position:absolute;left:-6px;border:7.5px solid transparent}
+.reelmark:before{top:0;border-top-color:#ffd23a} .reelmark:after{bottom:0;border-bottom-color:#ffd23a}
+#caseRes{margin:6px auto 4px;padding:10px;border:1px solid var(--rc);background:radial-gradient(ellipse at 50% 40%,color-mix(in srgb,var(--rc) 28%,transparent),rgba(0,0,0,0) 70%);max-width:420px;animation:crpop .45s ease-out}
+#caseRes canvas{width:min(300px,80vw);height:auto;aspect-ratio:300/160}
+#caseRes .crr{color:var(--rc);font-size:12px;letter-spacing:.16em;font-weight:700}
+#caseRes .crn{font-size:24px;font-weight:900;letter-spacing:.06em;margin:2px 0}
+#caseRes .crs{font-size:13px;color:var(--dim);letter-spacing:.04em}
+#caseRes.gold{box-shadow:0 0 30px rgba(255,210,58,.45)}
+@keyframes crpop{0%{transform:scale(.85);opacity:0}60%{transform:scale(1.04);opacity:1}100%{transform:scale(1)}}
+@media (max-height:500px){.rt{flex-basis:96px}.rt canvas{width:96px;height:51px}#caseRes canvas{width:180px}#caseRes .crn{font-size:18px}.cpanel{padding:10px 14px}.cpanel h2{font-size:18px;margin-bottom:0}#caseOv.done .reelwrap{display:none}#caseOv .row-btn{margin-top:8px}#caseOv .row-btn button{padding:9px 6px}}
 #btnFriends b{background:var(--red);color:#fff;border-radius:9px;padding:1px 7px;font-size:11px;margin-left:6px}
 .slot .fadd{cursor:pointer;font-size:10px;letter-spacing:.1em;color:var(--teal);border:1px solid rgba(30,227,207,.5);padding:2px 6px;white-space:nowrap}
 .slot .fadd.done{color:var(--dim);border-color:rgba(236,232,225,.2);cursor:default}
@@ -645,8 +681,9 @@ button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
   <div class="panel" style="width:min(980px,96vw)">
     <div class="st-head"><h2>MAĞAZA</h2><div class="gems"><span class="gi">💎</span> <b id="stGems">0</b> <span>GEMS</span></div></div>
     <div class="sub">Maç bittikçe gems kazanırsın: galibiyet 150 · beraberlik 70 · yenilgi 30 · öldürme başına +5 · Silah skinleri mermiye de renk ve iz verir</div>
-    <div id="stTabs" class="st-tabs"><button data-tab="sw" class="on">KILIÇLAR</button><button data-tab="ws">SİLAH SKİNLERİ</button><button data-tab="cs">KARAKTER SKİNLERİ</button></div>
+    <div id="stTabs" class="st-tabs"><button data-tab="sw" class="on">KILIÇLAR</button><button data-tab="ws">SİLAH SKİNLERİ</button><button data-tab="cs">KARAKTER SKİNLERİ</button><button data-tab="kf">ÖLDÜRME EFEKTLERİ</button><button data-tab="cr" class="crtab">🎁 KASALAR</button></div>
     <div id="stGrid" class="st-grid"></div>
+    <div id="stCase" class="hidden"></div>
     <div class="row-btn"><button data-back class="primary">GERİ</button></div>
   </div>
 </div>
@@ -711,6 +748,15 @@ button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
     <div id="admGameMsg" class="note"></div>
     </div>
     <div class="row-btn"><button id="admClose" class="primary">KAPAT <span class="kh">ESC</span></button></div>
+  </div>
+</div>
+
+<div id="caseOv" class="overlay hidden">
+  <div class="panel cpanel">
+    <h2 id="caseTitle">KASA</h2>
+    <div class="reelwrap"><div id="caseReel" class="reel"></div><div class="reelmark"></div></div>
+    <div id="caseRes" class="hidden"></div>
+    <div class="row-btn"><button id="caseSkip" class="ghost">ATLA</button><button id="caseEquip" class="primary hidden">KUŞAN</button><button id="caseAgain" class="store hidden">TEKRAR AÇ</button><button id="caseClose" class="ghost hidden">KAPAT <span class="kh">ESC</span></button></div>
   </div>
 </div>
 
@@ -3432,7 +3478,33 @@ const WSKINS = [
   { id: 'w17', n: 'Siber Mor', price: 400, c: ['#2a1e55', '#0f0b22', '#a86bff'], glow: 1 },
   { id: 'w18', n: 'Altın Varak', price: 450, c: ['#e2b33c', '#6e4f14', '#fff1a8'], glow: 1 },
   { id: 'w19', n: 'Kraliyet', price: 500, c: ['#1f3a93', '#0d1a44', '#f5c451'], glow: 1 },
-  { id: 'w20', n: 'Gökkuşağı', price: 650, c: ['#ff4655', '#1a1a1a', '#ffffff'], glow: 1, rb: 1 }
+  { id: 'w20', n: 'Gökkuşağı', price: 650, c: ['#ff4655', '#1a1a1a', '#ffffff'], glow: 1, rb: 1 },
+  // yeni, daha pahalı skinler · pulse: ışık nabız gibi atar · duo: ana renk ikinci renge gidip gelir
+  { id: 'w21', n: 'Karbon Fiber', price: 900, c: ['#2b2d31', '#111214', '#8a929c'] },
+  { id: 'w22', n: 'Bakır Pas', price: 950, c: ['#a8592c', '#3b1e10', '#4fb3a3'] },
+  { id: 'w23', n: 'Kum Fırtınası', price: 1000, c: ['#d4a75a', '#5e4220', '#fff0c2'], glow: 1 },
+  { id: 'w24', n: 'Mercan Resifi', price: 1100, c: ['#ff6f61', '#2b1a33', '#3ee0d0'], glow: 1 },
+  { id: 'w25', n: 'Zümrüt', price: 1200, c: ['#0f7b4f', '#06281a', '#6dffb0'], glow: 1 },
+  { id: 'w26', n: 'Yakut', price: 1200, c: ['#9b111e', '#2a0508', '#ff6b7a'], glow: 1 },
+  { id: 'w27', n: 'Safir', price: 1300, c: ['#0f52ba', '#06183a', '#7fb2ff'], glow: 1 },
+  { id: 'w28', n: 'Ametist', price: 1300, c: ['#6a2c91', '#1d0b29', '#d39bff'], glow: 1 },
+  { id: 'w29', n: 'Kutup Işığı', price: 1500, c: ['#0c2a3a', '#041018', '#4dffb8'], glow: 1, pulse: 1, duo: '#3a1e5a' },
+  { id: 'w30', n: 'Volkanik', price: 1600, c: ['#1e0f0a', '#0a0503', '#ff7a1a'], glow: 1, pulse: 1 },
+  { id: 'w31', n: 'Ruhani', price: 1700, c: ['#c8d6e5', '#5f6f80', '#ffffff'], glow: 1, pulse: 1 },
+  { id: 'w32', n: 'Plazma', price: 1800, c: ['#14103a', '#070514', '#5ef2ff'], glow: 1, pulse: 1, duo: '#3a0f4a' },
+  { id: 'w33', n: 'Fosfor', price: 2000, c: ['#1a2a0a', '#081004', '#c6ff3a'], glow: 1, pulse: 1 },
+  { id: 'w34', n: 'Kan Ayı', price: 2200, c: ['#3a0508', '#120102', '#ff2a3a'], glow: 1, pulse: 1, duo: '#6a0a12' },
+  { id: 'w35', n: 'Siber Kafes', price: 2400, c: ['#0b0f1a', '#03050a', '#00ffd5'], glow: 1, pulse: 1, duo: '#2a0b3a' },
+  { id: 'w36', n: 'Ejder Pulu', price: 2600, c: ['#0f4a2a', '#04140b', '#ffd166'], glow: 1, pulse: 1, duo: '#5a3a0a' },
+  { id: 'w37', n: 'Güneş Patlaması', price: 2900, c: ['#ffb627', '#5a2a00', '#fff6c2'], glow: 1, pulse: 1, duo: '#ff5a1a' },
+  { id: 'w38', n: 'Gece Yarısı Altını', price: 3200, c: ['#101018', '#050508', '#ffd65a'], glow: 1, pulse: 1 },
+  { id: 'w39', n: 'Prizma', price: 3600, c: ['#ffffff', '#2a2a3a', '#ffffff'], glow: 1, rb: 1 },
+  { id: 'w40', n: 'Sonsuzluk', price: 4200, c: ['#0a0a12', '#000000', '#ffffff'], glow: 1, pulse: 1, rb: 1 },
+  // YALNIZCA KASADAN (ex): mağazada satılmaz · val: kopya çıkınca iade hesabı için değer
+  { id: 'w41', n: 'Ejder Nefesi', ex: 1, val: 5000, c: ['#ff4a1a', '#1a0500', '#ffe14a'], glow: 1, pulse: 1, duo: '#ff9a1a' },
+  { id: 'w42', n: 'Galaksi', ex: 1, val: 5000, c: ['#1a0b3a', '#05020f', '#a8c8ff'], glow: 1, pulse: 1, duo: '#3a0b5a' },
+  { id: 'w43', n: 'Buz Kristali', ex: 1, val: 4500, c: ['#bff4ff', '#2a5a7a', '#ffffff'], glow: 1, pulse: 1, duo: '#5ac8ff' },
+  { id: 'w44', n: 'Neon Rüya', ex: 1, val: 4500, c: ['#ff3ec8', '#120614', '#3ef1ff'], glow: 1, pulse: 1, duo: '#7b4dff' }
 ];
 /* karakter skinleri: gövde/kollar, bacaklar, kask, vizör (ışıklı), sırt çantası, şapka */
 const CSKINS = [
@@ -3455,11 +3527,78 @@ const CSKINS = [
   { id: 'c17', n: 'Siber Punk', price: 450, suit: '#2a1e55', legs: '#0f0b22', helm: '#3ef1ff', visor: '#ff3ec8', pack: '#0f0b22', hat: 'mohawk', glow: 1 },
   { id: 'c18', n: 'Altın Şövalye', price: 550, suit: '#e2b33c', legs: '#6e4f14', helm: '#fff1a8', visor: '#ffffff', pack: '#a8781a', hat: 'crown', glow: 1 },
   { id: 'c19', n: 'Kraliyet Muhafızı', price: 650, suit: '#1f3a93', legs: '#0d1a44', helm: '#f5c451', visor: '#f5c451', pack: '#0d1a44', hat: 'crown', glow: 1 },
-  { id: 'c20', n: 'Gökkuşağı Efsanesi', price: 800, suit: '#ff4655', legs: '#1a1a1a', helm: '#ffffff', visor: '#ffffff', pack: '#1a1a1a', hat: 'halo', glow: 1, rb: 1 }
+  { id: 'c20', n: 'Gökkuşağı Efsanesi', price: 800, suit: '#ff4655', legs: '#1a1a1a', helm: '#ffffff', visor: '#ffffff', pack: '#1a1a1a', hat: 'halo', glow: 1, rb: 1 },
+  // yeni, daha pahalı skinler (yeni şapkalar: pumpkin, cowboy, santa, bunny, tophat, astro, wings, flame)
+  { id: 'c21', n: 'Cadı Kabağı', price: 1000, suit: '#3a2a4a', legs: '#1a1222', helm: '#ff8a1a', visor: '#ffd23a', pack: '#2a1a33', hat: 'pumpkin', glow: 1 },
+  { id: 'c22', n: 'Kovboy', price: 1000, suit: '#8a5a32', legs: '#3a4a6a', helm: '#6a4222', visor: '#ffd166', pack: '#5a3a1e', hat: 'cowboy' },
+  { id: 'c23', n: 'Noel Baba', price: 1100, suit: '#c8102e', legs: '#1a1a1a', helm: '#ffffff', visor: '#ffe0a0', pack: '#7a0a1a', hat: 'santa' },
+  { id: 'c24', n: 'Pamuk Tavşan', price: 1100, suit: '#f2e6f0', legs: '#b9a8c0', helm: '#ffffff', visor: '#ff8ab8', pack: '#d8c8dc', hat: 'bunny' },
+  { id: 'c25', n: 'Beyefendi', price: 1200, suit: '#1a1a22', legs: '#0a0a10', helm: '#202028', visor: '#d8c08a', pack: '#101016', hat: 'tophat' },
+  { id: 'c26', n: 'Astronot', price: 1400, suit: '#e8ecf0', legs: '#a8b0b8', helm: '#ffffff', visor: '#ffb347', pack: '#c0c8d0', hat: 'astro' },
+  { id: 'c27', n: 'Melek', price: 1600, suit: '#fff8e8', legs: '#e8dcc0', helm: '#ffffff', visor: '#ffe58a', pack: '#f0e6d0', hat: 'wings', glow: 1 },
+  { id: 'c28', n: 'Ateş Ruhu', price: 1800, suit: '#2a0f08', legs: '#120604', helm: '#3a1408', visor: '#ff7a1a', pack: '#1a0804', hat: 'flame', glow: 1, pulse: 1 },
+  { id: 'c29', n: 'Buz Kraliçesi', price: 2000, suit: '#cfefff', legs: '#5a8aa8', helm: '#ffffff', visor: '#7ad8ff', pack: '#a8d8f0', hat: 'crown', glow: 1, pulse: 1 },
+  { id: 'c30', n: 'Karanlık Melek', price: 2200, suit: '#120a18', legs: '#06030a', helm: '#1a1022', visor: '#ff3a5a', pack: '#0a050f', hat: 'wings', glow: 1, pulse: 1 },
+  { id: 'c31', n: 'Siber Samuray', price: 2400, suit: '#1a1a2a', legs: '#0a0a14', helm: '#ff3a4a', visor: '#3ef1ff', pack: '#0a0a14', hat: 'horns', glow: 1, pulse: 1, duo: '#2a0f3a' },
+  { id: 'c32', n: 'Uzay Kovboyu', price: 2500, suit: '#2a3a5a', legs: '#0f1830', helm: '#c0c8d8', visor: '#3ef1ff', pack: '#1a2440', hat: 'cowboy', glow: 1, pulse: 1 },
+  { id: 'c33', n: 'Hayalet Avcısı', price: 2600, suit: '#c8d6e5', legs: '#5f6f80', helm: '#e8f0f8', visor: '#9dff6a', pack: '#8a9aa8', hat: 'astro', glow: 1, pulse: 1 },
+  { id: 'c34', n: 'Cehennem Lordu', price: 2800, suit: '#3a0508', legs: '#120102', helm: '#1a0204', visor: '#ff4a1a', pack: '#120102', hat: 'flame', glow: 1, pulse: 1, duo: '#7a1a08' },
+  { id: 'c35', n: 'Kristal Şövalye', price: 3000, suit: '#a8e8ff', legs: '#3a6a8a', helm: '#e8fbff', visor: '#ffffff', pack: '#6aa8c8', hat: 'halo', glow: 1, pulse: 1, duo: '#c8a8ff' },
+  { id: 'c36', n: 'Sihirbaz', price: 3200, suit: '#2a1a5a', legs: '#120a2a', helm: '#3a2a7a', visor: '#ffd23a', pack: '#1a0f3a', hat: 'tophat', glow: 1, pulse: 1 },
+  { id: 'c37', n: 'Kozmik Tavşan', price: 3400, suit: '#1a0b3a', legs: '#05020f', helm: '#2a1a5a', visor: '#ff8ab8', pack: '#0f0624', hat: 'bunny', glow: 1, pulse: 1, duo: '#4a0b6a' },
+  { id: 'c38', n: 'Güneş Tanrısı', price: 3800, suit: '#ffb627', legs: '#5a2a00', helm: '#fff6c2', visor: '#ffffff', pack: '#a85a00', hat: 'halo', glow: 1, pulse: 1, duo: '#ff5a1a' },
+  { id: 'c39', n: 'Ejder Kral', price: 4400, suit: '#0f4a2a', legs: '#04140b', helm: '#ffd166', visor: '#ff4a1a', pack: '#0a2a18', hat: 'crown', glow: 1, pulse: 1, duo: '#1a7a3a' },
+  { id: 'c40', n: 'Prizma Efsanesi', price: 5000, suit: '#ffffff', legs: '#1a1a2a', helm: '#ffffff', visor: '#ffffff', pack: '#1a1a2a', hat: 'wings', glow: 1, rb: 1 },
+  // YALNIZCA KASADAN
+  { id: 'c41', n: 'Kozmik Varlık', ex: 1, val: 6000, suit: '#0a0a1a', legs: '#000005', helm: '#1a1a3a', visor: '#a8c8ff', pack: '#05050f', hat: 'astro', glow: 1, pulse: 1, duo: '#2a0b4a' },
+  { id: 'c42', n: 'Altın Ejder', ex: 1, val: 6000, suit: '#e2b33c', legs: '#6e4f14', helm: '#fff1a8', visor: '#ff4a1a', pack: '#a8781a', hat: 'wings', glow: 1, pulse: 1 },
+  { id: 'c43', n: 'Kabak Kral', ex: 1, val: 5000, suit: '#1a0a2a', legs: '#0a0412', helm: '#ff8a1a', visor: '#9dff6a', pack: '#120820', hat: 'pumpkin', glow: 1, pulse: 1 },
+  { id: 'c44', n: 'Alev Meleği', ex: 1, val: 5500, suit: '#ff5a1a', legs: '#3a0a00', helm: '#ffd23a', visor: '#ffffff', pack: '#a82a00', hat: 'flame', glow: 1, pulse: 1, duo: '#ffb627' }
 ];
-const WSK = {}, CSK = {};
+/* ÖLDÜRME EFEKTLERİ (Arsenal gibi): rakibi öldürünce onun yerinde oynar, herkes görür (çizim: 07i) */
+const KFXS = [
+  { id: 'k01', n: 'Konfeti', price: 900, dur: 1.9, ds: 'Parti patlaması' },
+  { id: 'k02', n: 'Kalp Yağmuru', price: 1000, dur: 2.1, ds: 'Kalpler saçılır' },
+  { id: 'k03', n: 'Balon', price: 1400, dur: 2.5, ds: 'Şişer, uçar, patlar' },
+  { id: 'k04', n: 'Örs', price: 1600, dur: 2.5, ds: 'Kafasına örs düşer' },
+  { id: 'k05', n: 'Tavuk', price: 1800, dur: 2.7, ds: 'Tavuğa dönüp kaçar' },
+  { id: 'k06', n: 'Mezar Taşı', price: 2000, dur: 2.7, ds: 'Yere gömülür' },
+  { id: 'k07', n: 'Hayalet', price: 2200, dur: 2.5, ds: 'Ruhu göğe yükselir' },
+  { id: 'k08', n: 'Buz Heykeli', price: 2500, dur: 2.4, ds: 'Donar ve paramparça olur' },
+  { id: 'k09', n: 'Şimşek', price: 2800, dur: 2.0, ds: 'Gökten yıldırım çarpar' },
+  { id: 'k10', n: 'Piksel Dağılma', price: 3000, dur: 2.3, ds: 'Kare kare dağılır' },
+  { id: 'k11', n: 'Havai Fişek', price: 3400, dur: 2.7, ds: 'Fırlar ve patlar' },
+  { id: 'k12', n: 'UFO', price: 4000, dur: 3.0, ds: 'Uzaylılar kaçırır' },
+  { id: 'k13', n: 'Kara Delik', ex: 1, val: 6000, dur: 2.7, ds: 'Girdaba çekilir' },
+  { id: 'k14', n: 'Meteor', ex: 1, val: 6000, dur: 2.7, ds: 'Gökten meteor düşer' }
+];
+const WSK = {}, CSK = {}, KFX = {};
 for (const s of WSKINS) WSK[s.id] = s;
 for (const s of CSKINS) CSK[s.id] = s;
+for (const s of KFXS) KFX[s.id] = s;
+/* mağaza türü → katalog / sahip olunanlar / kuşanılan alanı */
+const SHOP_KIND = { ws: { list: WSKINS, map: WSK, eq: 'wsk' }, cs: { list: CSKINS, map: CSK, eq: 'csk' }, kf: { list: KFXS, map: KFX, eq: 'kfx' } };
+/* NADİRLİK (CS gibi): değere göre; yalnızca kasadan çıkanlar altın */
+const RARITY = [
+  { k: 'mil', n: 'Askerî', c: '#4b69ff', w: 60 },
+  { k: 'res', n: 'Kısıtlı', c: '#8847ff', w: 25 },
+  { k: 'cla', n: 'Gizli', c: '#d32ce6', w: 10 },
+  { k: 'cov', n: 'Örtülü', c: '#eb4b4b', w: 4 },
+  { k: 'gold', n: '★ Nadir Özel', c: '#ffd23a', w: 1 }
+];
+const RARM = {}; RARITY.forEach((r, i) => { RARM[r.k] = r; r.i = i; });
+function itemVal(it) { return it ? (it.ex ? it.val : it.price) | 0 : 0; }
+function itemRar(it) {
+  if (!it) return RARM.mil;
+  if (it.ex) return RARM.gold;
+  const v = it.price;
+  return v < 250 ? RARM.mil : v < 700 ? RARM.res : v < 1800 ? RARM.cla : RARM.cov;
+}
+/* iki renk arası (RGB dizileri) */
+function mixRGB(a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k, 1]; }
+const skAnim = sk => !!(sk && (sk.rb || sk.duo || sk.pulse));
+const pulseK = t => 0.75 + 0.55 * Math.sin(t * 4.2);
+const duoK = t => 0.5 + 0.5 * Math.sin(t * 1.7);
 const GEM_REWARD = { win: 150, draw: 70, lose: 30, kill: 5, killCap: 30 };
 function swordStats(p) {
   const t = SWORD_TIERS[clamp((p && p.swt) | 0, 0, SWORD_MAX)];
@@ -3468,11 +3607,13 @@ function swordStats(p) {
 /* ağa gelen kozmetik bilgisini doğrula (host) */
 function cosClean(c) {
   c = c && typeof c === 'object' ? c : {};
-  return { sw: clamp(parseInt(c.sw, 10) || 0, 0, SWORD_MAX), ws: WSK[c.ws] ? c.ws : '', cs: CSK[c.cs] ? c.cs : '' };
+  return { sw: clamp(parseInt(c.sw, 10) || 0, 0, SWORD_MAX), ws: WSK[c.ws] ? c.ws : '', cs: CSK[c.cs] ? c.cs : '', kf: KFX[c.kf] ? c.kf : '' };
 }
-/* botlar: biraz çeşitlilik */
+/* botlar: biraz çeşitlilik (kasaya özel eşyalar botlarda yok) */
 function cosRandomBot() {
-  return { sw: Math.random() < 0.5 ? 0 : randi(1, 3), ws: Math.random() < 0.45 ? pick(WSKINS).id : '', cs: Math.random() < 0.55 ? pick(CSKINS).id : '' };
+  const buyable = l => l.filter(s => !s.ex);
+  return { sw: Math.random() < 0.5 ? 0 : randi(1, 3), ws: Math.random() < 0.45 ? pick(buyable(WSKINS)).id : '', cs: Math.random() < 0.55 ? pick(buyable(CSKINS)).id : '',
+    kf: Math.random() < 0.3 ? pick(buyable(KFXS)).id : '' };
 }
 /* gökkuşağı rengi (zamanla döner) */
 function rbCol(t, off) {
@@ -3484,14 +3625,18 @@ function rbCol(t, off) {
 
 const SHOP = {
   prof: null, key: '', _push: null,
-  blank() { return { gems: 150, sw: 0, ws: [], cs: [], wsk: '', csk: '', v: 0, played: 0, won: 0 }; },
+  blank() { return { gems: 150, sw: 0, ws: [], cs: [], kf: [], wsk: '', csk: '', kfx: '', v: 0, played: 0, won: 0, co: 0 }; },
   fix(p) {
     const b = this.blank(); p = Object.assign(b, p && typeof p === 'object' ? p : {});
-    p.gems = Math.max(0, Math.floor(+p.gems || 0)); p.sw = clamp(p.sw | 0, 0, SWORD_MAX); p.v = p.v | 0;
-    p.ws = Array.isArray(p.ws) ? p.ws.filter(id => WSK[id]) : []; p.cs = Array.isArray(p.cs) ? p.cs.filter(id => CSK[id]) : [];
-    if (p.wsk && !p.ws.includes(p.wsk)) p.wsk = ''; if (p.csk && !p.cs.includes(p.csk)) p.csk = '';
+    p.gems = Math.max(0, Math.floor(+p.gems || 0)); p.sw = clamp(p.sw | 0, 0, SWORD_MAX); p.v = p.v | 0; p.co = Math.max(0, p.co | 0);
+    for (const k in SHOP_KIND) {
+      const K = SHOP_KIND[k];
+      p[k] = Array.isArray(p[k]) ? p[k].filter((id, i, a) => K.map[id] && a.indexOf(id) === i) : [];
+      if (p[K.eq] && !p[k].includes(p[K.eq])) p[K.eq] = '';
+    }
     return p;
   },
+  owns(kind, id) { const p = this.prof || this.load(); return !!(p[kind] && p[kind].includes(id)); },
   /* hesap değişince (giriş/misafir) ilgili profili yükle */
   load() {
     this.key = 'spk_prof_' + (FR && FR.acc && FR.uid ? FR.uid : 'guest');
@@ -3545,7 +3690,7 @@ const SHOP = {
       if (typeof uiToast === 'function') uiToast('ADMİN: ' + (got >= 0 ? '+' : '−') + Math.abs(got) + ' GEMS', got < 0);
     } catch (e) { } finally { this._gBusy = false; }
   },
-  cos() { const p = this.prof || this.load(); return { sw: p.sw, ws: p.wsk || '', cs: p.csk || '' }; },
+  cos() { const p = this.prof || this.load(); return { sw: p.sw, ws: p.wsk || '', cs: p.csk || '', kf: p.kfx || '' }; },
   /* maç sonu ödülü: bir maç için bir kez */
   award(res, kills) {
     if (!this.prof) this.load();
@@ -3561,15 +3706,33 @@ const SHOP = {
     p.gems -= t.price; p.sw = nx; this.bump(); return 'ok';
   },
   buy(kind, id) {
-    const p = this.prof, list = kind === 'ws' ? WSK : CSK, it = list[id]; if (!it) return 'bad';
+    const p = this.prof, K = SHOP_KIND[kind], it = K && K.map[id]; if (!it) return 'bad';
     if (p[kind].includes(id)) return 'owned';
+    if (it.ex) return 'ex'; // yalnızca kasadan çıkar
     if (p.gems < it.price) return 'gems';
-    p.gems -= it.price; p[kind].push(id); p[kind === 'ws' ? 'wsk' : 'csk'] = id; this.bump(); return 'ok';
+    p.gems -= it.price; p[kind].push(id); p[K.eq] = id; this.bump(); return 'ok';
   },
   equip(kind, id) {
-    const p = this.prof, f = kind === 'ws' ? 'wsk' : 'csk';
+    const p = this.prof, K = SHOP_KIND[kind]; if (!K) return 'bad';
     if (id && !p[kind].includes(id)) return 'bad';
-    p[f] = id || ''; this.bump(); return 'ok';
+    p[K.eq] = id || ''; this.bump(); return 'ok';
+  },
+  /* KASA AÇ: gems düşülür, eşya hemen profile yazılır (animasyon yalnızca gösteri).
+     Önce nadirlik (kasadaki nadirliklerin ağırlıklarıyla), sonra o nadirlikten rastgele eşya.
+     Zaten sahip olunan eşya çıkarsa değerinin %35'i gems olarak geri verilir. */
+  openCase(cid, rnd) {
+    const p = this.prof || this.load(), c = CASEM[cid]; if (!c) return { r: 'bad' };
+    if (p.gems < c.price) return { r: 'gems' };
+    const R = rnd || Math.random, tiers = caseTiers(c), tot = tiers.reduce((a, t) => a + t.w, 0);
+    let x = R() * tot, tier = tiers[tiers.length - 1];
+    for (const t of tiers) { if (x < t.w) { tier = t; break; } x -= t.w; }
+    const [kind, id] = tier.items[Math.min(tier.items.length - 1, Math.floor(R() * tier.items.length))];
+    const it = SHOP_KIND[kind].map[id], dup = p[kind].includes(id), refund = dup ? Math.max(10, Math.round(itemVal(it) * 0.35)) : 0;
+    p.gems -= c.price;
+    if (dup) p.gems += refund; else p[kind].push(id);
+    p.co = (p.co | 0) + 1;
+    this.bump();
+    return { r: 'ok', kind, id, it, dup, refund, rar: tier.k };
   }
 };
 
@@ -3586,26 +3749,33 @@ function gunPartsFor(wid, p, t) {
   }
   const sk = p && p.wsk ? WSK[p.wsk] : null, base = GUNM[wid] || GUNM.classic;
   if (!sk) return GUNC[wid] || GUNC.classic;
-  if (!sk.rb && _SKC[wid + sk.id]) return _SKC[wid + sk.id];
-  const main = sk.rb ? rbCol(t || 0) : hexRGB(sk.c[0]), dark = hexRGB(sk.c[1]), acc = sk.rb ? rbCol(t || 0, 0.5) : hexRGB(sk.c[2]);
+  const anim = skAnim(sk), tt = t || 0;
+  if (!anim && _SKC[wid + sk.id]) return _SKC[wid + sk.id];
+  const main = sk.rb ? rbCol(tt) : sk.duo ? mixRGB(hexRGB(sk.c[0]), hexRGB(sk.duo), duoK(tt)) : hexRGB(sk.c[0]), dark = hexRGB(sk.c[1]), acc = sk.rb ? rbCol(tt, 0.5) : hexRGB(sk.c[2]);
+  const gl = sk.glow ? 0.65 * (sk.pulse ? pulseK(tt) : 1) : 0;
   const out = base.map((q, i) => {
     const l = lumOf(hexRGB(q[2]));
     const isAcc = i > 0 && l >= 0.16 && i % 2 === 1;
     const col = i === 0 ? main : l < 0.16 ? dark : isAcc ? acc : main;
-    return [q[0], q[1], col, sk.glow && isAcc ? 0.65 : 0];
+    return [q[0], q[1], col, isAcc ? gl : 0];
   });
-  if (!sk.rb) _SKC[wid + sk.id] = out;
+  if (!anim) _SKC[wid + sk.id] = out;
   return out;
 }
-/* karakter skini renkleri (RGB dizileri) */
+/* karakter skini renkleri (RGB dizileri) · pk: ışıklı parçaların parlaklık çarpanı (nabız) */
 function charSkin(p, t) {
   const sk = p && p.csk ? CSK[p.csk] : null; if (!sk) return null;
-  if (!sk.rb) return sk._c || (sk._c = { suit: hexRGB(sk.suit), legs: hexRGB(sk.legs), helm: hexRGB(sk.helm), visor: hexRGB(sk.visor), pack: hexRGB(sk.pack), hat: sk.hat, glow: !!sk.glow });
-  return { suit: rbCol(t || 0), legs: hexRGB(sk.legs), helm: rbCol(t || 0, 0.33), visor: rbCol(t || 0, 0.66), pack: hexRGB(sk.pack), hat: sk.hat, glow: true };
+  const b = sk._c || (sk._c = { suit: hexRGB(sk.suit), legs: hexRGB(sk.legs), helm: hexRGB(sk.helm), visor: hexRGB(sk.visor), pack: hexRGB(sk.pack), hat: sk.hat, glow: !!sk.glow, pk: 1 });
+  if (!skAnim(sk)) return b;
+  const tt = t || 0, o = Object.assign({}, b);
+  if (sk.rb) { o.suit = rbCol(tt); o.helm = rbCol(tt, 0.33); o.visor = rbCol(tt, 0.66); o.glow = true; }
+  else if (sk.duo) o.suit = mixRGB(b.suit, hexRGB(sk.duo), duoK(tt));
+  if (sk.pulse) o.pk = pulseK(tt);
+  return o;
 }
 
 /* ---------- MAĞAZA arayüzü (2B önizlemeler) ---------- */
-const STORE = { tab: 'sw' };
+const STORE = { tab: 'sw', raf: 0, cs: 'cs1' };
 function _hx(c) { return '#' + c.slice(0, 3).map(v => Math.round(clamp(v, 0, 1) * 255).toString(16).padStart(2, '0')).join(''); }
 function _shade(hex, k) { const c = hexRGB(hex); return _hx([c[0] * k, c[1] * k, c[2] * k]); }
 /* yandan görünüş: GUNM parçaları (x ileri, y yukarı) */
@@ -3643,6 +3813,30 @@ function previewChar(cv, sk) {
   else if (hat === 'crown') { B(0, 74.2, 13.5, 2.6, '#f5c451', true); for (const z of [-5.2, 0, 5.2]) B(z, 77, 2.4, 3.2, '#f5c451', true); B(0, 75, 1.6, 1.6, '#ff4655'); }
   else if (hat === 'halo') { g.save(); g.shadowColor = acc; g.shadowBlur = 12; g.strokeStyle = acc; g.lineWidth = 2.2; g.beginPath(); g.ellipse(ox, oy - 83 * sc, 9 * sc, 2.4 * sc, 0, 0, TAU); g.stroke(); g.restore(); }
   else if (hat === 'band') { B(0, 69, 13.2, 2.2, acc); B(9, 67.5, 5, 1.5, acc); }
+  else if (hat === 'pumpkin') {
+    g.fillStyle = c.helm; g.beginPath(); g.ellipse(ox, oy - 67 * sc, 12 * sc, 10.5 * sc, 0, 0, TAU); g.fill();
+    g.strokeStyle = _shade(c.helm, 0.7); g.lineWidth = Math.max(1, sc * 0.8); g.beginPath(); g.ellipse(ox, oy - 67 * sc, 5 * sc, 10.5 * sc, 0, 0, TAU); g.stroke();
+    B(0, 79, 2.4, 4.5, '#3f7f2e'); B(-4, 70, 3, 3, acc, true); B(4, 70, 3, 3, acc, true); B(0, 63.6, 8, 1.8, acc, true);
+  }
+  else if (hat === 'cowboy') { B(0, 73.6, 24, 1.4, c.helm); B(0, 77, 12.5, 6.5, c.helm); B(0, 74.8, 12.9, 1.5, acc); }
+  else if (hat === 'santa') {
+    B(0, 74, 14, 2.6, '#ffffff'); g.fillStyle = '#c8102e'; g.beginPath(); g.moveTo(ox - 6 * sc, oy - 75.3 * sc); g.lineTo(ox + 6 * sc, oy - 75.3 * sc); g.lineTo(ox - 5 * sc, oy - 86 * sc); g.closePath(); g.fill();
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(ox - 5 * sc, oy - 86.5 * sc, 2 * sc, 0, TAU); g.fill();
+  }
+  else if (hat === 'bunny') { for (const z of [-3.6, 3.6]) { B(z, 81, 3.8, 15, c.helm); B(z, 81, 1.8, 11, acc); } }
+  else if (hat === 'tophat') { B(0, 73.6, 18, 1.4, _shade(c.helm, 0.8)); B(0, 80, 11.5, 12, c.helm); B(0, 75.4, 11.9, 2, acc, true); }
+  else if (hat === 'astro') { B(0, 57.6, 15, 2.4, c.helm); g.save(); g.fillStyle = 'rgba(190,235,255,0.22)'; g.strokeStyle = 'rgba(220,245,255,0.75)'; g.lineWidth = 1.2; g.beginPath(); g.arc(ox, oy - 66.5 * sc, 13 * sc, 0, TAU); g.fill(); g.stroke(); g.restore(); }
+  else if (hat === 'wings') {
+    g.save(); g.globalCompositeOperation = 'destination-over';
+    for (const s of [-1, 1]) for (let i = 0; i < 3; i++) { const z = (14 + i * 7.5) * s, hh = 52 + i * 5, ht = 17 - i * 3; B(z, hh, 7.5, ht, c.helm); B(z, hh + ht / 2 - 1, 7.7, 2, acc, true); }
+    g.restore();
+  }
+  else if (hat === 'flame') {
+    g.save(); g.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 3; i++) { const z = (i - 1) * 4, fh = 11 + (i === 1 ? 4 : 0); g.fillStyle = acc; g.beginPath(); g.moveTo(ox + (z - 3.5) * sc, oy - 75 * sc); g.lineTo(ox + (z + 3.5) * sc, oy - 75 * sc); g.lineTo(ox + z * sc, oy - (75 + fh) * sc); g.closePath(); g.fill();
+      g.fillStyle = 'rgba(255,240,140,0.8)'; g.beginPath(); g.moveTo(ox + (z - 2) * sc, oy - 75 * sc); g.lineTo(ox + (z + 2) * sc, oy - 75 * sc); g.lineTo(ox + z * sc, oy - (75 + fh * 0.6) * sc); g.closePath(); g.fill(); }
+    g.restore();
+  }
 }
 function previewRainbow(cv) {
   const g = cv.getContext('2d'); g.save(); g.globalCompositeOperation = 'source-atop';
@@ -3655,14 +3849,41 @@ function uiGemsChanged() {
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   set('gemN', p.gems); set('stGems', p.gems);
 }
+/* silah skini önizlemesi (yandan tüfek + mermi izi); t: zaman (nabız / renk geçişi için) */
+function previewWs(cv, id, t) {
+  const s = WSK[id]; previewGun(cv, gunPartsFor('vandal', { wsk: id }, t || 0), s ? s.c[2] : null); if (s && s.rb) previewRainbow(cv);
+  if (!s) return;
+  const g = cv.getContext('2d'), y = cv.height * 0.28, x0 = cv.width * 0.62, x1 = cv.width - 6, col = s.c[2];
+  const gr = g.createLinearGradient(x0, 0, x1, 0); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, col);
+  g.save(); g.shadowColor = col; g.shadowBlur = s.glow ? 10 * (s.pulse ? pulseK(t || 0) : 1) : 4; g.strokeStyle = gr; g.lineWidth = 3; g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
+  if (s.rb) { const g2 = g.createLinearGradient(x0, 0, x1, 0); ['#ff4655', '#f7f35a', '#3ef17a', '#3ec1ff', '#a86bff'].forEach((c, i) => g2.addColorStop(i / 4, c)); g.strokeStyle = g2; g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke(); }
+  g.fillStyle = '#fff'; g.beginPath(); g.arc(x1 - 2, y, 2.4, 0, TAU); g.fill(); g.restore();
+}
+/* herhangi bir eşyanın önizlemesi (mağaza kartı, kasa şeridi, kasa sonucu) */
+function previewItem(cv, kind, id, t) {
+  if (kind === 'ws') previewWs(cv, id, t);
+  else if (kind === 'cs') { const s = CSK[id]; previewChar(cv, s || null); if (s && s.rb) previewRainbow(cv); }
+  else if (kind === 'kf') { if (typeof kfxPreview === 'function') kfxPreview(cv, id, t === undefined ? -1 : t); }
+}
+/* önizleme canlandırması: öldürme efektleri oynar, nabızlı / renk değiştiren skinler parlar */
+function storeAnimTick() {
+  STORE.raf = 0;
+  if (UI.screen !== 'scr-store' || UI.caseOpen) return;
+  const tt = performance.now() / 1000;
+  for (const el of document.querySelectorAll('#stGrid .sc[data-anim]')) previewItem(el.querySelector('canvas'), el.dataset.k, el.dataset.id, tt);
+  STORE.raf = requestAnimationFrame(storeAnimTick);
+}
+function storeAnimStart() { if (!STORE.raf && document.querySelector('#stGrid .sc[data-anim]')) STORE.raf = requestAnimationFrame(storeAnimTick); }
 function uiStoreRender() {
   const grid = document.getElementById('stGrid'); if (!grid || !SHOP.prof) return;
   const p = SHOP.prof, tab = STORE.tab;
   for (const b of document.querySelectorAll('#stTabs button')) b.classList.toggle('on', b.dataset.tab === tab);
   uiGemsChanged();
+  const det = document.getElementById('stCase'); if (det) det.classList.toggle('hidden', tab !== 'cr');
+  if (tab === 'cr') { if (typeof uiCaseRender === 'function') uiCaseRender(); return; } // KASALAR (02j)
   const cards = [];
-  const card = (o) => '<div class="sc' + (o.eq ? ' eq' : '') + (o.lock ? ' lock' : '') + '" data-k="' + o.k + '" data-id="' + o.id + '">' +
-    '<canvas width="180" height="96"></canvas><div class="nm">' + esc(o.n) + '</div><div class="ds">' + o.ds + '</div>' +
+  const card = (o) => '<div class="sc' + (o.eq ? ' eq' : '') + (o.lock ? ' lock' : '') + '" data-k="' + o.k + '" data-id="' + o.id + '"' + (o.anim ? ' data-anim="1"' : '') + (o.rc ? ' style="--rc:' + o.rc + '"' : '') + '>' +
+    '<canvas width="180" height="96"></canvas>' + (o.rn ? '<div class="rr">' + esc(o.rn) + '</div>' : '') + '<div class="nm">' + esc(o.n) + '</div><div class="ds">' + o.ds + '</div>' +
     '<button class="' + (o.primary ? 'primary' : '') + '"' + (o.dis ? ' disabled' : '') + '>' + o.btn + '</button></div>';
   if (tab === 'sw') {
     SWORD_TIERS.forEach((t, i) => {
@@ -3672,11 +3893,13 @@ function uiStoreRender() {
         btn: cur ? (i === SWORD_MAX ? 'MAKSİMUM' : 'ŞU AN ELİNDE') : own ? 'SAHİPSİN' : next ? 'YÜKSELT 💎 ' + t.price : '🔒 ' + t.n.toUpperCase(), dis: !next || p.gems < t.price }));
     });
   } else {
-    const list = tab === 'ws' ? WSKINS : CSKINS, eqId = tab === 'ws' ? p.wsk : p.csk;
-    cards.push(card({ k: tab, id: '', n: 'Varsayılan', ds: 'Skin yok', eq: !eqId, btn: !eqId ? 'KUŞANILDI' : 'KUŞAN', dis: !eqId }));
-    for (const s of list) {
-      const own = p[tab].includes(s.id), eq = eqId === s.id;
-      cards.push(card({ k: tab, id: s.id, n: s.n, ds: (s.rb ? 'Renk değiştiren · ' : s.glow ? 'Işıklı · ' : '') + (own ? 'Sahipsin' : '💎 ' + s.price), eq,
+    const K = SHOP_KIND[tab] || SHOP_KIND.ws, eqId = p[K.eq], kf = tab === 'kf';
+    cards.push(card({ k: tab, id: '', n: kf ? 'Efektsiz' : 'Varsayılan', ds: kf ? 'Öldürme efekti yok' : 'Skin yok', eq: !eqId, btn: !eqId ? 'KUŞANILDI' : 'KUŞAN', dis: !eqId }));
+    for (const s of K.list) {
+      const own = p[tab].includes(s.id), eq = eqId === s.id, R = itemRar(s), anim = kf || (tab === 'ws' && skAnim(s));
+      const tr = kf ? s.ds + ' · ' : s.rb ? 'Renk değiştiren · ' : s.pulse ? 'Nabız ışıklı · ' : s.glow ? 'Işıklı · ' : '';
+      if (s.ex && !own) { cards.push(card({ k: tab, id: s.id, n: s.n, ds: kf ? s.ds : tr + '🎁 Yalnızca kasadan', rc: R.c, rn: R.n, anim, lock: true, btn: '🎁 KASALARDA', dis: true })); continue; }
+      cards.push(card({ k: tab, id: s.id, n: s.n, ds: kf ? (own ? tr + 'Sahipsin' : s.ds) : tr + (own ? 'Sahipsin' : '💎 ' + s.price), eq, rc: R.c, rn: R.n, anim,
         primary: !own && p.gems >= s.price, btn: eq ? 'KUŞANILDI' : own ? 'KUŞAN' : 'SATIN AL 💎 ' + s.price, dis: eq || (!own && p.gems < s.price) }));
     }
   }
@@ -3684,17 +3907,8 @@ function uiStoreRender() {
   for (const el of grid.querySelectorAll('.sc')) {
     const cv = el.querySelector('canvas'), k = el.dataset.k, id = el.dataset.id;
     if (k === 'sw') previewGun(cv, gunPartsFor('sword', { swt: +id }), SWORD_TIERS[+id].glow ? SWORD_TIERS[+id].c[0] : null);
-    else if (k === 'ws') {
-      const s = WSK[id]; previewGun(cv, gunPartsFor('vandal', { wsk: id }, 0), s ? s.c[2] : null); if (s && s.rb) previewRainbow(cv);
-      if (s) { // mermi + arkasındaki iz
-        const g = cv.getContext('2d'), y = cv.height * 0.28, x0 = cv.width * 0.62, x1 = cv.width - 6, col = s.c[2];
-        const gr = g.createLinearGradient(x0, 0, x1, 0); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, col);
-        g.save(); g.shadowColor = col; g.shadowBlur = s.glow ? 10 : 4; g.strokeStyle = gr; g.lineWidth = 3; g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
-        if (s.rb) { const g2 = g.createLinearGradient(x0, 0, x1, 0); ['#ff4655', '#f7f35a', '#3ef17a', '#3ec1ff', '#a86bff'].forEach((c, i) => g2.addColorStop(i / 4, c)); g.strokeStyle = g2; g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke(); }
-        g.fillStyle = '#fff'; g.beginPath(); g.arc(x1 - 2, y, 2.4, 0, TAU); g.fill(); g.restore();
-      }
-    }
-    else { const s = CSK[id]; previewChar(cv, s || null); if (s && s.rb) previewRainbow(cv); }
+    else if (k === 'kf' && !id) { if (typeof kfxPreview === 'function') kfxPreview(cv, '', 0); }
+    else previewItem(cv, k, id, k === 'kf' ? -1 : 0);
     el.querySelector('button').onclick = () => {
       let r;
       if (k === 'sw') r = SHOP.buySword();
@@ -3705,9 +3919,11 @@ function uiStoreRender() {
       uiStoreRender();
     };
   }
+  storeAnimStart();
 }
 function uiStoreInit() {
   SHOP.load();
+  uiCaseInit();
   for (const b of document.querySelectorAll('#stTabs button')) b.onclick = () => { STORE.tab = b.dataset.tab; uiStoreRender(); };
   const bs = document.getElementById('btnStore');
   if (bs) bs.onclick = () => { uiShow('scr-store'); uiStoreRender(); };
@@ -3851,6 +4067,208 @@ const PUB = {
 window.addEventListener('pagehide', () => { if (PUB.code) { try { PUB.req('DELETE', 'pub/' + PUB.code, undefined, true).catch(() => { }); } catch (e) { } } });
 
 /* =====================================================================
+   02j · KASALAR (CS gibi)
+   Mağazadaki KASALAR sekmesinden gems ile alınır ve hemen açılır.
+   · Eşya önce nadirliğe göre (Askerî → Kısıtlı → Gizli → Örtülü → ★ Nadir Özel),
+     sonra o nadirlikteki eşyalar arasından rastgele seçilir; olasılıklar kasada yazar.
+   · ★ Nadir Özel eşyalar yalnızca kasadan çıkar, mağazada satılmaz.
+   · Sahip olunan eşya yeniden çıkarsa değerinin %35'i gems olarak geri verilir.
+   · Sonuç gems düşülürken profile yazılır; dönen şerit yalnızca gösteridir.
+   ===================================================================== */
+const CASES = [
+  { id: 'cs1', n: 'Başlangıç Kasası', price: 400, c: ['#3ec1ff', '#123047'],
+    items: ['ws:w01-w24', 'cs:c01-c22', 'kf:k01-k02', 'ws:w32', 'cs:c28', 'kf:k05', 'ws:w41', 'cs:c43'] },
+  { id: 'cs2', n: 'Efsane Kasası', price: 2000, c: ['#ff4655', '#3a0a12'],
+    items: ['ws:w21-w44', 'cs:c21-c44'] },
+  { id: 'cs3', n: 'Öldürme Kasası', price: 1800, c: ['#ffd23a', '#3a2a06'],
+    items: ['kf:k01-k14'] }
+];
+const CASEM = {};
+/* 'ws:w01-w24' → [['ws','w01'], …] */
+function _caseExpand(spec) {
+  const out = [];
+  for (const s of spec) {
+    const [kind, r] = s.split(':'), [a, b] = r.split('-'), pre = a[0], n0 = +a.slice(1), n1 = b ? +b.slice(1) : n0;
+    for (let n = n0; n <= n1; n++) { const id = pre + String(n).padStart(2, '0'); if (SHOP_KIND[kind] && SHOP_KIND[kind].map[id]) out.push([kind, id]); }
+  }
+  return out;
+}
+for (const c of CASES) { c.all = _caseExpand(c.items); CASEM[c.id] = c; }
+/* kasadaki nadirlik basamakları: [{k, w, items}] (yalnızca kasada bulunanlar) */
+function caseTiers(c) {
+  if (c._t) return c._t;
+  const by = {};
+  for (const [kind, id] of c.all) { const r = itemRar(SHOP_KIND[kind].map[id]); (by[r.k] = by[r.k] || []).push([kind, id]); }
+  return (c._t = RARITY.filter(r => by[r.k]).map(r => ({ k: r.k, w: r.w, items: by[r.k] })));
+}
+function caseOdds(c) { const T = caseTiers(c), tot = T.reduce((a, t) => a + t.w, 0); return T.map(t => ({ r: RARM[t.k], p: t.w / tot * 100, n: t.items.length })); }
+const _pct = v => { const n = String(+v.toFixed(v >= 10 ? 0 : v >= 1 ? 1 : 2)); return LANG === 'en' ? n + '%' : '%' + n.replace('.', ','); };
+
+/* 2B kasa çizimi (mağaza kartı) */
+function drawCaseArt(cv, c, t) {
+  const g = cv.getContext('2d'), W2 = cv.width, H2 = cv.height; g.clearRect(0, 0, W2, H2);
+  const w = W2 * 0.56, h = H2 * 0.62, x = (W2 - w) / 2, y = H2 * 0.2 + Math.sin((t || 0) * 2) * 1.5;
+  const gr = g.createLinearGradient(0, y, 0, y + h); gr.addColorStop(0, c.c[0]); gr.addColorStop(1, c.c[1]);
+  g.save(); g.shadowColor = c.c[0]; g.shadowBlur = 16; g.fillStyle = gr; g.fillRect(x, y, w, h); g.restore();
+  g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(x, y + h * 0.34, w, h * 0.1); // kapak çizgisi
+  g.fillStyle = 'rgba(255,255,255,0.18)'; g.fillRect(x, y, w, h * 0.08);
+  g.strokeStyle = 'rgba(255,255,255,0.35)'; g.lineWidth = 1.5; g.strokeRect(x + 1, y + 1, w - 2, h - 2);
+  for (const sx of [x + 6, x + w - 12]) { g.fillStyle = 'rgba(0,0,0,0.4)'; g.fillRect(sx, y + 4, 6, h - 8); }
+  g.fillStyle = '#d9dde2'; g.fillRect(W2 / 2 - 7, y + h * 0.3, 14, h * 0.2); g.fillStyle = '#20242a'; g.fillRect(W2 / 2 - 2, y + h * 0.36, 4, h * 0.08); // kilit
+  g.fillStyle = '#fff'; g.font = 'bold ' + Math.round(h * 0.34) + 'px ' + FONT; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.save(); g.shadowColor = '#fff'; g.shadowBlur = 8; g.fillText('?', W2 / 2, y + h * 0.72); g.restore();
+}
+/* KASALAR sekmesi: kasa kartları + seçili kasanın olasılıkları ve içeriği */
+function uiCaseRender() {
+  const grid = document.getElementById('stGrid'), det = document.getElementById('stCase'); if (!grid || !SHOP.prof) return;
+  const p = SHOP.prof; if (!CASEM[STORE.cs]) STORE.cs = CASES[0].id;
+  grid.innerHTML = CASES.map(c => '<div class="sc case' + (c.id === STORE.cs ? ' eq' : '') + '" data-c="' + c.id + '" style="--rc:' + c.c[0] + '"><canvas width="180" height="96"></canvas>' +
+    '<div class="nm">' + esc(c.n) + '</div><div class="ds">' + c.all.length + ' eşya · ' + caseTiers(c).length + ' nadirlik</div>' +
+    '<button class="' + (p.gems >= c.price ? 'primary' : '') + '"' + (p.gems < c.price ? ' disabled' : '') + '>🎁 AÇ 💎 ' + c.price + '</button></div>').join('');
+  for (const el of grid.querySelectorAll('.sc.case')) {
+    const c = CASEM[el.dataset.c]; drawCaseArt(el.querySelector('canvas'), c, 0);
+    el.onclick = e => { if (e.target.tagName === 'BUTTON') return; STORE.cs = c.id; uiCaseRender(); };
+    el.querySelector('button').onclick = () => { STORE.cs = c.id; caseOpen(c.id); };
+  }
+  if (!det) return;
+  const c = CASEM[STORE.cs];
+  det.innerHTML = '<div class="cdh"><b>' + esc(c.n) + '</b> · İÇİNDEKİLER</div>' +
+    '<div class="codds">' + caseOdds(c).map(o => '<span style="--rc:' + o.r.c + '"><i></i>' + esc(o.r.n) + ' ' + _pct(o.p) + '</span>').join('') + '</div>' +
+    '<div class="note">Kopya çıkarsa eşyanın değerinin %35\'i gems olarak geri verilir · ★ Nadir Özel eşyalar yalnızca kasalardan çıkar</div>' +
+    '<div class="citems">' + c.all.slice().sort((a, b) => itemRar(SHOP_KIND[b[0]].map[b[1]]).i - itemRar(SHOP_KIND[a[0]].map[a[1]]).i).map(([kind, id]) => {
+      const it = SHOP_KIND[kind].map[id], R = itemRar(it), own = SHOP.owns(kind, id);
+      return '<div class="ci' + (own ? ' own' : '') + '" data-k="' + kind + '" data-id="' + id + '" style="--rc:' + R.c + '"><canvas width="120" height="64"></canvas><span>' + esc(it.n) + '</span><small>' + (own ? '✓ ' : '') + esc(KIND_NAME[kind]) + '</small></div>';
+    }).join('') + '</div>';
+  for (const el of det.querySelectorAll('.ci')) previewItem(el.querySelector('canvas'), el.dataset.k, el.dataset.id, el.dataset.k === 'kf' ? -1 : 0);
+}
+const KIND_NAME = { ws: 'Silah skini', cs: 'Karakter skini', kf: 'Öldürme efekti' };
+
+/* ---------- açılış ekranı: dönen şerit ---------- */
+const CASEUI = { spin: false, res: null, raf: 0 };
+function _caseTile(kind, id) {
+  const it = SHOP_KIND[kind].map[id], R = itemRar(it);
+  return '<div class="rt" style="--rc:' + R.c + '"><canvas width="120" height="64"></canvas><span>' + esc(it.n) + '</span></div>';
+}
+function caseOpen(cid) {
+  const c = CASEM[cid]; if (!c || CASEUI.spin) return;
+  if (SHOP.prof.gems < c.price) { uiToast('Yeterli gems yok', true); return; }
+  const res = SHOP.openCase(cid);
+  if (res.r !== 'ok') { if (res.r === 'gems') uiToast('Yeterli gems yok', true); return; }
+  CASEUI.res = res; CASEUI.c = c; UI.caseOpen = true;
+  try { AU.init(); AU.resume(); } catch (e) { }
+  AU.play('copen');
+  // şerit: rastgele dolgu eşyalar (kasanın olasılıklarıyla) + kazanılan eşya WIN sırasında
+  const T = caseTiers(c), tot = T.reduce((a, t) => a + t.w, 0), N = 48, WIN = 41, tiles = [];
+  for (let i = 0; i < N; i++) {
+    if (i === WIN) { tiles.push([res.kind, res.id]); continue; }
+    let x = Math.random() * tot, tr = T[0]; for (const t of T) { if (x < t.w) { tr = t; break; } x -= t.w; }
+    tiles.push(pick(tr.items));
+  }
+  $('caseTitle').textContent = c.n;
+  const reel = $('caseReel');
+  reel.innerHTML = tiles.map(([k, id]) => _caseTile(k, id)).join('');
+  reel.querySelectorAll('.rt').forEach((el, i) => previewItem(el.querySelector('canvas'), tiles[i][0], tiles[i][1], tiles[i][0] === 'kf' ? -1 : 0));
+  reel.style.transform = 'translateX(0px)';
+  $('caseRes').classList.add('hidden'); $('caseRes').innerHTML = '';
+  $('caseSkip').classList.remove('hidden'); for (const id of ['caseEquip', 'caseAgain', 'caseClose']) $(id).classList.add('hidden');
+  $('caseOv').classList.remove('hidden'); $('caseOv').classList.remove('done');
+  // durma noktası: kazanılan karonun içinde rastgele bir yer (CS gibi bazen kenara yakın)
+  requestAnimationFrame(() => {
+    const wrap = $('caseReel').parentElement, first = reel.querySelector('.rt');
+    const TW = first ? first.getBoundingClientRect().width + 8 : 128, ww = wrap.getBoundingClientRect().width || 600;
+    const end = WIN * TW + TW / 2 - ww / 2 + (Math.random() - 0.5) * TW * 0.7;
+    CASEUI.spin = true; CASEUI.t0 = performance.now(); CASEUI.dur = 5600; CASEUI.end = end; CASEUI.TW = TW; CASEUI.ww = ww; CASEUI.lastTile = -1;
+    cancelAnimationFrame(CASEUI.raf); CASEUI.raf = requestAnimationFrame(caseTick);
+  });
+}
+function caseTick() {
+  if (!CASEUI.spin) return;
+  const u = clamp((performance.now() - CASEUI.t0) / CASEUI.dur, 0, 1), e = 1 - Math.pow(1 - u, 4.2), x = CASEUI.end * e;
+  $('caseReel').style.transform = 'translateX(' + (-x).toFixed(1) + 'px)';
+  const tile = Math.floor((x + CASEUI.ww / 2) / CASEUI.TW);
+  if (tile !== CASEUI.lastTile) { CASEUI.lastTile = tile; AU.play('ctick'); }
+  if (u >= 1) { caseReveal(); return; }
+  CASEUI.raf = requestAnimationFrame(caseTick);
+}
+function caseSkip() {
+  if (!CASEUI.spin) return;
+  $('caseReel').style.transform = 'translateX(' + (-CASEUI.end).toFixed(1) + 'px)';
+  caseReveal();
+}
+function caseReveal() {
+  CASEUI.spin = false; cancelAnimationFrame(CASEUI.raf);
+  const r = CASEUI.res, R = RARM[r.rar], c = CASEUI.c;
+  AU.play(r.rar === 'gold' ? 'cgold' : r.rar === 'cov' || r.rar === 'cla' ? 'crare' : 'creveal');
+  const el = $('caseRes'); $('caseOv').classList.add('done');
+  el.style.setProperty('--rc', R.c);
+  el.innerHTML = '<canvas width="300" height="160"></canvas><div class="crr">' + esc(R.n) + ' · ' + esc(KIND_NAME[r.kind]) + '</div><div class="crn">' + esc(r.it.n) + '</div>' +
+    '<div class="crs">' + (r.dup ? 'Zaten sahipsin · kopya iadesi +' + r.refund + ' 💎' : 'YENİ! Envanterine eklendi') + '</div>';
+  el.classList.remove('hidden');
+  el.classList.toggle('gold', r.rar === 'gold');
+  previewItem(el.querySelector('canvas'), r.kind, r.id, r.kind === 'kf' ? -1 : 0);
+  $('caseSkip').classList.add('hidden');
+  const eqd = SHOP.prof[SHOP_KIND[r.kind].eq] === r.id;
+  $('caseEquip').textContent = eqd ? 'KUŞANILDI' : 'KUŞAN'; $('caseEquip').disabled = eqd; $('caseEquip').classList.remove('hidden');
+  $('caseAgain').innerHTML = 'TEKRAR AÇ 💎 ' + c.price; $('caseAgain').disabled = SHOP.prof.gems < c.price; $('caseAgain').classList.remove('hidden');
+  $('caseClose').classList.remove('hidden');
+  uiGemsChanged();
+  // sonuç önizlemesi canlı oynasın (öldürme efekti / nabızlı skin)
+  const cv = el.querySelector('canvas');
+  const anim = () => { if (!UI.caseOpen || CASEUI.spin || !cv.isConnected) return; previewItem(cv, r.kind, r.id, performance.now() / 1000); CASEUI.raf = requestAnimationFrame(anim); };
+  if (r.kind === 'kf' || (r.kind === 'ws' && skAnim(r.it))) CASEUI.raf = requestAnimationFrame(anim);
+}
+function caseClose() {
+  if (CASEUI.spin) { caseSkip(); return; }
+  cancelAnimationFrame(CASEUI.raf);
+  $('caseOv').classList.add('hidden'); UI.caseOpen = false;
+  uiStoreRender();
+}
+function uiCaseInit() {
+  if (!$('caseOv')) return;
+  $('caseSkip').onclick = caseSkip;
+  $('caseClose').onclick = caseClose;
+  $('caseEquip').onclick = () => { const r = CASEUI.res; if (r && SHOP.equip(r.kind, r.id) === 'ok') { AU.play('buy'); $('caseEquip').textContent = 'KUŞANILDI'; $('caseEquip').disabled = true; } };
+  $('caseAgain').onclick = () => { const c = CASEUI.c; if (c) caseOpen(c.id); };
+  $('caseOv').addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); caseClose(); } });
+}
+Object.assign(SFX, {
+  ctick(o, t) { AU.tone(o, t, 0.025, 'square', 1900, 1500, 0.07); },
+  copen(o, t) { AU.noise(o, t, 0.12, 'bandpass', 1800, 600, 0.6, 2); AU.tone(o, t + 0.08, 0.1, 'square', 300, 200, 0.18); AU.tone(o, t + 0.16, 0.12, 'triangle', 900, 1400, 0.15); },
+  creveal(o, t) { [660, 880].forEach((f, i) => AU.tone(o, t + i * 0.08, 0.35, 'triangle', f, f, 0.25)); },
+  crare(o, t) { [523, 784, 1046, 1318].forEach((f, i) => AU.tone(o, t + i * 0.07, 0.5, 'triangle', f, f * 1.01, 0.25)); AU.noise(o, t, 0.5, 'highpass', 4000, 0, 0.2, 1); },
+  cgold(o, t) { [523, 659, 784, 1046, 1318, 1568].forEach((f, i) => AU.tone(o, t + i * 0.09, 0.9, 'triangle', f, f, 0.26)); [1046, 1318, 1568].forEach(f => AU.tone(o, t + 0.6, 1.2, 'sine', f, f, 0.14, 0.05)); AU.noise(o, t + 0.55, 1.2, 'highpass', 5000, 0, 0.25, 1); }
+});
+/* İngilizce: yeni eşyalar, kasalar, öldürme efektleri */
+Object.assign(EN_EXACT, {
+  'Karbon Fiber': 'Carbon Fiber', 'Bakır Pas': 'Copper Rust', 'Kum Fırtınası': 'Sandstorm', 'Mercan Resifi': 'Coral Reef', 'Zümrüt': 'Emerald', 'Yakut': 'Ruby', 'Safir': 'Sapphire',
+  'Ametist': 'Amethyst', 'Kutup Işığı': 'Aurora', 'Volkanik': 'Volcanic', 'Ruhani': 'Spectral', 'Hayalet': 'Ghost', 'Plazma': 'Plasma', 'Fosfor': 'Phosphor', 'Kan Ayı': 'Blood Moon', 'Siber Kafes': 'Cyber Grid',
+  'Ejder Pulu': 'Dragon Scale', 'Güneş Patlaması': 'Solar Flare', 'Gece Yarısı Altını': 'Midnight Gold', 'Prizma': 'Prism', 'Sonsuzluk': 'Infinity', 'Ejder Nefesi': 'Dragon Breath',
+  'Galaksi': 'Galaxy', 'Buz Kristali': 'Ice Crystal', 'Neon Rüya': 'Neon Dream',
+  'Cadı Kabağı': 'Witch Pumpkin', 'Kovboy': 'Cowboy', 'Noel Baba': 'Santa', 'Pamuk Tavşan': 'Cotton Bunny', 'Beyefendi': 'Gentleman', 'Astronot': 'Astronaut', 'Melek': 'Angel',
+  'Ateş Ruhu': 'Fire Spirit', 'Buz Kraliçesi': 'Ice Queen', 'Karanlık Melek': 'Dark Angel', 'Siber Samuray': 'Cyber Samurai', 'Uzay Kovboyu': 'Space Cowboy', 'Hayalet Avcısı': 'Ghost Hunter',
+  'Cehennem Lordu': 'Hell Lord', 'Kristal Şövalye': 'Crystal Knight', 'Sihirbaz': 'Wizard', 'Kozmik Tavşan': 'Cosmic Bunny', 'Güneş Tanrısı': 'Sun God', 'Ejder Kral': 'Dragon King',
+  'Prizma Efsanesi': 'Prism Legend', 'Kozmik Varlık': 'Cosmic Being', 'Altın Ejder': 'Golden Dragon', 'Kabak Kral': 'Pumpkin King', 'Alev Meleği': 'Flame Angel',
+  'Konfeti': 'Confetti', 'Kalp Yağmuru': 'Heart Shower', 'Balon': 'Balloon', 'Örs': 'Anvil', 'Tavuk': 'Chicken', 'Mezar Taşı': 'Tombstone', 'Buz Heykeli': 'Ice Statue',
+  'Piksel Dağılma': 'Pixelate', 'Havai Fişek': 'Firework', 'UFO': 'UFO', 'Kara Delik': 'Black Hole', 'Meteor': 'Meteor', 'Şimşek': 'Lightning Strike',
+  'ÖLDÜRME EFEKTLERİ': 'KILL EFFECTS', '🎁 KASALAR': '🎁 CASES', 'Efektsiz': 'None', 'Öldürme efekti yok': 'No kill effect', '🎁 KASALARDA': '🎁 IN CASES',
+  'Başlangıç Kasası': 'Starter Case', 'Efsane Kasası': 'Legend Case', 'Öldürme Kasası': 'Kill Effect Case', 'KASA': 'CASE', 'ATLA': 'SKIP', 'KAPAT': 'CLOSE',
+  'Askerî': 'Mil-Spec', 'Kısıtlı': 'Restricted', 'Gizli': 'Classified', 'Örtülü': 'Covert', '★ Nadir Özel': '★ Rare Special',
+  'YENİ! Envanterine eklendi': 'NEW! Added to your inventory'
+});
+Object.assign(EN_FRAG, {
+  'Parti patlaması': 'Party blast', 'Kalpler saçılır': 'Hearts burst out', 'Şişer, uçar, patlar': 'Inflates, floats, pops', 'Kafasına örs düşer': 'An anvil lands on their head',
+  'Tavuğa dönüp kaçar': 'Turns into a chicken and runs', 'Yere gömülür': 'Gets buried', 'Ruhu göğe yükselir': 'Their ghost floats away', 'Donar ve paramparça olur': 'Freezes and shatters',
+  'Gökten yıldırım çarpar': 'Struck by lightning', 'Kare kare dağılır': 'Breaks into pixels', 'Fırlar ve patlar': 'Launches and explodes', 'Uzaylılar kaçırır': 'Abducted by aliens',
+  'Girdaba çekilir': 'Sucked into a vortex', 'Gökten meteor düşer': 'A meteor crashes down',
+  'Nabız ışıklı': 'Pulsing glow', 'Yalnızca kasadan': 'Case only', '🎁 AÇ ': '🎁 OPEN ', 'TEKRAR AÇ': 'OPEN AGAIN', ' eşya · ': ' items · ', ' nadirlik': ' rarities',
+  'İÇİNDEKİLER': 'CONTENTS', 'Kopya çıkarsa eşyanın değerinin %35\'i gems olarak geri verilir': 'A duplicate refunds 35% of the item\'s value as gems',
+  '★ Nadir Özel eşyalar yalnızca kasalardan çıkar': '★ Rare Special items only drop from cases', 'Zaten sahipsin · kopya iadesi +': 'Already owned · duplicate refund +',
+  'Silah skini': 'Weapon skin', 'Karakter skini': 'Character skin', 'Öldürme efekti': 'Kill effect',
+  'Askerî': 'Mil-Spec', 'Kısıtlı': 'Restricted', 'Örtülü': 'Covert', '★ Nadir Özel': '★ Rare Special', 'Gizli ': 'Classified '
+});
+try { _EN_RE = null; _EN_CACHE.clear(); } catch (e) { }
+
+/* =====================================================================
    03 · OYUN DURUMU, RAUNT/EKONOMİ, BOMBA, HAREKET, SİLAH, HASAR
    (Bu bölüm host/tek oyunculu modda otoritedir; istemci yalnızca
     hareket ve görsel tahmin için movePlayer/curW vb. kullanır.)
@@ -3892,7 +4310,7 @@ function makePlayer(o) {
     plantT: 0, defT: 0, hasBomb: false, kit: false, crouch: false, kills: 0, deaths: 0, dmg: 0, jz: 0, jvz: 0, lastJc: 0, rbT: 0, cards: [], tk: 0, reqT: 0,
     input: blankInput(), rt: 0, netMv: 0, rebirth: null, ai: null, dotAcc: {}, roundBuys: {}, beamT: 0, hist: []
   };
-  { const c = cosClean(o.cos); p.swt = c.sw; p.wsk = c.ws; p.csk = c.cs; } // kozmetik: kılıç seviyesi + skinler
+  { const c = cosClean(o.cos); p.swt = c.sw; p.wsk = c.ws; p.csk = c.cs; p.kfx = c.kf; } // kozmetik: kılıç seviyesi + skinler + öldürme efekti
   if (p.ctrl === 'bot') p.ai = newAI(p);
   return p;
 }
@@ -8456,7 +8874,8 @@ function drawCharacter(p, rel, alpha, xray, t) {
   // karakter skini (yoksa ajan renkleri) — takım şeridi her zaman takım renginde kalır
   const cs = charSkin(p, t), suitC = cs ? cs.suit : ag, suitK = cs ? 1 : 0.75, legC = cs ? cs.legs : COL.dark, legK = cs ? 1 : 1.2;
   const visC = cs ? cs.visor : ag, helmC = cs ? cs.helm : ag, helmK = cs ? 1 : 0.55, packC = cs ? cs.pack : COL.dark, packK = cs ? 1 : 1.4;
-  const glo = (c, k) => xray ? o : { em: [c[0] * k, c[1] * k, c[2] * k] };
+  const pk = cs ? cs.pk || 1 : 1, glo = (c, k) => xray ? o : { em: [c[0] * k * pk, c[1] * k * pk, c[2] * k * pk] };
+  const partM = (mesh, fx, h, sz, sx, sy, szz, col, extra) => { const off = xf(R, fx, h + lift, sz); QR(mesh, p.x + off[0], off[1], p.y + off[2], R, sx, sy, szz, col, extra || o); };
   // bacaklar (eğilince kısa ve bükük)
   const cr = !!p.crouch, dy = cr ? -21 : 0, hx = cr ? 3 : 0;
   if (cr) { part(5, 6, -5, 16, 12, 8, C(legC, legK)); part(-4, 7, 5, 10, 14, 8, C(legC, legK)); }
@@ -8484,6 +8903,38 @@ function drawCharacter(p, rel, alpha, xray, t) {
         part(hx + 6.8, 75 + H0, 0, 0.6, 1.6, 1.6, [1, 0.27, 0.33, alpha], glo([1, 0.27, 0.33], 0.6)); break; }
       case 'halo': { const hp = xf(R, hx, 83 + H0 + lift, 0); Q('ring', p.x + hp[0], hp[1], p.y + hp[2], t * 1.5, 0, 9, 1, 9, [ac[0], ac[1], ac[2], 0.95 * alpha], { add: true, lit: 0 }); break; }
       case 'band': part(hx, 69 + H0, 0, 13.2, 2.2, 13.2, C(ac)); part(hx - 8, 67.5 + H0, 2, 6, 1.5, 1.5, C(ac)); break;
+      case 'pumpkin': { // kabak kafa: turuncu küre, sap, ışıklı göz ve ağız
+        partM('sphere', hx, 67 + H0, 0, 24, 21, 24, C(hd));
+        partM('sphere', hx, 67 + H0, 0, 16, 21.4, 25.5, C(hd, 0.8));
+        part(hx, 78.5 + H0, 0, 2.4, 4.5, 2.4, C([0.25, 0.5, 0.18, 1]));
+        for (const s of [-1, 1]) part(hx + 11.6, 70 + H0, 4 * s, 1, 3, 3, [ac[0], ac[1], ac[2], alpha], glo(ac, 0.9));
+        part(hx + 11.6, 63.6 + H0, 0, 1, 1.8, 8, [ac[0], ac[1], ac[2], alpha], glo(ac, 0.9)); break;
+      }
+      case 'cowboy': partM('cyl', hx, 73.6 + H0, 0, 24, 1.2, 24, C(hd)); partM('cyl', hx, 77 + H0, 0, 12.5, 6.5, 12.5, C(hd)); partM('cyl', hx, 74.8 + H0, 0, 12.9, 1.5, 12.9, C(ac)); break;
+      case 'santa': {
+        const red = [0.78, 0.06, 0.18, 1], wh = [1, 1, 1, 1];
+        partM('cyl', hx, 74 + H0, 0, 14, 2.6, 14, C(wh)); partM('cone', hx - 1.5, 80.5 + H0, 0, 12, 12, 12, C(red)); partM('sphere', hx - 4, 86.5 + H0, 0, 4, 4, 4, C(wh)); break;
+      }
+      case 'bunny': for (const s of [-1, 1]) { part(hx - 1, 81 + H0, 3.6 * s, 2.6, 15, 3.8, C(hd)); part(hx + 0.4, 81 + H0, 3.6 * s, 0.6, 11, 2, C(ac)); } break;
+      case 'tophat': partM('cyl', hx, 73.6 + H0, 0, 18, 1.2, 18, C(hd, 0.8)); partM('cyl', hx, 80 + H0, 0, 11.5, 12, 11.5, C(hd)); partM('cyl', hx, 75.4 + H0, 0, 11.9, 2, 11.9, [ac[0], ac[1], ac[2], alpha], glo(ac, 0.5)); break;
+      case 'astro': partM('cyl', hx, 57.6 + H0, 0, 15, 2.4, 15, C(hd)); partM('sphere', hx, 66.5 + H0, 0, 26, 26, 26, [0.75, 0.92, 1, 0.2 * alpha], { add: true, lit: 0 }); break;
+      case 'wings': { // sırtta üç tüylü kanat, yavaşça çırpar
+        const fl = 1 + Math.sin(t * 3.2 + (p.id ? p.id.charCodeAt(0) : 0)) * 0.12;
+        for (const s of [-1, 1]) for (let i = 0; i < 3; i++) {
+          const z = (10 + i * 7.5) * fl * s, hh = 52 + i * 5 + dy, ht = 17 - i * 3;
+          part(-9.5 - i * 0.6, hh, z, 2, ht, 8.5, C(hd)); part(-9.6 - i * 0.6, hh + ht / 2 - 1, z, 2.2, 2, 8.7, [ac[0], ac[1], ac[2], alpha], glo(ac, 0.5));
+        }
+        break;
+      }
+      case 'flame': { // alev saç: titreyen ışıklı koniler
+        const hp = xf(R, hx, 80 + H0 + lift, 0);
+        for (let i = 0; i < 3; i++) {
+          const fz = (i - 1) * 4, fh = 10 + Math.sin(t * 17 + i * 2.1) * 2.5 + (i === 1 ? 4 : 0), off = xf(R, 0, 0, fz);
+          Q('cone', p.x + hp[0] + off[0], hp[1] + fh / 2 - 4, p.y + hp[2] + off[2], 0, 0, 7, fh, 7, [ac[0], ac[1], ac[2], 0.85 * alpha], { add: true, lit: 0 });
+          Q('cone', p.x + hp[0] + off[0], hp[1] + fh / 3 - 4, p.y + hp[2] + off[2], 0, 0, 4, fh * 0.6, 4, [1, 0.95, 0.5, 0.7 * alpha], { add: true, lit: 0 });
+        }
+        break;
+      }
     }
   }
   // kollar ve silah
@@ -8737,6 +9188,7 @@ function drawWorldDynamic(v, me, t) {
   }
   // cesetler
   for (const c of S.corpses) {
+    if (kfxHides(c.id)) continue; // öldürme efekti oynuyor (07i)
     const ally = c.team === mt;
     if (!ally && !(v.alive && losClear(v.x, v.y, c.x, c.y, true))) continue;
     drawCorpse(c, ally);
@@ -9092,6 +9544,7 @@ function render3D(dt, me, v) {
       else if (p.st.reveal > 0) drawCharacter(p, 'enemy', 1, true, t);
     }
     drawFX(dt);
+    drawKillFx(me, v);
     if (v.alive && !CAM.on) drawViewmodel(v, dt, t);
   }
   glFlush();
@@ -9263,6 +9716,7 @@ function handleEvent(ev) {
       }
       if (ev.v === G.myId) { UIS.deathBy = ev.a; G.spec = null; }
       cmbOnKill(ev);
+      kfxOnKill(ev); // öldürme efekti (07i)
       const v = S.pmap[ev.v];
       if (v) addFx({ type: 'ring', x: v.x, y: v.y, r0: 10, r1: 50, c: v.team === myTeam() ? COL.teal : COL.red, t: 0.5, dur: 0.5 });
       break;
@@ -9290,6 +9744,7 @@ function handleEvent(ev) {
       showMsg(ev.big, ev.small, ev.big ? PAL.gold : PAL.white);
       break;
     case 'round': {
+      kfxClear();
       const side = me ? sideOf(me.team) : 'atk';
       if (arOn()) { // arena modları: tek uzun raunt
         const m = arMode();
@@ -10559,9 +11014,11 @@ function gunColsFor(wid, p, t) {
     for (const pt of G.parts) o[pt.r] = S0[pt.r] || pt.c;
     return (_SKC[key] = o);
   }
-  if (!sk.rb && _SKC['gs' + wid + sk.id]) return _SKC['gs' + wid + sk.id];
-  const o = { main: sk.rb ? rbCol(t || 0) : hexRGB(sk.c[0]), dark: hexRGB(sk.c[1]), acc: sk.rb ? rbCol(t || 0, 0.5) : hexRGB(sk.c[2]), glow: sk.glow ? 0.65 : 0 };
-  if (!sk.rb) _SKC['gs' + wid + sk.id] = o;
+  const anim = skAnim(sk), tt = t || 0;
+  if (!anim && _SKC['gs' + wid + sk.id]) return _SKC['gs' + wid + sk.id];
+  const o = { main: sk.rb ? rbCol(tt) : sk.duo ? mixRGB(hexRGB(sk.c[0]), hexRGB(sk.duo), duoK(tt)) : hexRGB(sk.c[0]), dark: hexRGB(sk.c[1]), acc: sk.rb ? rbCol(tt, 0.5) : hexRGB(sk.c[2]),
+    glow: sk.glow ? 0.65 * (sk.pulse ? pulseK(tt) : 1) : 0, glowMain: sk.pulse && sk.glow ? 0.12 * pulseK(tt) : 0 };
+  if (!anim) _SKC['gs' + wid + sk.id] = o;
   return o;
 }
 function drawGunModel(wid, x, h, z, R, sc, o, cols, alpha) {
@@ -10755,6 +11212,565 @@ function npcAudioTick() {
   }
   for (const [key, v] of live) if (!keep.has(key)) { _npcStopV(v); live.delete(key); }
 }
+
+/* =====================================================================
+   07i · ÖLDÜRME EFEKTLERİ (Arsenal gibi)
+   Öldüren oyuncunun kuşandığı efekt, ölen oyuncunun yerinde oynar; herkes görür.
+   · Efekt 'kill' olayından başlar (host ve istemci aynı olayı işler), süresi S.time ile ölçülür.
+   · Efekt sürerken ceset çizilmez; efekt bitince ceset görünür (canlandırma oyun kuralını değiştirmez).
+   · Görünürlük cesetle aynı: takım arkadaşı, öldüren ve ölen hep görür; rakip cesedi görüş hattı ister.
+   · Mağaza önizlemeleri (2B) kfxPreview ile çizilir.
+   ===================================================================== */
+const KFXA = [];
+const _kh = (i, s) => { const x = Math.sin(i * 127.1 + s * 311.7) * 43758.5453; return x - Math.floor(x); }; // tohumlu rastgele [0,1)
+const _kOut = u => 1 - Math.pow(1 - clamp(u, 0, 1), 3);
+const _kBack = u => { u = clamp(u, 0, 1); const c = 1.7; return 1 + (c + 1) * Math.pow(u - 1, 3) + c * Math.pow(u - 1, 2); };
+const KFX_PAL = [[1, 0.27, 0.33], [1, 0.82, 0.3], [0.12, 0.89, 0.81], [0.66, 0.42, 1], [1, 0.4, 0.8], [0.35, 0.95, 0.4], [0.3, 0.6, 1]];
+/* zamanlı sesler: [saniye, ses] */
+const KFX_SND = {
+  k01: [[0.18, 'kconf']], k02: [[0, 'kheart']], k03: [[0, 'kinfl'], [1.95, 'kpop']], k04: [[0, 'kfall'], [0.42, 'kanvil']],
+  k05: [[0, 'kpoof'], [0.2, 'kcluck'], [1.3, 'kcluck']], k06: [[0, 'kdig'], [0.6, 'ktomb']], k07: [[0.3, 'kghost']], k08: [[0, 'kfreeze'], [1.35, 'kshatter']],
+  k09: [[0, 'kthunder']], k10: [[0, 'kpixel']], k11: [[0, 'kwhizz'], [0.85, 'kfw']], k12: [[0, 'kufo']], k13: [[0, 'kvoid']], k14: [[0, 'kmeteor'], [0.55, 'bigboom']]
+};
+const KFX_SHAKE = { k04: [0.42, 5], k09: [0, 6], k11: [0.85, 4], k14: [0.55, 12] };
+
+/* ölen oyuncunun renkleri (karakter skini ya da ajan renkleri) — efekt başında bir kez alınır */
+function kfxCols(v) {
+  const cs = charSkin(v, S ? S.time : 0), ag = AGCOL[v.agent] || COL.white, m = (c, k) => [c[0] * k, c[1] * k, c[2] * k, 1];
+  return cs ? { suit: cs.suit.slice(), legs: cs.legs, helm: cs.helm.slice(), visor: cs.visor.slice(), pack: cs.pack }
+    : { suit: m(ag, 0.75), legs: m(COL.dark, 1.2), helm: m(ag, 0.55), visor: ag, pack: m(COL.dark, 1.4) };
+}
+function kfxStart(kid, v, a) {
+  const d = KFX[kid]; if (!d || !v || !S) return null;
+  for (let i = KFXA.length - 1; i >= 0; i--) if (KFXA[i].id === v.id) KFXA.splice(i, 1);
+  const ang = a && (a.x !== v.x || a.y !== v.y) ? Math.atan2(a.y - v.y, a.x - v.x) : (v.ang || 0);
+  const f = { k: kid, d, id: v.id, team: v.team, att: a ? a.id : null, x: v.x, y: v.y, ang, run: ang + Math.PI + (Math.random() - 0.5) * 1.2, t0: S.time, sd: Math.random() * 97, col: kfxCols(v), st: 0, sh: 0 };
+  if (KFXA.length >= 24) KFXA.shift();
+  KFXA.push(f);
+  return f;
+}
+/* 'kill' olayı (07c): öldürenin efekti varsa başlat */
+function kfxOnKill(ev) {
+  if (!S || !ev || !ev.a || ev.a === ev.v) return;
+  const a = S.pmap[ev.a], v = S.pmap[ev.v];
+  if (a && v && a.kfx && KFX[a.kfx]) kfxStart(a.kfx, v, a);
+}
+function kfxClear() { KFXA.length = 0; }
+function kfxHides(id) { for (let i = 0; i < KFXA.length; i++) if (KFXA[i].id === id) return true; return false; }
+function kfxVisible(f, me, v) {
+  if (!me || PKMAP) return true;
+  if (f.team === me.team || f.att === G.myId || f.id === G.myId) return true;
+  return !!(v && v.alive && losClear(v.x, v.y, f.x, f.y, true));
+}
+function kfxSound(f, e, me) {
+  const L = KFX_SND[f.k] || [];
+  while (f.st < L.length && e >= L[f.st][0]) { AU.play(L[f.st][1], f.x, f.y, 1, f.att === G.myId); f.st++; }
+  const sh = KFX_SHAKE[f.k];
+  if (sh && !f.sh && e >= sh[0]) { f.sh = 1; if (me && dist(me.x, me.y, f.x, f.y) < 480) UIS.shake = Math.max(UIS.shake, sh[1]); }
+}
+function drawKillFx(me, v) {
+  if (!S) { KFXA.length = 0; return; }
+  for (let i = KFXA.length - 1; i >= 0; i--) {
+    const f = KFXA[i], e = S.time - f.t0;
+    if (e < -0.25 || e > f.d.dur) { KFXA.splice(i, 1); continue; }
+    if (e < 0) continue;
+    kfxSound(f, e, me);
+    if (!kfxVisible(f, me, v)) continue;
+    const fn = KFX_DRAW[f.k];
+    if (fn) { try { fn(f, e, e / f.d.dur); } catch (er) { KFXA.splice(i, 1); } }
+  }
+}
+
+/* ---------- çizim yardımcıları ---------- */
+const _KR = new Array(9);
+/* ölen oyuncunun gövdesi: o = { h: yükselme, sq: dikey ölçek, w: yatay ölçek, rot: ek dönüş, tilt: arkaya devrilme,
+   roll, a: saydamlık, tint: [r,g,b], tk: renk karışımı 0..1, jx: titreme } */
+function kfxBody(f, o) {
+  o = o || {};
+  const c = f.col, sq = o.sq === undefined ? 1 : o.sq, w = o.w === undefined ? 1 : o.w, al = o.a === undefined ? 1 : o.a;
+  if (al <= 0.01 || sq <= 0.01 || w <= 0.01) return;
+  const R = rotMat(f.ang + (o.rot || 0), o.tilt || 0, o.roll || 0, new Array(9)), h0 = o.h || 0, jx = o.jx || 0;
+  const tc = f.team === myTeam() ? COL.teal : COL.red;
+  const col = cc => o.tk ? [lerp(cc[0], o.tint[0], o.tk), lerp(cc[1], o.tint[1], o.tk), lerp(cc[2], o.tint[2], o.tk), al] : [cc[0], cc[1], cc[2], al];
+  const P = (fx, hh, fz, sx, sy, sz, cc, em) => {
+    const off = xf(R, fx * w, hh * sq, fz * w);
+    QR('box', f.x + off[0] + jx, h0 + off[1], f.y + off[2], R, sx * w, sy * sq, sz * w, col(cc), em ? { em: o.tk ? [em[0] * (1 - o.tk), em[1] * (1 - o.tk), em[2] * (1 - o.tk)] : em } : null);
+  };
+  P(0, 13, -5, 9, 26, 8, c.legs); P(0, 13, 5, 9, 26, 8, c.legs);
+  P(0, 41, 0, 12, 30, 22, c.suit);
+  P(0.4, 49, 0, 12.6, 4, 22.6, tc, [tc[0] * 0.5, tc[1] * 0.5, tc[2] * 0.5]);
+  P(-6.5, 44, 0, 3, 22, 16, c.pack);
+  P(0, 64, 0, 12, 13, 12, COL.skin);
+  P(5.6, 65, 0, 2, 4, 10, c.visor, [c.visor[0] * 0.7, c.visor[1] * 0.7, c.visor[2] * 0.7]);
+  P(0, 71.5, 0, 13, 3, 13, c.helm);
+  P(7, 50, 9, 16, 5, 5, c.suit); P(7, 50, -7, 16, 5, 5, c.suit);
+}
+const _kAdd = { add: true, lit: 0 };
+function kfxGlow(x, h, z, r, c, a) { Q('sphere', x, h, z, 0, 0, r, r, r, [c[0], c[1], c[2], a], _kAdd); }
+/* parçacık (analitik): yön th, yatay hız sp, dikey hız up, sürtünme k, yerçekimi g */
+function kfxPart(f, i, te, sp, up, k, g, h0) {
+  const th = _kh(i, f.sd) * TAU, s = (1 - Math.exp(-k * te)) / k;
+  return [f.x + Math.cos(th) * sp * s, Math.max(1.5, h0 + up * s - g * te * te), f.y + Math.sin(th) * sp * s];
+}
+function kfxConfetti(f, te, n, h0, cols, fade, spd) {
+  for (let i = 0; i < n; i++) {
+    const sp = (110 + _kh(i, f.sd + 1) * 240) * (spd || 1), up = 240 + _kh(i, f.sd + 2) * 340;
+    const pnt = kfxPart(f, i, te, sp, up, 2.4, 40, h0), cc = cols ? cols[i % cols.length] : KFX_PAL[i % KFX_PAL.length];
+    Q('box', pnt[0], pnt[1], pnt[2], te * 9 + i, te * 13 + i * 0.7, 3.4, 0.7, 2.2, [cc[0], cc[1], cc[2], fade], { em: [cc[0] * 0.25, cc[1] * 0.25, cc[2] * 0.25] });
+  }
+}
+function kfxShards(f, te, n, h0, col, sz, fade, g) {
+  for (let i = 0; i < n; i++) {
+    const pnt = kfxPart(f, i + 50, te, 90 + _kh(i, f.sd + 5) * 200, 120 + _kh(i, f.sd + 6) * 220, 1.6, g || 260, h0 + _kh(i, f.sd + 7) * 50);
+    const s = sz * (0.6 + _kh(i, f.sd + 8) * 0.8);
+    Q(i % 2 ? 'pyr' : 'octa', pnt[0], pnt[1], pnt[2], te * 6 + i, te * 8 + i, s, s * 1.4, s, [col[0], col[1], col[2], fade], col[3] ? { em: [col[0] * 0.3, col[1] * 0.3, col[2] * 0.4] } : null);
+  }
+}
+const _kFade = (e, dur, d) => clamp((dur - e) / (d || 0.4), 0, 1);
+/* kameraya dönük yön (kalpler, hayalet gözleri) */
+const _kFace = (x, z) => Math.atan2(GLX.cam[2] - z, GLX.cam[0] - x);
+
+/* ---------- efektler: (f, e = geçen sn, u = e/süre) ---------- */
+const KFX_DRAW = {
+  k01(f, e) { // KONFETİ: gövde zıplayıp patlar, renkli kâğıtlar saçılır
+    const D = f.d.dur, fade = _kFade(e, D, 0.5);
+    if (e < 0.2) { const s = Math.sin(e / 0.2 * Math.PI); kfxBody(f, { sq: 1 + 0.25 * s, w: 1 - 0.12 * s }); }
+    else {
+      if (e < 0.45) kfxGlow(f.x, 45, f.y, 60 + (e - 0.2) * 260, [1, 0.9, 0.6], 0.6 * (1 - (e - 0.2) / 0.25));
+      kfxConfetti(f, e - 0.2, 70, 45, null, fade);
+      for (let i = 0; i < 6; i++) { // serpantin
+        const pnt = kfxPart(f, i + 200, e - 0.2, 160, 380, 2, 60, 50), cc = KFX_PAL[(i * 2) % KFX_PAL.length];
+        Qline(pnt[0], pnt[1], pnt[2], pnt[0], pnt[1] + 16, pnt[2], 1.4, [cc[0], cc[1], cc[2], fade], _kAdd);
+      }
+    }
+  },
+  k02(f, e) { // KALP YAĞMURU
+    const D = f.d.dur, fade = _kFade(e, D, 0.5);
+    kfxBody(f, { a: 1 - e / 0.55, h: e * 30 });
+    for (let i = 0; i < 14; i++) {
+      const te = e - 0.08 - _kh(i, f.sd) * 0.25; if (te <= 0) continue;
+      const th = _kh(i, f.sd + 1) * TAU, r = (40 + _kh(i, f.sd + 2) * 80) * (1 - Math.exp(-3 * te));
+      const x = f.x + Math.cos(th) * r, z = f.y + Math.sin(th) * r, h = 40 + te * (35 + _kh(i, f.sd + 3) * 45) + Math.sin(te * 4 + i) * 5;
+      const s = Math.min(1, te * 5) * (5 + _kh(i, f.sd + 4) * 4), R = rotMat(_kFace(x, z), 0, Math.sin(te * 3 + i) * 0.3, _KR);
+      const cc = i % 3 ? [1, 0.22, 0.42, fade] : [1, 0.55, 0.75, fade], o = { em: [0.5, 0.08, 0.18] };
+      for (const sz of [-1, 1]) { const p = xf(R, 0, s * 0.25, sz * s * 0.34); QR('sphere', x + p[0], h + p[1], z + p[2], R, s * 0.5, s * 0.8, s * 0.8, cc, o); }
+      const p2 = xf(R, 0, -s * 0.22, 0); QR('octa', x + p2[0], h + p2[1], z + p2[2], R, s * 0.4, s * 1.25, s * 1.05, cc, o);
+    }
+  },
+  k03(f, e) { // BALON: şişer, uçar, patlar
+    const D = f.d.dur, POP = 1.95, c = f.col.suit;
+    if (e < POP) {
+      const u1 = _kOut(e / 0.6), rise = e > 0.6 ? Math.pow(e - 0.6, 1.5) * 125 : 0, sway = Math.sin(e * 3.2) * 6 * clamp(e - 0.6, 0, 1);
+      if (e < 0.45) kfxBody(f, { w: 1 + u1 * 0.35, sq: 1 - u1 * 0.2 });
+      const r = lerp(14, 42, u1) * (1 + Math.sin(e * 9) * 0.03), bh = 45 + rise;
+      const ux = Math.cos(f.ang), uz = Math.sin(f.ang), bx = f.x + ux * sway * 0.2 - uz * sway, bz = f.y + uz * sway * 0.2 + ux * sway;
+      Q('sphere', bx, bh, bz, f.ang, 0, r, r * 1.12, r, [c[0], c[1], c[2], 1], { em: [c[0] * 0.15, c[1] * 0.15, c[2] * 0.15] });
+      Q('sphere', bx - uz * r * 0.2 + ux * r * 0.18, bh + r * 0.25, bz + ux * r * 0.2 + uz * r * 0.18, 0, 0, r * 0.22, r * 0.3, r * 0.22, [1, 1, 1, 0.35], _kAdd); // parlama
+      const v = f.col.visor; Q('box', bx + ux * r * 0.47, bh + r * 0.05, bz + uz * r * 0.47, f.ang, 0, 2, r * 0.18, r * 0.55, [v[0], v[1], v[2], 1], { em: [v[0] * 0.7, v[1] * 0.7, v[2] * 0.7] });
+      const hm = f.col.helm; Q('box', bx, bh + r * 0.54, bz, f.ang, 0, r * 0.4, 3, r * 0.4, [hm[0], hm[1], hm[2], 1]);
+      Q('cone', bx, bh - r * 0.58, bz, 0, Math.PI, 6, 6, 6, [c[0] * 0.8, c[1] * 0.8, c[2] * 0.8, 1]);
+      if (e > 0.35) Qline(bx, bh - r * 0.6, bz, bx - uz * sway * 0.6, bh - r * 0.6 - 55, bz + ux * sway * 0.6, 0.7, [0.95, 0.95, 0.95, 1]);
+    } else {
+      const te = e - POP, fade = _kFade(e, D, 0.35), bh = 45 + Math.pow(POP - 0.6, 1.5) * 125;
+      if (te < 0.18) kfxGlow(f.x, bh, f.y, 70 + te * 400, [1, 1, 1], 0.7 * (1 - te / 0.18));
+      kfxConfetti(f, te, 36, bh, [c, [1, 1, 1], f.col.visor], fade, 0.8);
+    }
+  },
+  k04(f, e) { // ÖRS: gökten örs düşer, gövde yassılaşır, kafada yıldızlar döner
+    const D = f.d.dur, TI = 0.42, fade = _kFade(e, D, 0.45), sink = e > D - 0.45 ? (e - (D - 0.45)) * 110 : 0;
+    let ab;
+    if (e < TI) {
+      kfxBody(f, {});
+      ab = 80 + 440 * (1 - Math.pow(e / TI, 2));
+      const sr = 18 + 26 * (e / TI); Q('disc', f.x, 0.8, f.y, 0, 0, sr, 1, sr, [0, 0, 0, 0.45 * (e / TI)], { lit: 0 });
+    } else {
+      const te = e - TI, sq = 0.15 + 0.1 * Math.exp(-te * 7) * Math.cos(te * 26);
+      kfxBody(f, { sq, w: 1.55, h: -sink });
+      ab = 74 * sq + Math.max(0, Math.sin(te * 13) * 12 * Math.exp(-te * 5)) - sink;
+      if (te < 0.45) { const k = te / 0.45; Q('ring', f.x, 2, f.y, 0, 0, 30 + k * 150, 1, 30 + k * 150, [0.8, 0.72, 0.6, 0.8 * (1 - k)], _kAdd); }
+      if (te < 0.8) for (let i = 0; i < 12; i++) { const p = kfxPart(f, i + 300, te, 140 + _kh(i, 3) * 120, 160, 3, 380, 4); Q('box', p[0], p[1], p[2], te * 8 + i, i, 4, 4, 4, [0.55, 0.5, 0.42, 1 - te / 0.8]); }
+      if (te > 0.08) for (let i = 0; i < 3; i++) { // dönen yıldızlar
+        const a = e * 6 + i * TAU / 3; Q('octa', f.x + Math.cos(a) * 24, ab + 52 + Math.sin(e * 9 + i) * 2, f.y + Math.sin(a) * 20, e * 5, 0, 6, 8, 6, [1, 0.88, 0.25, fade], { lit: 0, em: [0.9, 0.7, 0.1] });
+      }
+    }
+    // örs modeli
+    const ux = Math.cos(f.ang), uz = Math.sin(f.ang), M = [0.27, 0.28, 0.31, 1], T = [0.42, 0.43, 0.47, 1], K = 1.4;
+    Q('box', f.x, ab + 3.5 * K, f.y, f.ang, 0, 26 * K, 7 * K, 18 * K, M);
+    Q('box', f.x, ab + 11.5 * K, f.y, f.ang, 0, 13 * K, 9 * K, 10 * K, M);
+    Q('box', f.x, ab + 20.5 * K, f.y, f.ang, 0, 34 * K, 10 * K, 16 * K, T);
+    Q('cone', f.x + ux * 23 * K, ab + 21.5 * K, f.y + uz * 23 * K, f.ang, -Math.PI / 2, 9 * K, 13 * K, 9 * K, M);
+    Q('box', f.x - ux * 19 * K, ab + 22 * K, f.y - uz * 19 * K, f.ang, 0, 5 * K, 7 * K, 12 * K, M);
+  },
+  k05(f, e) { // TAVUK: duman olur, tavuk kaçar
+    const D = f.d.dur, fade = _kFade(e, D, 0.35);
+    if (e < 0.14) kfxBody(f, { w: 1 - e / 0.2, sq: 1 - e / 0.2 });
+    if (e < 0.6) for (let i = 0; i < 7; i++) {
+      const k = e / 0.6, th = i / 7 * TAU, r = 10 + k * 40;
+      kfxGlow(f.x + Math.cos(th) * r, 25 + _kh(i, f.sd) * 40 + k * 20, f.y + Math.sin(th) * r, 26 + k * 30, [0.95, 0.95, 0.95], 0.55 * (1 - k));
+    }
+    if (e < 0.12) return;
+    const te = e - 0.12, run = Math.max(0, te - 0.15) * 175, hop = te < 0.15 ? Math.sin(te / 0.15 * Math.PI) * 22 : Math.abs(Math.sin(te * 17)) * 4;
+    const A = f.run + Math.sin(te * 2.3) * 0.25, cx = f.x + Math.cos(f.run) * run, cz = f.y + Math.sin(f.run) * run;
+    const R = rotMat(A, 0, 0, new Array(9)), SC = 1.6, W = [0.97, 0.97, 0.95, fade], OR = [1, 0.6, 0.12, fade], RD = [0.92, 0.12, 0.15, fade];
+    const P = (fx, h, fz, sx, sy, sz, col, mesh) => { const o = xf(R, fx * SC, h * SC, fz * SC); QR(mesh || 'box', cx + o[0], hop + o[1], cz + o[2], R, sx * SC, sy * SC, sz * SC, col); };
+    const lg = Math.sin(te * 22) * 2.5;
+    P(lg, 4, 2.6, 1.4, 8, 1.4, OR); P(-lg, 4, -2.6, 1.4, 8, 1.4, OR);
+    P(0, 14, 0, 14, 11, 10, W); P(-8, 18, 0, 5, 8, 8, W);
+    const wf = Math.sin(te * 30) * 1.5; P(0, 15 + wf, 5.6, 9, 6, 1.6, W); P(0, 15 + wf, -5.6, 9, 6, 1.6, W);
+    P(7, 23, 0, 7, 8, 7, W); P(7, 28.5, 0, 4, 4, 1.6, RD); P(11.5, 23, 0, 4, 2.2, 3, OR); P(10, 19.6, 0, 1.6, 3, 1.4, RD);
+    P(9.8, 24.6, 2.3, 1, 1.2, 1, [0.05, 0.05, 0.05, fade]); P(9.8, 24.6, -2.3, 1, 1.2, 1, [0.05, 0.05, 0.05, fade]);
+  },
+  k06(f, e) { // MEZAR TAŞI: gövde yere gömülür, mezar taşı yükselir
+    const D = f.d.dur, end = e > D - 0.4 ? (e - (D - 0.4)) / 0.4 : 0;
+    const sink = Math.pow(clamp(e / 0.7, 0, 1), 2) * 90; if (sink < 88) kfxBody(f, { h: -sink, jx: Math.sin(e * 60) * 1.2 });
+    if (e < 0.9) for (let i = 0; i < 14; i++) { const p = kfxPart(f, i + 400, e, 60 + _kh(i, 9) * 90, 140 + _kh(i, 8) * 120, 2.5, 330, 3); Q('box', p[0], p[1], p[2], e * 7 + i, i, 4.5, 4.5, 4.5, [0.36, 0.25, 0.16, 1 - e / 0.9]); }
+    const gm = _kOut((e - 0.2) / 0.5) * (1 - end); if (gm > 0) Q('sphere', f.x, 0, f.y, f.ang, 0, 52, 14 * gm, 34, [0.32, 0.23, 0.15, 1]);
+    const th = _kBack((e - 0.45) / 0.5), off = -62 + 62 * th - end * 70; if (off < -60) return;
+    const ux = Math.cos(f.ang), uz = Math.sin(f.ang), bx = f.x - ux * 22, bz = f.y - uz * 22, ST = [0.55, 0.56, 0.6, 1], DK = [0.2, 0.2, 0.22, 1];
+    Q('box', bx, off + 18, bz, f.ang, 0, 7, 36, 28, ST);
+    Q('cyl', bx, off + 36, bz, f.ang, Math.PI / 2, 28, 7, 28, ST);
+    Q('box', bx + ux * 3.7, off + 30, bz + uz * 3.7, f.ang, 0, 0.8, 16, 2.8, DK);
+    Q('box', bx + ux * 3.7, off + 33, bz + uz * 3.7, f.ang, 0, 0.8, 2.8, 11, DK);
+    Q('box', bx + ux * 3.7, off + 12, bz + uz * 3.7, f.ang, 0, 0.8, 1.6, 18, DK);
+    Q('box', bx, off + 2, bz, f.ang, 0, 12, 4, 34, [0.45, 0.46, 0.5, 1]);
+  },
+  k07(f, e) { // HAYALET: gövde devrilir, ruhu yükselir
+    const D = f.d.dur, tilt = _kOut(e / 0.45) * 1.45;
+    kfxBody(f, { tilt, a: e > D - 0.3 ? (D - e) / 0.3 : 1 });
+    if (e < 0.3) return;
+    const te = e - 0.3, gh = 18 + te * 88, a = 0.72 * clamp(te / 0.3, 0, 1) * _kFade(e, D, 0.6), sw = Math.sin(e * 4) * 12;
+    const fx = _kFace(f.x, f.y), sx = Math.cos(fx + Math.PI / 2) * sw, sz = Math.sin(fx + Math.PI / 2) * sw, x = f.x + sx, z = f.y + sz;
+    const WH = [0.9, 0.95, 1, a], o = { lit: 0, em: [0.35, 0.4, 0.45] };
+    Q('sphere', x, gh + 30, z, 0, 0, 24, 24, 24, WH, o);
+    Q('cyl', x, gh + 16, z, 0, 0, 23, 26, 23, WH, o);
+    for (let i = 0; i < 5; i++) { const aa = i / 5 * TAU + e * 3; Q('sphere', x + Math.cos(aa) * 8.5, gh + 3 + Math.sin(e * 8 + i) * 2, z + Math.sin(aa) * 8.5, 0, 0, 9, 9, 9, WH, o); }
+    const R = rotMat(fx, 0, 0, _KR);
+    for (const s of [-1, 1]) {
+      const pe = xf(R, 11.5, 33, s * 4.5); QR('sphere', x + pe[0], gh + pe[1], z + pe[2], R, 2, 5, 3.4, [0.05, 0.05, 0.08, a], { lit: 0 });
+      const pa = xf(R, 0, 18 + Math.sin(e * 6 + s) * 4, s * 14); QR('sphere', x + pa[0], gh + pa[1], z + pa[2], R, 7, 7, 7, WH, o);
+    }
+    const pm = xf(R, 11.5, 25, 0); QR('sphere', x + pm[0], gh + pm[1], z + pm[2], R, 2, 4, 4, [0.05, 0.05, 0.08, a], { lit: 0 });
+  },
+  k08(f, e) { // BUZ HEYKELİ: donar, sonra paramparça olur
+    const D = f.d.dur, SH = 1.35, IC = [0.62, 0.86, 1];
+    if (e < SH) {
+      const k = clamp(e / 0.35, 0, 1), jx = e > 0.9 ? Math.sin(e * 80) * 1.5 * (e - 0.9) : 0;
+      kfxBody(f, { tint: IC, tk: k * 0.85, jx });
+      const g = _kOut(k);
+      Q('box', f.x + jx, 42 * g, f.y, f.ang, 0, 30 * g, 86 * g, 36 * g, [0.72, 0.92, 1, 0.38], { em: [0.12, 0.22, 0.3] });
+      Q('disc', f.x, 0.9, f.y, 0, 0, 70 * g, 1, 70 * g, [0.75, 0.92, 1, 0.5], { lit: 0, em: [0.2, 0.3, 0.35] });
+      if (e < 0.5) for (let i = 0; i < 10; i++) { const p = kfxPart(f, i + 500, e, 70, 60 + _kh(i, 2) * 80, 2, 0, 10 + _kh(i, 3) * 60); kfxGlow(p[0], p[1], p[2], 4, [0.85, 0.95, 1], 0.8 * (1 - e / 0.5)); }
+    } else {
+      const te = e - SH, fade = _kFade(e, D, 0.4);
+      if (te < 0.2) kfxGlow(f.x, 45, f.y, 80 + te * 300, [0.8, 0.95, 1], 0.6 * (1 - te / 0.2));
+      kfxShards(f, te, 28, 10, [0.75, 0.93, 1, 1], 7, fade, 420);
+      Q('disc', f.x, 0.9, f.y, 0, 0, 70, 1, 70, [0.75, 0.92, 1, 0.5 * fade], { lit: 0 });
+    }
+  },
+  k09(f, e) { // YILDIRIM: gökten çarpar, gövde kömürleşir ve devrilir
+    const D = f.d.dur, fade = _kFade(e, D, 0.5), BL = [0.08, 0.08, 0.09];
+    if (e < 0.38 && Math.floor(e * 30) % 3 !== 2) { // titreyen şimşek
+      let px = f.x + 40, pz = f.y - 30, ph = 700; const fr = Math.floor(e * 24);
+      for (let s = 1; s <= 11; s++) {
+        const k = s / 11, nx = lerp(f.x + 40, f.x, k) + (s < 11 ? (_kh(s + fr * 13, f.sd) - 0.5) * 46 : 0), nz = lerp(f.y - 30, f.y, k) + (s < 11 ? (_kh(s + fr * 17, f.sd + 1) - 0.5) * 46 : 0), nh = lerp(700, 70, k);
+        Qline(px, ph, pz, nx, nh, nz, 4, [0.92, 0.96, 1, 1], _kAdd); Qline(px, ph, pz, nx, nh, nz, 14, [0.5, 0.7, 1, 0.35], _kAdd);
+        px = nx; pz = nz; ph = nh;
+      }
+    }
+    if (e < 0.3) kfxGlow(f.x, 50, f.y, 190, [0.7, 0.85, 1], 0.6 * (1 - e / 0.3));
+    if (e > 0.08) Q('disc', f.x, 0.8, f.y, 0, 0, 64, 1, 64, [0.04, 0.04, 0.04, 0.8 * fade], { lit: 0 });
+    const tilt = e > 0.4 ? _kOut((e - 0.4) / 0.4) * 1.45 : 0;
+    kfxBody(f, { tint: BL, tk: clamp(e / 0.15, 0, 0.95), jx: e < 0.4 ? Math.sin(e * 120) * 2 : 0, tilt, a: fade });
+    if (e > 0.25) for (let i = 0; i < 6; i++) { // duman
+      const k = ((e - 0.25) * 0.8 + i / 6) % 1; Q('sphere', f.x + Math.sin(i * 2.4) * 8, 20 + k * 90, f.y + Math.cos(i * 1.7) * 8, 0, 0, 14 + k * 22, 14 + k * 22, 14 + k * 22, [0.3, 0.3, 0.32, 0.35 * (1 - k) * fade], { lit: 0 });
+    }
+    if (e < 0.6) for (let i = 0; i < 12; i++) { const p = kfxPart(f, i + 600, e, 150 + _kh(i, 4) * 150, 150, 2, 300, 30); kfxGlow(p[0], p[1], p[2], 4, [1, 0.95, 0.5], 1 - e / 0.6); }
+  },
+  k10(f, e) { // PİKSEL DAĞILMA: gövde küplere ayrılıp dağılır
+    const D = f.d.dur, R = rotMat(f.ang, 0, 0, _KR), c = f.col, tc = f.team === myTeam() ? COL.teal : COL.red, CY = [0.2, 1, 0.9];
+    let i = 0;
+    const grid = (x0, z0, h0, nx, nz, nh, col) => {
+      for (let a = 0; a < nx; a++) for (let b = 0; b < nz; b++) for (let hh = 0; hh < nh; hh++, i++) {
+        const lx = x0 + a * 5.2, lz = z0 + b * 5.2, lh = h0 + hh * 5.2, dl = 0.05 + (1 - lh / 76) * 0.55 + _kh(i, f.sd) * 0.3, te = e - dl;
+        let px, py, pz, s = 5, cc = col, gl = 0;
+        const o = xf(R, lx, lh, lz);
+        if (te <= 0) { px = f.x + o[0] + (Math.random() < 0.04 ? 2 : 0); py = o[1]; pz = f.y + o[2]; }
+        else {
+          const th = _kh(i, f.sd + 2) * TAU, k = te / 0.85; if (k >= 1) continue;
+          px = f.x + o[0] + Math.cos(th) * te * 55; pz = f.y + o[2] + Math.sin(th) * te * 55; py = o[1] + te * (70 + _kh(i, f.sd + 3) * 70);
+          s = 5 * (1 - k); gl = k; cc = [lerp(col[0], CY[0], k), lerp(col[1], CY[1], k), lerp(col[2], CY[2], k)];
+        }
+        Q('box', px, py, pz, f.ang + (te > 0 ? te * 4 : 0), te > 0 ? te * 3 : 0, s, s, s, [cc[0], cc[1], cc[2], 1], gl ? { em: [CY[0] * gl * 0.6, CY[1] * gl * 0.6, CY[2] * gl * 0.6] } : null);
+      }
+    };
+    grid(-2.6, -7.6, 2.6, 2, 2, 5, c.legs); grid(-2.6, 2.4, 2.6, 2, 2, 5, c.legs);
+    grid(-2.6, -10.4, 28.6, 2, 5, 4, c.suit); grid(-2.6, -10.4, 49.4, 2, 5, 1, tc);
+    grid(-2.6, -2.6, 59.8, 2, 2, 2, COL.skin); grid(-2.6, -2.6, 70.2, 2, 2, 1, c.helm);
+    const rh = (e / D) * 120; Q('ring', f.x, rh, f.y, e * 2, 0, 46, 1, 46, [CY[0], CY[1], CY[2], 0.7 * _kFade(e, D, 0.5)], _kAdd);
+  },
+  k11(f, e) { // HAVAİ FİŞEK: gövde roket gibi fırlar, gökte patlar
+    const D = f.d.dur, BO = 0.85, fade = _kFade(e, D, 0.6), bh = u => Math.pow(clamp(u / BO, 0, 1), 2) * 200;
+    if (e < BO) {
+      kfxBody(f, { h: bh(e), rot: e * 16, tilt: Math.sin(e * 5) * 0.15 });
+      for (let i = 1; i <= 16; i++) { const tt = e - i * 0.035; if (tt < 0) break; kfxGlow(f.x + Math.sin(i * 1.3) * 3, bh(tt) - 4, f.y + Math.cos(i * 1.7) * 3, 9 - i * 0.4, [1, 0.6 + i * 0.02, 0.2], 0.8 - i * 0.045); }
+      kfxGlow(f.x, 1, f.y, 60 * (1 - e / BO), [1, 0.7, 0.3], 0.4);
+    } else {
+      const te = e - BO, H0 = bh(BO) + 30, C3 = [KFX_PAL[Math.floor(f.sd) % 7], KFX_PAL[(Math.floor(f.sd) + 2) % 7], [1, 0.95, 0.8]];
+      if (te < 0.3) kfxGlow(f.x, H0, f.y, 120 + te * 500, [1, 0.9, 0.7], 0.7 * (1 - te / 0.3));
+      for (let i = 0; i < 64; i++) {
+        const u = _kh(i, f.sd + 9) * 2 - 1, th = _kh(i, f.sd + 10) * TAU, rr = Math.sqrt(1 - u * u), sp = (i % 2 ? 230 : 160) * (1 - Math.exp(-2.6 * te));
+        const x = f.x + Math.cos(th) * rr * sp, z = f.y + Math.sin(th) * rr * sp, h = H0 + u * sp - 45 * te * te;
+        const fl = te > 0.9 ? (Math.sin(te * 40 + i) > 0 ? 1 : 0.25) : 1, cc = C3[i % 3];
+        kfxGlow(x, h, z, 6, cc, fade * fl); if (te < 0.5) Qline(x, h, z, f.x + (x - f.x) * 0.8, H0 + (h - H0) * 0.8, f.y + (z - f.y) * 0.8, 1.2, [cc[0], cc[1], cc[2], 0.5 * (1 - te / 0.5)], _kAdd);
+      }
+    }
+  },
+  k12(f, e) { // UFO: uzay gemisi gelir, çekim ışınıyla gövdeyi alıp götürür
+    const D = f.d.dur, ux = Math.cos(f.run), uz = Math.sin(f.run), HV = 205;
+    let x = f.x, z = f.y, h = HV;
+    if (e < 0.55) { const k = 1 - _kOut(e / 0.55); x -= ux * 320 * k; z -= uz * 320 * k; h = HV + 260 * k; }
+    else if (e > 2.25) { const k = e - 2.25; x += ux * k * k * 1100; z += uz * k * k * 1100; h = HV + k * 320; }
+    const beam = e > 0.55 && e < 2.25, lift = e > 0.7 ? Math.pow(clamp((e - 0.7) / 1.4, 0, 1), 1.6) * (HV - 35) : 0;
+    if (e < 2.12) kfxBody(f, { h: lift, rot: lift * 0.03, w: 1 - lift / HV * 0.55, sq: 1 - lift / HV * 0.55 });
+    if (beam) {
+      const bp = 0.14 + Math.sin(e * 14) * 0.03, bw = 92 * clamp((e - 0.55) / 0.15, 0, 1) * clamp((2.25 - e) / 0.15, 0, 1);
+      Q('cone', f.x, HV / 2, f.y, e, 0, bw, HV, bw, [0.45, 1, 0.6, bp], _kAdd);
+      Q('ring', f.x, 2, f.y, 0, 0, bw * 1.1 + Math.sin(e * 10) * 6, 1, bw * 1.1, [0.45, 1, 0.6, 0.7], _kAdd);
+      for (let i = 0; i < 8; i++) { const k = ((e * 0.9 + i / 8) % 1); kfxGlow(f.x + Math.cos(i * 2.1 + e) * 26, k * HV, f.y + Math.sin(i * 2.1 + e) * 26, 5, [0.6, 1, 0.7], 0.8 * (1 - k)); }
+    }
+    const ME = [0.62, 0.66, 0.72, 1];
+    Q('sphere', x, h, z, e * 2, 0, 96, 17, 96, ME, { em: [0.05, 0.06, 0.08] });
+    Q('sphere', x, h - 4, z, e * 2, 0, 70, 12, 70, [0.4, 0.43, 0.48, 1]);
+    Q('sphere', x, h + 10, z, 0, 0, 42, 30, 42, [0.55, 0.95, 0.85, 0.5], { lit: 0, em: [0.15, 0.4, 0.35] });
+    for (let i = 0; i < 10; i++) { const a = i / 10 * TAU + e * 2.5, on = (Math.floor(e * 8) + i) % 3 === 0, cc = on ? [1, 0.95, 0.4] : [0.4, 1, 0.7]; Q('sphere', x + Math.cos(a) * 41, h - 2, z + Math.sin(a) * 41, 0, 0, 5, 5, 5, [cc[0], cc[1], cc[2], 1], { lit: 0, em: cc }); }
+    kfxGlow(x, h - 9, z, 44, [0.5, 1, 0.7], 0.35);
+  },
+  k13(f, e) { // KARA DELİK: girdap açılır, gövdeyi yutar, çöker
+    const D = f.d.dur, CH = 50, grow = _kOut(e / 0.4), col = e > D - 0.35 ? 1 - (e - (D - 0.35)) / 0.35 : 1, rr = 28 * grow * col;
+    const kk = clamp((e - 0.25) / 1.35, 0, 1), ke = kk * kk;
+    if (kk < 0.98) kfxBody(f, { h: ke * (CH - 6), w: 1 - ke, sq: 1 - ke, rot: ke * 30, tilt: ke * 0.8, roll: ke * 0.6 });
+    if (rr > 0.5) {
+      Q('sphere', f.x, CH, f.y, 0, 0, rr, rr, rr, [0, 0, 0, 1], { lit: 0 });
+      kfxGlow(f.x, CH, f.y, rr * 1.9, [0.55, 0.2, 0.95], 0.4);
+      Q('ring', f.x, CH, f.y, e * 3.2, 0.38, rr * 4.4, 1, rr * 4.4, [1, 0.6, 0.25, 0.85], { add: true, lit: 0, roll: 0.25 });
+      Q('ring', f.x, CH, f.y, -e * 2.4, 0.38, rr * 3.4, 1, rr * 3.4, [0.7, 0.35, 1, 0.85], { add: true, lit: 0, roll: 0.25 });
+      Q('disc', f.x, CH, f.y, e * 3, 0.38, rr * 4, 1, rr * 4, [0.45, 0.2, 0.7, 0.22], { add: true, lit: 0, roll: 0.25 });
+      for (let i = 0; i < 30; i++) {
+        const k = ((e * 0.7 + _kh(i, f.sd)) % 1), a = _kh(i, f.sd + 1) * TAU + e * (3 + k * 6), r = rr * 0.9 + (1 - k) * 110;
+        kfxGlow(f.x + Math.cos(a) * r, CH + (_kh(i, f.sd + 2) - 0.5) * 40 * (1 - k), f.y + Math.sin(a) * r, 4 + k * 2, i % 2 ? [1, 0.6, 0.25] : [0.7, 0.4, 1], 0.8 * k * col);
+      }
+    }
+    if (e > D - 0.35) { const k = (e - (D - 0.35)) / 0.35; kfxGlow(f.x, CH, f.y, 40 + k * 160, [0.8, 0.6, 1], 0.7 * (1 - k)); }
+  },
+  k14(f, e) { // METEOR: gökten düşer, patlar, krater yanar
+    const D = f.d.dur, TI = 0.55, ux = Math.cos(f.ang), uz = Math.sin(f.ang), fade = _kFade(e, D, 0.5);
+    if (e < TI) {
+      kfxBody(f, {});
+      const k = Math.pow(e / TI, 1.25), mx = f.x + ux * 460 * (1 - k), mz = f.y + uz * 460 * (1 - k), mh = 20 + 600 * (1 - k);
+      Q('sphere', mx, mh, mz, e * 5, e * 3, 30, 28, 30, [0.32, 0.2, 0.13, 1], { em: [0.5, 0.18, 0.04] });
+      kfxGlow(mx, mh, mz, 62, [1, 0.55, 0.15], 0.6);
+      for (let i = 1; i <= 9; i++) { const kk = Math.max(0, k - i * 0.035); kfxGlow(f.x + ux * 460 * (1 - kk), 20 + 600 * (1 - kk), f.y + uz * 460 * (1 - kk), 50 - i * 4, [1, 0.45 + i * 0.03, 0.12], 0.45 - i * 0.04); }
+      const rr = 30 + k * 60; Q('ring', f.x, 2, f.y, e * 4, 0, rr, 1, rr, [1, 0.3, 0.2, 0.6 + 0.3 * Math.sin(e * 30)], _kAdd);
+    } else {
+      const te = e - TI;
+      if (te < 0.45) { kfxGlow(f.x, 40, f.y, 160 + te * 600, [1, 0.6, 0.25], 0.75 * (1 - te / 0.45)); Q('ring', f.x, 3, f.y, 0, 0, 40 + te * 520, 1, 40 + te * 520, [1, 0.75, 0.4, 1 - te / 0.45], _kAdd); }
+      Q('disc', f.x, 0.8, f.y, 0, 0, 95, 1, 95, [0.05, 0.04, 0.04, 0.92 * fade], { lit: 0 });
+      Q('ring', f.x, 1, f.y, 0, 0, 96, 1, 96, [1, 0.4, 0.1, 0.6 * fade], _kAdd);
+      for (let i = 0; i < 5; i++) { const a = i / 5 * TAU + 0.4, fh = 26 + Math.sin(e * 18 + i * 2) * 8; Q('cone', f.x + Math.cos(a) * 24, fh / 2, f.y + Math.sin(a) * 24, e * 3 + i, 0, 16, fh, 16, [1, 0.45, 0.1, 0.7 * fade], _kAdd); Q('cone', f.x + Math.cos(a) * 24, fh / 3, f.y + Math.sin(a) * 24, -e * 2, 0, 9, fh * 0.6, 9, [1, 0.85, 0.35, 0.6 * fade], _kAdd); }
+      if (te < 1.2) for (let i = 0; i < 20; i++) { const p = kfxPart(f, i + 700, te, 200 + _kh(i, 5) * 220, 260 + _kh(i, 6) * 200, 1.8, 420, 10); Q('box', p[0], p[1], p[2], te * 7 + i, i, 6, 6, 6, [0.3, 0.2, 0.14, 1 - te / 1.2], { em: [0.4, 0.12, 0.02] }); }
+      for (let i = 0; i < 5; i++) { const k = ((te * 0.6 + i / 5) % 1); Q('sphere', f.x + Math.sin(i * 2.1) * 20, 20 + k * 120, f.y + Math.cos(i * 1.4) * 20, 0, 0, 20 + k * 40, 20 + k * 40, 20 + k * 40, [0.22, 0.2, 0.2, 0.4 * (1 - k) * fade], { lit: 0 }); }
+    }
+  }
+};
+
+/* ---------- 2B önizleme (mağaza, kasa) ----------
+   t: performance saniyesi (canlı) ya da -1 (efektin en tanıdık anı, durağan) */
+const KFX_PEAK = { k01: 0.55, k02: 0.7, k03: 1.3, k04: 0.9, k05: 1.0, k06: 1.3, k07: 1.1, k08: 0.8, k09: 0.15, k10: 0.75, k11: 1.15, k12: 1.4, k13: 0.9, k14: 0.4 };
+const _pvC = (c, a) => 'rgba(' + Math.round(c[0] * 255) + ',' + Math.round(c[1] * 255) + ',' + Math.round(c[2] * 255) + ',' + (a === undefined ? 1 : a) + ')';
+const PV_BODY = { suit: '#3a6f8a', legs: '#262b33', helm: '#2c5568', visor: '#3ec1ff', pack: '#20242b', skin: '#d9a679' };
+/* önden ajan (yerden yukarı): sq dikey, w yatay ölçek, a saydamlık, tint renk, tk karışım, rot dönüş (yer noktasında) */
+function pvBody(g, cx, gy, sc, o) {
+  o = o || {}; const sq = o.sq === undefined ? 1 : o.sq, w = o.w === undefined ? 1 : o.w, a = o.a === undefined ? 1 : o.a;
+  if (a <= 0.01 || sq <= 0.01 || w <= 0.01) return;
+  g.save(); g.globalAlpha *= a; g.translate(cx, gy - (o.lift || 0) * sc); if (o.rot) g.rotate(o.rot);
+  const T = hx => { if (!o.tk) return hx; const c = hexRGB(hx); return _pvC([lerp(c[0], o.tint[0], o.tk), lerp(c[1], o.tint[1], o.tk), lerp(c[2], o.tint[2], o.tk)]); };
+  const B = (z, y, ww, h, c, gl) => { if (gl && !o.tk) { g.shadowColor = c; g.shadowBlur = 8; } g.fillStyle = T(c); g.fillRect((z - ww / 2) * sc * w, -(y + h / 2) * sc * sq, ww * sc * w, h * sc * sq); g.shadowBlur = 0; };
+  const C = PV_BODY;
+  B(-5, 13, 8, 26, C.legs); B(5, 13, 8, 26, C.legs); B(0, 41, 22, 30, C.suit); B(0, 49, 22.6, 4, '#1ee3cf', true);
+  B(-13.5, 44, 5, 20, C.suit); B(13.5, 44, 5, 20, C.suit); B(-13.5, 32, 5, 5, C.skin); B(13.5, 32, 5, 5, C.skin);
+  B(0, 64, 12, 13, C.skin); B(0, 65, 10, 4, C.visor, true); B(0, 71.5, 13, 3, C.helm);
+  g.restore();
+}
+function _pvDot(g, x, y, r, col, glow) { g.save(); if (glow) { g.shadowColor = col; g.shadowBlur = glow; } g.fillStyle = col; g.beginPath(); g.arc(x, y, Math.max(0.3, r), 0, TAU); g.fill(); g.restore(); }
+function _pvParts(g, n, cx, cy, te, sp, up, gr, seed, draw) {
+  for (let i = 0; i < n; i++) { const th = _kh(i, seed) * TAU, s = (1 - Math.exp(-2.4 * te)) / 2.4; const x = cx + Math.cos(th) * sp * (0.4 + _kh(i, seed + 1) * 0.6) * s, y = Math.min(cy + 40, cy - (up * (0.5 + _kh(i, seed + 2) * 0.5) * s - gr * te * te)); draw(x, y, i); }
+}
+function kfxPreview(cv, id, t) {
+  const g = cv.getContext('2d'), W2 = cv.width, H2 = cv.height, d = KFX[id]; g.clearRect(0, 0, W2, H2);
+  const sc = (H2 - 18) / 130, cx = W2 / 2, gy = H2 - 9;
+  g.fillStyle = 'rgba(255,255,255,0.08)'; g.fillRect(8, gy, W2 - 16, 1.5);
+  if (!d) { pvBody(g, cx, gy, sc, { rot: Math.PI / 2 * 0.98, a: 0.75 }); return; } // efektsiz: normal devrilme
+  const D = d.dur, e = t < 0 ? KFX_PEAK[id] : ((t % (D + 0.8)) - 0.3), fade = clamp((D - e) / 0.4, 0, 1);
+  if (e < 0) { pvBody(g, cx, gy, sc); return; }
+  const S2 = sc * 1, Y = h => gy - h * S2, PAL = ['#ff4655', '#ffd14d', '#1ee3cf', '#a86bff', '#ff66cc', '#5af266', '#4d99ff'];
+  switch (id) {
+    case 'k01': {
+      if (e < 0.2) { const s = Math.sin(e / 0.2 * Math.PI); pvBody(g, cx, gy, sc, { sq: 1 + 0.25 * s, w: 1 - 0.12 * s }); break; }
+      const te = e - 0.2; g.globalAlpha = fade;
+      _pvParts(g, 40, cx, Y(45), te, 120, 160, 30, 3, (x, y, i) => { g.save(); g.translate(x, y); g.rotate(te * 9 + i); g.fillStyle = PAL[i % 7]; g.fillRect(-2.5, -1, 5, 2); g.restore(); });
+      g.globalAlpha = 1; break;
+    }
+    case 'k02': {
+      pvBody(g, cx, gy, sc, { a: 1 - e / 0.55, lift: e * 30 }); g.globalAlpha = clamp((D - e) / 0.5, 0, 1);
+      for (let i = 0; i < 9; i++) { const te = e - 0.08 - _kh(i, 2) * 0.25; if (te <= 0) continue; const x = cx + (_kh(i, 4) - 0.5) * 120 * (1 - Math.exp(-3 * te)), y = Y(40 + te * (35 + _kh(i, 5) * 45)), s = Math.min(1, te * 5) * (4 + _kh(i, 6) * 3);
+        g.fillStyle = i % 3 ? '#ff3a6c' : '#ff8cc0'; g.beginPath(); g.moveTo(x, y + s); g.bezierCurveTo(x - s * 1.6, y - s * 0.2, x - s * 0.6, y - s * 1.5, x, y - s * 0.5); g.bezierCurveTo(x + s * 0.6, y - s * 1.5, x + s * 1.6, y - s * 0.2, x, y + s); g.fill(); }
+      g.globalAlpha = 1; break;
+    }
+    case 'k03': {
+      if (e < 1.95) {
+        const u1 = _kOut(e / 0.6), rise = e > 0.6 ? Math.pow(e - 0.6, 1.5) * 125 : 0, r = lerp(14, 42, u1) * S2, by = Y(45 + rise), bx = cx + Math.sin(e * 3.2) * 4;
+        if (e < 0.45) pvBody(g, cx, gy, sc, { w: 1 + u1 * 0.35, sq: 1 - u1 * 0.2 });
+        if (e > 0.35) { g.strokeStyle = '#eee'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(bx, by + r * 1.1); g.quadraticCurveTo(bx + 4, by + r * 1.1 + 20, bx - 2, by + r * 1.1 + 40); g.stroke(); }
+        g.fillStyle = PV_BODY.suit; g.beginPath(); g.ellipse(bx, by, r, r * 1.12, 0, 0, TAU); g.fill();
+        g.fillStyle = 'rgba(255,255,255,0.35)'; g.beginPath(); g.ellipse(bx - r * 0.35, by - r * 0.4, r * 0.18, r * 0.28, -0.4, 0, TAU); g.fill();
+        g.save(); g.shadowColor = PV_BODY.visor; g.shadowBlur = 8; g.fillStyle = PV_BODY.visor; g.fillRect(bx - r * 0.3, by - r * 0.1, r * 0.6, r * 0.18); g.restore();
+        g.fillStyle = PV_BODY.helm; g.fillRect(bx - r * 0.25, by - r * 1.15, r * 0.5, 2.5);
+        g.fillStyle = PV_BODY.suit; g.beginPath(); g.moveTo(bx - 3, by + r * 1.15); g.lineTo(bx + 3, by + r * 1.15); g.lineTo(bx, by + r * 1.05); g.fill();
+      } else {
+        const te = e - 1.95, by = Y(45 + Math.pow(1.35, 1.5) * 125); if (te < 0.18) _pvDot(g, cx, by, 10 + te * 160, 'rgba(255,255,255,' + 0.6 * (1 - te / 0.18) + ')');
+        g.globalAlpha = fade; _pvParts(g, 22, cx, by, te, 100, 80, 40, 7, (x, y, i) => { g.fillStyle = [PV_BODY.suit, '#fff', PV_BODY.visor][i % 3]; g.fillRect(x - 2, y - 1, 4, 2); }); g.globalAlpha = 1;
+      }
+      break;
+    }
+    case 'k04': {
+      const TI = 0.42; let ab;
+      if (e < TI) { pvBody(g, cx, gy, sc); ab = 80 + 440 * (1 - Math.pow(e / TI, 2)); g.fillStyle = 'rgba(0,0,0,' + 0.4 * e / TI + ')'; g.beginPath(); g.ellipse(cx, gy, (12 + 20 * e / TI) * S2 * 1.5, 3, 0, 0, TAU); g.fill(); }
+      else {
+        const te = e - TI, sq = 0.15 + 0.1 * Math.exp(-te * 7) * Math.cos(te * 26); pvBody(g, cx, gy, sc, { sq, w: 1.55 });
+        ab = 74 * sq + Math.max(0, Math.sin(te * 13) * 12 * Math.exp(-te * 5));
+        if (te > 0.08) for (let i = 0; i < 3; i++) { const a = e * 6 + i * TAU / 3; _pvDot(g, cx + Math.cos(a) * 24 * S2, Y(ab + 52) + Math.sin(a) * 4, 2.6, '#ffd84d', 6); }
+      }
+      const y0 = Y(ab), A = S2 * 1.4; g.fillStyle = '#45474e'; g.fillRect(cx - 13 * A, y0 - 7 * A, 26 * A, 7 * A); g.fillRect(cx - 6.5 * A, y0 - 16 * A, 13 * A, 9 * A);
+      g.fillStyle = '#6b6d75'; g.fillRect(cx - 17 * A, y0 - 26 * A, 34 * A, 10 * A);
+      g.fillStyle = '#45474e'; g.beginPath(); g.moveTo(cx + 17 * A, y0 - 26 * A); g.lineTo(cx + 30 * A, y0 - 22 * A); g.lineTo(cx + 17 * A, y0 - 17 * A); g.fill();
+      break;
+    }
+    case 'k05': {
+      if (e < 0.14) pvBody(g, cx, gy, sc, { w: 1 - e / 0.2, sq: 1 - e / 0.2 });
+      if (e < 0.6) for (let i = 0; i < 6; i++) _pvDot(g, cx + Math.cos(i) * (6 + e * 50), Y(30 + _kh(i, 1) * 40), (8 + e * 20) * S2, 'rgba(240,240,240,' + 0.6 * (1 - e / 0.6) + ')');
+      if (e < 0.12) break;
+      const te = e - 0.12, run = Math.max(0, te - 0.15) * 70, hop = te < 0.15 ? Math.sin(te / 0.15 * Math.PI) * 22 : Math.abs(Math.sin(te * 17)) * 4, x = cx + run, y = gy - hop * S2, k = 1.6 * S2;
+      g.globalAlpha = fade; const lg = Math.sin(te * 22) * 2.5;
+      g.fillStyle = '#ff9a1f'; g.fillRect(x + lg * k - 1, y - 8 * k, 1.6 * k, 8 * k); g.fillRect(x - lg * k - 1, y - 8 * k, 1.6 * k, 8 * k);
+      g.fillStyle = '#f7f7f2'; g.fillRect(x - 7 * k, y - 19.5 * k, 14 * k, 11 * k); g.fillRect(x - 10.5 * k, y - 22 * k, 5 * k, 8 * k); g.fillRect(x + 3.5 * k, y - 27 * k, 7 * k, 8 * k);
+      g.fillStyle = '#e8202a'; g.fillRect(x + 5 * k, y - 30.5 * k, 4 * k, 4 * k); g.fillRect(x + 9.2 * k, y - 21 * k, 1.6 * k, 3 * k);
+      g.fillStyle = '#ff9a1f'; g.fillRect(x + 10.5 * k, y - 24 * k, 4 * k, 2.2 * k); g.fillStyle = '#111'; g.fillRect(x + 8 * k, y - 25.5 * k, 1.2 * k, 1.2 * k);
+      g.globalAlpha = 1; break;
+    }
+    case 'k06': {
+      const sink = Math.pow(clamp(e / 0.7, 0, 1), 2) * 90; g.save(); g.beginPath(); g.rect(0, 0, W2, gy); g.clip(); pvBody(g, cx, gy + sink * S2, sc); g.restore();
+      const gm = _kOut((e - 0.2) / 0.5); if (gm > 0) { g.fillStyle = '#523b26'; g.beginPath(); g.ellipse(cx, gy, 26 * S2 * 1.4, 7 * gm * S2 * 1.4, 0, Math.PI, TAU); g.fill(); }
+      const th = _kBack((e - 0.45) / 0.5), off = -62 + 62 * th; if (off < -60) break;
+      g.save(); g.beginPath(); g.rect(0, 0, W2, gy); g.clip(); const x = cx + 16 * S2;
+      g.fillStyle = '#8c8f99'; g.beginPath(); g.moveTo(x - 14 * S2, Y(off)); g.lineTo(x - 14 * S2, Y(off + 36)); g.arc(x, Y(off + 36), 14 * S2, Math.PI, TAU); g.lineTo(x + 14 * S2, Y(off)); g.fill();
+      g.fillStyle = '#34353a'; g.fillRect(x - 1, Y(off + 38), 2, 16 * S2); g.fillRect(x - 5.5 * S2, Y(off + 34.5), 11 * S2, 2); g.font = 'bold ' + Math.round(7 * S2 + 4) + 'px ' + FONT; g.textAlign = 'center'; g.fillText('RIP', x, Y(off + 14)); g.restore();
+      break;
+    }
+    case 'k07': {
+      pvBody(g, cx, gy, sc, { rot: -_kOut(e / 0.45) * 1.45 });
+      if (e < 0.3) break;
+      const te = e - 0.3, gh = Y(18 + te * 88), a = 0.75 * clamp(te / 0.3, 0, 1) * clamp((D - e) / 0.6, 0, 1), x = cx + Math.sin(e * 4) * 10;
+      g.save(); g.globalAlpha = a; g.fillStyle = '#e6f0ff'; g.shadowColor = '#cfe3ff'; g.shadowBlur = 10;
+      g.beginPath(); g.arc(x, gh - 30 * S2, 12 * S2, Math.PI, TAU); g.lineTo(x + 12 * S2, gh); for (let i = 0; i < 4; i++) g.quadraticCurveTo(x + (9 - i * 6) * S2, gh - 5 * S2, x + (6 - i * 6) * S2, gh); g.closePath(); g.fill();
+      g.shadowBlur = 0; g.fillStyle = '#111'; g.beginPath(); g.ellipse(x - 4 * S2, gh - 31 * S2, 1.8 * S2, 2.8 * S2, 0, 0, TAU); g.ellipse(x + 4 * S2, gh - 31 * S2, 1.8 * S2, 2.8 * S2, 0, 0, TAU); g.fill(); g.restore();
+      break;
+    }
+    case 'k08': {
+      if (e < 1.35) {
+        const k = clamp(e / 0.35, 0, 1); pvBody(g, cx, gy, sc, { tint: [0.62, 0.86, 1], tk: k * 0.85 });
+        g.fillStyle = 'rgba(180,230,255,' + 0.35 * k + ')'; g.strokeStyle = 'rgba(220,245,255,' + 0.8 * k + ')'; g.lineWidth = 1; g.fillRect(cx - 18 * S2, Y(86 * k), 36 * S2, 86 * k * S2); g.strokeRect(cx - 18 * S2, Y(86 * k), 36 * S2, 86 * k * S2);
+      } else { const te = e - 1.35; g.globalAlpha = fade; _pvParts(g, 20, cx, Y(30), te, 110, 110, 90, 11, (x, y, i) => { g.fillStyle = i % 2 ? '#bfeaff' : '#e8f8ff'; g.beginPath(); g.moveTo(x, y - 4); g.lineTo(x + 3, y + 2); g.lineTo(x - 3, y + 2); g.fill(); }); g.globalAlpha = 1; }
+      break;
+    }
+    case 'k09': {
+      if (e < 0.38 && Math.floor(e * 30) % 3 !== 2) { g.save(); g.strokeStyle = '#eaf3ff'; g.lineWidth = 2; g.shadowColor = '#7fb0ff'; g.shadowBlur = 12; g.beginPath(); g.moveTo(cx + 20, 0); const fr = Math.floor(e * 24); for (let s = 1; s <= 8; s++) g.lineTo(cx + 20 * (1 - s / 8) + (s < 8 ? (_kh(s + fr * 13, 1) - 0.5) * 22 : 0), Y(80) * s / 8); g.stroke(); g.restore(); }
+      if (e < 0.3) _pvDot(g, cx, Y(45), 40 * (1 - e / 0.3) + 5, 'rgba(180,210,255,' + 0.5 * (1 - e / 0.3) + ')');
+      pvBody(g, cx, gy, sc, { tint: [0.08, 0.08, 0.09], tk: clamp(e / 0.15, 0, 0.95), rot: e > 0.4 ? -_kOut((e - 0.4) / 0.4) * 1.45 : 0, a: fade });
+      if (e > 0.25) for (let i = 0; i < 4; i++) { const k = ((e - 0.25) * 0.8 + i / 4) % 1; _pvDot(g, cx + Math.sin(i * 2.4) * 6, Y(20 + k * 70), (6 + k * 10) * S2, 'rgba(90,90,95,' + 0.4 * (1 - k) * fade + ')'); }
+      break;
+    }
+    case 'k10': {
+      const cols = { l: PV_BODY.legs, s: PV_BODY.suit, h: PV_BODY.skin, m: PV_BODY.helm };
+      let i = 0; const cube = (z, h, c) => { const dl = 0.05 + (1 - h / 76) * 0.55 + _kh(i, 3) * 0.3, te = e - dl; i++; let x = cx + z * S2, y = Y(h), s = 5.2 * S2, col = c;
+        if (te > 0) { const k = te / 0.85; if (k >= 1) return; x += (_kh(i, 4) - 0.5) * te * 110; y -= te * (70 + _kh(i, 5) * 70) * S2; s *= 1 - k; col = 'rgba(40,255,230,' + (0.6 + 0.4 * (1 - k)) + ')'; }
+        g.fillStyle = col; g.fillRect(x - s / 2, y - s / 2, s, s); };
+      for (let h = 2.6; h < 26; h += 5.2) for (const z of [-7.6, -2.4, 2.4, 7.6]) cube(z, h, cols.l);
+      for (let h = 28.6; h < 56; h += 5.2) for (let z = -10.4; z <= 10.5; z += 5.2) cube(z, h, h > 48 ? '#1ee3cf' : cols.s);
+      for (let h = 59.8; h < 72; h += 5.2) for (const z of [-2.6, 2.6]) cube(z, h, h > 69 ? cols.m : cols.h);
+      break;
+    }
+    case 'k11': {
+      const BO = 0.85, bh = u => Math.pow(clamp(u / BO, 0, 1), 2) * 330 * 0.3;
+      if (e < BO) { pvBody(g, cx, gy, sc * 0.8, { lift: bh(e) / 0.8, rot: Math.sin(e * 16) * 0.25 }); for (let i = 1; i <= 10; i++) { const tt = e - i * 0.035; if (tt < 0) break; _pvDot(g, cx, Y(bh(tt) - 4), 3.5 - i * 0.25, 'rgba(255,170,60,' + (0.9 - i * 0.08) + ')', 6); } }
+      else { const te = e - BO, H0 = Y(bh(BO) + 50); if (te < 0.3) _pvDot(g, cx, H0, 10 + te * 90, 'rgba(255,240,200,' + 0.6 * (1 - te / 0.3) + ')');
+        for (let i = 0; i < 40; i++) { const a = _kh(i, 9) * TAU, sp = (i % 2 ? 55 : 38) * (1 - Math.exp(-2.6 * te)), x = cx + Math.cos(a) * sp, y = H0 + Math.sin(a) * sp * 0.8 + 14 * te * te; const fl = te > 0.9 ? (Math.sin(te * 40 + i) > 0 ? 1 : 0.3) : 1; _pvDot(g, x, y, 1.8, PAL[(i % 3) * 2], 6 * fl); } }
+      break;
+    }
+    case 'k12': {
+      const HV = 92; let x = cx, h = HV;
+      if (e < 0.55) { const k = 1 - _kOut(e / 0.55); x -= 120 * k; h = HV + 60 * k; } else if (e > 2.25) { const k = e - 2.25; x += k * k * 500; h = HV + k * 60; }
+      const lift = e > 0.7 ? Math.pow(clamp((e - 0.7) / 1.4, 0, 1), 1.6) * (HV - 20) : 0;
+      if (e > 0.55 && e < 2.25) { const gr = g.createLinearGradient(0, Y(HV), 0, gy); gr.addColorStop(0, 'rgba(110,255,150,0.05)'); gr.addColorStop(1, 'rgba(110,255,150,0.3)'); g.fillStyle = gr; g.beginPath(); g.moveTo(cx - 8, Y(HV)); g.lineTo(cx + 8, Y(HV)); g.lineTo(cx + 34, gy); g.lineTo(cx - 34, gy); g.fill(); }
+      if (e < 2.12) pvBody(g, cx, gy, sc, { lift, w: 1 - lift / HV * 0.55, sq: 1 - lift / HV * 0.55, rot: Math.sin(lift * 0.1) * 0.3 });
+      const y = Y(h); g.fillStyle = 'rgba(140,240,215,0.6)'; g.beginPath(); g.ellipse(x, y - 4, 13, 10, 0, Math.PI, TAU); g.fill();
+      g.fillStyle = '#9ea7b3'; g.beginPath(); g.ellipse(x, y, 34, 7, 0, 0, TAU); g.fill(); g.fillStyle = '#69707a'; g.fillRect(x - 22, y + 2, 44, 3);
+      for (let i = 0; i < 5; i++) _pvDot(g, x - 24 + i * 12, y + 1, 1.8, (Math.floor(e * 8) + i) % 3 ? '#66ffaa' : '#ffee66', 5);
+      break;
+    }
+    case 'k13': {
+      const grow = _kOut(e / 0.4), cl = e > D - 0.35 ? 1 - (e - (D - 0.35)) / 0.35 : 1, rr = 12 * grow * cl, kk = clamp((e - 0.25) / 1.35, 0, 1), ke = kk * kk, cy = Y(50);
+      if (kk < 0.98) { g.save(); g.translate(cx, cy); g.rotate(ke * 12); g.translate(-cx, -cy); pvBody(g, cx, gy - ke * (gy - cy) * 0.9, sc, { w: 1 - ke, sq: 1 - ke }); g.restore(); }
+      if (rr > 0.5) { g.save(); g.translate(cx, cy); g.rotate(e * 2); for (const [k, c] of [[2.4, 'rgba(255,150,60,0.8)'], [1.8, 'rgba(180,100,255,0.8)']]) { g.strokeStyle = c; g.lineWidth = 2; g.shadowColor = c; g.shadowBlur = 8; g.beginPath(); g.ellipse(0, 0, rr * k, rr * k * 0.35, 0, 0, TAU); g.stroke(); } g.restore();
+        _pvDot(g, cx, cy, rr * 1.4, 'rgba(140,60,240,0.35)'); _pvDot(g, cx, cy, rr, '#000');
+        for (let i = 0; i < 14; i++) { const k = ((e * 0.7 + _kh(i, 2)) % 1), a = _kh(i, 3) * TAU + e * (3 + k * 6), r = rr + (1 - k) * 45; _pvDot(g, cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.4, 1.5, i % 2 ? '#ffa040' : '#b070ff', 5); } }
+      break;
+    }
+    case 'k14': {
+      const TI = 0.55;
+      if (e < TI) { pvBody(g, cx, gy, sc); const k = Math.pow(e / TI, 1.25), mx = cx + 110 * (1 - k), my = Y(10 + 160 * (1 - k));
+        for (let i = 6; i >= 1; i--) _pvDot(g, mx + i * 6, my - i * 8, 9 - i, 'rgba(255,' + (110 + i * 15) + ',40,' + (0.5 - i * 0.06) + ')', 8);
+        _pvDot(g, mx, my, 8, '#5a3a24', 14); g.save(); g.globalCompositeOperation = 'lighter'; _pvDot(g, mx, my, 12, 'rgba(255,130,40,0.5)'); g.restore(); }
+      else { const te = e - TI; if (te < 0.45) _pvDot(g, cx, Y(20), 20 + te * 140, 'rgba(255,170,80,' + 0.7 * (1 - te / 0.45) + ')');
+        g.fillStyle = 'rgba(15,10,10,' + 0.9 * fade + ')'; g.beginPath(); g.ellipse(cx, gy, 50, 6, 0, 0, TAU); g.fill();
+        g.save(); g.globalCompositeOperation = 'lighter'; for (let i = 0; i < 5; i++) { const fh = (16 + Math.sin(e * 18 + i * 2) * 5) * fade; g.fillStyle = 'rgba(255,120,30,0.7)'; g.beginPath(); g.moveTo(cx - 34 + i * 17 - 5, gy); g.lineTo(cx - 34 + i * 17 + 5, gy); g.lineTo(cx - 34 + i * 17, gy - fh); g.fill(); } g.restore();
+        if (te < 1.2) _pvParts(g, 12, cx, Y(10), te, 140, 130, 140, 13, (x, y) => { g.fillStyle = 'rgba(80,55,40,' + (1 - te / 1.2) + ')'; g.fillRect(x - 2, y - 2, 4, 4); }); }
+      break;
+    }
+  }
+}
+
+Object.assign(SFX, {
+  kconf(o, t) { AU.noise(o, t, 0.12, 'highpass', 2500, 0, 0.9, 1); [784, 988, 1175, 1568].forEach((f, i) => AU.tone(o, t + 0.04 + i * 0.05, 0.25, 'triangle', f, f, 0.18)); AU.tone(o, t, 0.4, 'sawtooth', 300, 900, 0.12, 0.02); },
+  kheart(o, t) { [1046, 1318, 1568, 2093].forEach((f, i) => AU.tone(o, t + i * 0.09, 0.5, 'sine', f, f, 0.2)); },
+  kinfl(o, t) { AU.tone(o, t, 0.6, 'sine', 180, 620, 0.25, 0.05); AU.noise(o, t, 0.6, 'bandpass', 1500, 3000, 0.25, 3); AU.tone(o, t + 0.65, 1.2, 'sine', 620, 660, 0.06, 0.2); },
+  kpop(o, t) { AU.noise(o, t, 0.09, 'highpass', 1800, 0, 1.3, 0.8); AU.tone(o, t, 0.08, 'square', 900, 120, 0.3); },
+  kfall(o, t) { AU.tone(o, t, 0.42, 'sine', 2200, 700, 0.18, 0.02); },
+  kanvil(o, t) { [523, 1312, 2210, 3170].forEach((f, i) => AU.tone(o, t, 1.1 - i * 0.2, 'triangle', f, f * 0.995, 0.35 - i * 0.06)); AU.noise(o, t, 0.25, 'lowpass', 900, 120, 1.2, 1); AU.tone(o, t, 0.3, 'sine', 110, 50, 0.7); },
+  kpoof(o, t) { AU.noise(o, t, 0.35, 'bandpass', 900, 300, 0.8, 1); },
+  kcluck(o, t) { [[620, 480], [760, 520], [900, 600]].forEach(([a, b], i) => AU.tone(o, t + i * 0.11, 0.08, 'square', a, b, 0.14)); AU.noise(o, t, 0.3, 'bandpass', 2500, 1500, 0.15, 4); },
+  kdig(o, t) { AU.noise(o, t, 0.6, 'lowpass', 600, 120, 1, 1); AU.tone(o, t, 0.4, 'sine', 90, 50, 0.4); },
+  ktomb(o, t) { [330, 660, 990, 1320].forEach((f, i) => AU.tone(o, t, 1.6 - i * 0.25, 'sine', f, f, 0.22 - i * 0.04, 0.01)); },
+  kghost(o, t) { AU.tone(o, t, 0.9, 'sine', 380, 520, 0.2, 0.25); AU.tone(o, t + 0.8, 0.9, 'sine', 520, 300, 0.2, 0.1); AU.tone(o, t, 1.7, 'triangle', 760, 600, 0.05, 0.3); },
+  kfreeze(o, t) { AU.noise(o, t, 0.4, 'highpass', 4500, 0, 0.5, 1); AU.tone(o, t, 0.4, 'sine', 800, 2400, 0.12, 0.02); },
+  kshatter(o, t) { AU.noise(o, t, 0.45, 'highpass', 3500, 0, 1, 1); for (let i = 0; i < 6; i++) AU.tone(o, t + i * 0.03, 0.3, 'sine', rand(2200, 4200), rand(1800, 3800), 0.1); },
+  kthunder(o, t) { AU.noise(o, t, 0.15, 'highpass', 2500, 0, 1.2, 0.8); AU.noise(o, t + 0.05, 1.6, 'lowpass', 900, 60, 1.5, 0.6); AU.tone(o, t, 1.2, 'sine', 70, 30, 0.8); },
+  kpixel(o, t) { for (let i = 0; i < 10; i++) AU.tone(o, t + i * 0.07, 0.06, 'square', [880, 1320, 660, 1760, 990][i % 5], 0, 0.1); },
+  kwhizz(o, t) { AU.tone(o, t, 0.85, 'sine', 500, 2600, 0.15, 0.02); AU.noise(o, t, 0.85, 'bandpass', 1200, 4000, 0.3, 2); },
+  kfw(o, t) { AU.noise(o, t, 0.7, 'lowpass', 2500, 100, 1.4, 0.6); AU.tone(o, t, 0.5, 'sine', 90, 35, 0.8); for (let i = 0; i < 9; i++) AU.noise(o, t + 0.25 + i * 0.09 + Math.random() * 0.04, 0.05, 'highpass', 3000, 0, 0.5, 1); },
+  kufo(o, t) { for (let i = 0; i < 14; i++) AU.tone(o, t + i * 0.16, 0.18, 'sine', i % 2 ? 520 : 760, i % 2 ? 600 : 680, 0.14, 0.03); AU.tone(o, t + 0.55, 1.7, 'sawtooth', 120, 160, 0.06, 0.2); },
+  kvoid(o, t) { AU.tone(o, t, 1.8, 'sine', 260, 40, 0.45, 0.1); AU.noise(o, t, 1.8, 'lowpass', 1200, 80, 0.7, 0.6); AU.tone(o, t + 2.2, 0.4, 'sine', 900, 200, 0.2); },
+  kmeteor(o, t) { AU.noise(o, t, 0.55, 'bandpass', 300, 1400, 0.9, 1.5); AU.tone(o, t, 0.55, 'sawtooth', 120, 60, 0.2, 0.05); }
+});
 
 /* =====================================================================
    08 · ARAYÜZ: menüler, lobi, ajan seçimi, mağaza, duraklatma, maç sonu,
@@ -11504,6 +12520,7 @@ function cycleSpec() {
 function onKeyDown(e) {
   const tag = e.target && e.target.tagName;
   if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+  if (e.code === 'Escape' && UI.caseOpen) { caseClose(); return; }
   if (e.code === 'Escape' && UI.admOpen) { admClose(); return; }
   if (e.code === 'Escape' && UI.frOpen) { frMenuToggle(false); return; }
   if (e.code === 'Escape' && UI.setOpen) { closeSettings(); return; }

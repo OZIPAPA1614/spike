@@ -53,9 +53,11 @@ function gunColsFor(wid, p, t) {
     for (const pt of G.parts) o[pt.r] = S0[pt.r] || pt.c;
     return (_SKC[key] = o);
   }
-  if (!sk.rb && _SKC['gs' + wid + sk.id]) return _SKC['gs' + wid + sk.id];
-  const o = { main: sk.rb ? rbCol(t || 0) : hexRGB(sk.c[0]), dark: hexRGB(sk.c[1]), acc: sk.rb ? rbCol(t || 0, 0.5) : hexRGB(sk.c[2]), glow: sk.glow ? 0.65 : 0 };
-  if (!sk.rb) _SKC['gs' + wid + sk.id] = o;
+  const anim = skAnim(sk), tt = t || 0;
+  if (!anim && _SKC['gs' + wid + sk.id]) return _SKC['gs' + wid + sk.id];
+  const o = { main: sk.rb ? rbCol(tt) : sk.duo ? mixRGB(hexRGB(sk.c[0]), hexRGB(sk.duo), duoK(tt)) : hexRGB(sk.c[0]), dark: hexRGB(sk.c[1]), acc: sk.rb ? rbCol(tt, 0.5) : hexRGB(sk.c[2]),
+    glow: sk.glow ? 0.65 * (sk.pulse ? pulseK(tt) : 1) : 0, glowMain: sk.pulse && sk.glow ? 0.12 * pulseK(tt) : 0 };
+  if (!anim) _SKC['gs' + wid + sk.id] = o;
   return o;
 }
 function drawGunModel(wid, x, h, z, R, sc, o, cols, alpha) {

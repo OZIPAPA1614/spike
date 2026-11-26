@@ -6,7 +6,9 @@ Tarayıcıda oynanan 3D taktik FPS (5v5, ajanlar, bomba kur/imha et).
 
 - Tek oyunculu (botlara karşı), çok oyunculu odalar ve herkese açık sunucular (rastgele eşleşme)
 - Hesaplar, arkadaş listesi, sesli ve yazılı sohbet
-- 11 harita, gems mağazası, kılıç seviyeleri, 20 silah + 20 karakter skini
+- 11 harita, gems mağazası, kılıç seviyeleri, 44 silah + 44 karakter skini (nabız gibi atan ışıklar, kabak kafa, kanat, alev saç…)
+- **Öldürme efektleri** (Arsenal gibi): örs, balon, tavuk, buz heykeli, UFO, havai fişek, kara delik… rakibi öldürünce onun yerinde oynar, herkes görür
+- **Kasalar** (CS gibi): mağazada gems ile al, dönen şeritle aç · nadirlik ve olasılıklar yazılı · ★ Nadir Özel eşyalar yalnızca kasadan çıkar · kopya çıkarsa %35 gems iadesi
 - **PARKUR modu:** yalnızca kılıçla engel yarışı · 5 raunt, her raunt farklı ve çok uzun, ince bir pist · bitişe ilk varan raundu alır
 - **SİLAH YARIŞI:** her öldürmede sıradaki silah, kılıçla öldüren takım kazanır
 - **SÜPERNOVA:** yer değiştiren enerji bölgesini tutan takım puan toplar, 100 puan kazanır
