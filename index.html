@@ -10623,7 +10623,7 @@ function aimPoint(me) {
 /* Oyun içi fare imleci: oyun sırasında gizli, menü/mağaza/maç sonu açıkken görünür */
 function syncCursor() {
   const endOpen = !$('end').classList.contains('hidden');
-  document.body.classList.toggle('ovl', !!(UI.pauseOpen || UI.buyOpen || endOpen));
+  document.body.classList.toggle('ovl', !!(UI.pauseOpen || UI.buyOpen || UI.frOpen || UI.admOpen || UI.setOpen || endOpen)); // spawn menüsü / admin paneli açıkken de imleç görünür
 }
 /* Bağlantı durumu (lobi) */
 function uiNetStatus() {
