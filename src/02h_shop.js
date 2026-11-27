@@ -129,7 +129,31 @@ const CSKINS = [
   { id: 'c41', n: 'Kozmik Varlık', ex: 1, val: 6000, suit: '#0a0a1a', legs: '#000005', helm: '#1a1a3a', visor: '#a8c8ff', pack: '#05050f', hat: 'astro', glow: 1, pulse: 1, duo: '#2a0b4a' },
   { id: 'c42', n: 'Altın Ejder', ex: 1, val: 6000, suit: '#e2b33c', legs: '#6e4f14', helm: '#fff1a8', visor: '#ff4a1a', pack: '#a8781a', hat: 'wings', glow: 1, pulse: 1 },
   { id: 'c43', n: 'Kabak Kral', ex: 1, val: 5000, suit: '#1a0a2a', legs: '#0a0412', helm: '#ff8a1a', visor: '#9dff6a', pack: '#120820', hat: 'pumpkin', glow: 1, pulse: 1 },
-  { id: 'c44', n: 'Alev Meleği', ex: 1, val: 5500, suit: '#ff5a1a', legs: '#3a0a00', helm: '#ffd23a', visor: '#ffffff', pack: '#a82a00', hat: 'flame', glow: 1, pulse: 1, duo: '#ffb627' }
+  { id: 'c44', n: 'Alev Meleği', ex: 1, val: 5500, suit: '#ff5a1a', legs: '#3a0a00', helm: '#ffd23a', visor: '#ffffff', pack: '#a82a00', hat: 'flame', glow: 1, pulse: 1, duo: '#ffb627' },
+  // YENİDEN BAŞLIYORUZ (c45–c65, kasası 02j'de): grup sohbetinde en çok geçen 20 isim (gruptakiler hariç) + Dederam.
+  // Ne kadar çok geçtiyse o kadar nadir: Askerî → Kısıtlı → Gizli → Örtülü → ★ Nadir Özel (en çok geçen 4'ü, yalnızca kasadan)
+  // Dederam: en nadir — kendi basamağı (★★ Efsanevi), Yeniden Başlıyoruz kasasında tam %1
+  { id: 'c65', n: 'Dederam', ex: 1, ultra: 1, val: 10000, suit: '#f5f0e6', legs: '#8a7a5a', helm: '#ffffff', visor: '#ffd23a', pack: '#c8b88a', hat: 'halo', glow: 1, pulse: 1, rb: 1 },
+  { id: 'c45', n: 'Ömer', price: 120, suit: '#5a6b7a', legs: '#2c343c', helm: '#3e4a55', visor: '#9fd3ff', pack: '#2c343c', hat: 'cap' },
+  { id: 'c46', n: 'Miraç', price: 150, suit: '#7a4a2a', legs: '#3a2416', helm: '#5a3620', visor: '#ffb347', pack: '#3a2416', hat: 'band' },
+  { id: 'c47', n: 'Okan', price: 180, suit: '#2f5d50', legs: '#173029', helm: '#24473d', visor: '#7dffcf', pack: '#173029', hat: 'antenna' },
+  { id: 'c48', n: 'Aziz', price: 220, suit: '#8b1e3f', legs: '#3a0d1b', helm: '#5c1429', visor: '#ffd166', pack: '#3a0d1b', hat: 'ears' },
+  { id: 'c49', n: 'Kenan', price: 300, suit: '#1b3b6f', legs: '#0c1d38', helm: '#e8eef7', visor: '#5ec8ff', pack: '#0c1d38', hat: 'mohawk', glow: 1 },
+  { id: 'c50', n: 'Deniz', price: 400, suit: '#0a7c8c', legs: '#043c44', helm: '#d8f6fa', visor: '#33f0d4', pack: '#06525c', hat: 'halo', glow: 1 },
+  { id: 'c51', n: 'Türker', price: 500, suit: '#6b2c91', legs: '#2a1038', helm: '#ffd23a', visor: '#ffd23a', pack: '#2a1038', hat: 'horns', glow: 1 },
+  { id: 'c52', n: 'Ramazan', price: 600, suit: '#0f3d2e', legs: '#061a13', helm: '#e2b33c', visor: '#fff1a8', pack: '#0a2a1f', hat: 'crown', glow: 1 },
+  { id: 'c53', n: 'Kuzey', price: 900, suit: '#dfe9f2', legs: '#6b8aa3', helm: '#ffffff', visor: '#7ad8ff', pack: '#a9c3d6', hat: 'astro', glow: 1 },
+  { id: 'c54', n: 'Uğurcan', price: 1100, suit: '#ff8a1a', legs: '#1a1a1a', helm: '#ffd23a', visor: '#ffffff', pack: '#a84a00', hat: 'cap', glow: 1 },
+  { id: 'c55', n: 'Levent', price: 1300, suit: '#1a1a22', legs: '#0a0a10', helm: '#c0c8d8', visor: '#ff3ec8', pack: '#101016', hat: 'tophat', glow: 1 },
+  { id: 'c56', n: 'Kayra', price: 1500, suit: '#3a1d5a', legs: '#170a26', helm: '#2a1240', visor: '#9dff6a', pack: '#170a26', hat: 'wings', glow: 1 },
+  { id: 'c57', n: 'Ata', price: 2000, suit: '#5a2a00', legs: '#2a1400', helm: '#d08a3a', visor: '#ffe0a0', pack: '#3a1c00', hat: 'crown', glow: 1, pulse: 1 },
+  { id: 'c58', n: 'Mehmet', price: 2600, suit: '#b3141f', legs: '#2a0508', helm: '#ffffff', visor: '#ffffff', pack: '#5a0a10', hat: 'halo', glow: 1, pulse: 1, duo: '#5a0a10' },
+  { id: 'c59', n: 'Utku', price: 3200, suit: '#0b0f1a', legs: '#03050a', helm: '#00ffd5', visor: '#00ffd5', pack: '#03050a', hat: 'mohawk', glow: 1, pulse: 1, duo: '#2a0b3a' },
+  { id: 'c60', n: 'İsmail', price: 3800, suit: '#ffd23a', legs: '#0d1a44', helm: '#1f3a93', visor: '#ffffff', pack: '#0d1a44', hat: 'flame', glow: 1, pulse: 1, duo: '#1f3a93' },
+  { id: 'c61', n: 'Mete', ex: 1, val: 5500, suit: '#0a0a1a', legs: '#000005', helm: '#ff3a5a', visor: '#ff3a5a', pack: '#05050f', hat: 'horns', glow: 1, pulse: 1, duo: '#3a0a1a' },
+  { id: 'c62', n: 'Ege', ex: 1, val: 6000, suit: '#0f6e7a', legs: '#063238', helm: '#e8fbff', visor: '#33f0d4', pack: '#0a4650', hat: 'wings', glow: 1, pulse: 1, duo: '#1d3cb8' },
+  { id: 'c63', n: 'Haktan', ex: 1, val: 6500, suit: '#e2b33c', legs: '#1a1a1a', helm: '#1a1a1a', visor: '#ff4a1a', pack: '#a8781a', hat: 'flame', glow: 1, pulse: 1, duo: '#ff5a1a' },
+  { id: 'c64', n: 'Yusuf', ex: 1, val: 8000, suit: '#ffffff', legs: '#1a1a2a', helm: '#ffffff', visor: '#ffffff', pack: '#1a1a2a', hat: 'crown', glow: 1, pulse: 1, rb: 1 }
 ];
 /* ÖLDÜRME EFEKTLERİ (Arsenal gibi): rakibi öldürünce onun yerinde oynar, herkes görür (çizim: 07i) */
 const KFXS = [
@@ -160,12 +184,15 @@ const RARITY = [
   { k: 'res', n: 'Kısıtlı', c: '#8847ff', w: 25 },
   { k: 'cla', n: 'Gizli', c: '#d32ce6', w: 10 },
   { k: 'cov', n: 'Örtülü', c: '#eb4b4b', w: 4 },
-  { k: 'gold', n: '★ Nadir Özel', c: '#ffd23a', w: 1 }
+  { k: 'gold', n: '★ Nadir Özel', c: '#ffd23a', w: 1 },
+  // yalnızca Dederam (Yeniden Başlıyoruz kasası): ağırlık 100/99 → o kasada tam %1
+  { k: 'ultra', n: '★★ Efsanevi', c: '#ff3ec8', w: 100 / 99 }
 ];
 const RARM = {}; RARITY.forEach((r, i) => { RARM[r.k] = r; r.i = i; });
 function itemVal(it) { return it ? (it.ex ? it.val : it.price) | 0 : 0; }
 function itemRar(it) {
   if (!it) return RARM.mil;
+  if (it.ultra) return RARM.ultra;
   if (it.ex) return RARM.gold;
   const v = it.price;
   return v < 250 ? RARM.mil : v < 700 ? RARM.res : v < 1800 ? RARM.cla : RARM.cov;

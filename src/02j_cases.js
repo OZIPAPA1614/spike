@@ -13,7 +13,10 @@ const CASES = [
   { id: 'cs2', n: 'Efsane Kasası', price: 2000, c: ['#ff4655', '#3a0a12'],
     items: ['ws:w21-w44', 'cs:c21-c44'] },
   { id: 'cs3', n: 'Öldürme Kasası', price: 1800, c: ['#ffd23a', '#3a2a06'],
-    items: ['kf:k01-k14'] }
+    items: ['kf:k01-k14'] },
+  // grup sohbetindeki isimlerle 20 karakter skini (02h, c45–c64); en çok geçen 4 isim yalnızca buradan çıkar
+  { id: 'cs4', n: 'Yeniden Başlıyoruz', price: 500, c: ['#3ee08a', '#0e3a26'],
+    items: ['cs:c45-c65'] }
 ];
 const CASEM = {};
 /* 'ws:w01-w24' → [['ws','w01'], …] */
@@ -130,13 +133,14 @@ function caseSkip() {
 function caseReveal() {
   CASEUI.spin = false; cancelAnimationFrame(CASEUI.raf);
   const r = CASEUI.res, R = RARM[r.rar], c = CASEUI.c;
-  AU.play(r.rar === 'gold' ? 'cgold' : r.rar === 'cov' || r.rar === 'cla' ? 'crare' : 'creveal');
+  const top = r.rar === 'gold' || r.rar === 'ultra'; // en üst iki nadirlik: altın açılış sesi + parıltı
+  AU.play(top ? 'cgold' : r.rar === 'cov' || r.rar === 'cla' ? 'crare' : 'creveal');
   const el = $('caseRes'); $('caseOv').classList.add('done');
   el.style.setProperty('--rc', R.c);
   el.innerHTML = '<canvas width="300" height="160"></canvas><div class="crr">' + esc(R.n) + ' · ' + esc(KIND_NAME[r.kind]) + '</div><div class="crn">' + esc(r.it.n) + '</div>' +
     '<div class="crs">' + (r.dup ? 'Zaten sahipsin · kopya iadesi +' + r.refund + ' 💎' : 'YENİ! Envanterine eklendi') + '</div>';
   el.classList.remove('hidden');
-  el.classList.toggle('gold', r.rar === 'gold');
+  el.classList.toggle('gold', top);
   previewItem(el.querySelector('canvas'), r.kind, r.id, r.kind === 'kf' ? -1 : 0);
   $('caseSkip').classList.add('hidden');
   const eqd = SHOP.prof[SHOP_KIND[r.kind].eq] === r.id;
@@ -184,6 +188,10 @@ Object.assign(EN_EXACT, {
   'Piksel Dağılma': 'Pixelate', 'Havai Fişek': 'Firework', 'UFO': 'UFO', 'Kara Delik': 'Black Hole', 'Meteor': 'Meteor', 'Şimşek': 'Lightning Strike',
   'ÖLDÜRME EFEKTLERİ': 'KILL EFFECTS', '🎁 KASALAR': '🎁 CASES', 'Efektsiz': 'None', 'Öldürme efekti yok': 'No kill effect', '🎁 KASALARDA': '🎁 IN CASES',
   'Başlangıç Kasası': 'Starter Case', 'Efsane Kasası': 'Legend Case', 'Öldürme Kasası': 'Kill Effect Case', 'KASA': 'CASE', 'ATLA': 'SKIP', 'KAPAT': 'CLOSE',
+  // özel adlar: İngilizcede de aynı kalır (parça çevirisi "Ata", "Ege" gibi kısa adları bozmasın)
+  'Yeniden Başlıyoruz': 'Yeniden Başlıyoruz', 'Ömer': 'Ömer', 'Miraç': 'Miraç', 'Okan': 'Okan', 'Aziz': 'Aziz', 'Kenan': 'Kenan', 'Deniz': 'Deniz', 'Türker': 'Türker',
+  'Ramazan': 'Ramazan', 'Kuzey': 'Kuzey', 'Uğurcan': 'Uğurcan', 'Levent': 'Levent', 'Kayra': 'Kayra', 'Ata': 'Ata', 'Mehmet': 'Mehmet', 'Utku': 'Utku', 'İsmail': 'İsmail',
+  'Mete': 'Mete', 'Ege': 'Ege', 'Haktan': 'Haktan', 'Yusuf': 'Yusuf', 'Dederam': 'Dederam', '★★ Efsanevi': '★★ Legendary',
   'Askerî': 'Mil-Spec', 'Kısıtlı': 'Restricted', 'Gizli': 'Classified', 'Örtülü': 'Covert', '★ Nadir Özel': '★ Rare Special',
   'YENİ! Envanterine eklendi': 'NEW! Added to your inventory'
 });

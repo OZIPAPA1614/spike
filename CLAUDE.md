@@ -28,9 +28,10 @@ The owner writes in Turkish: reply to them in Turkish and write commit messages 
   `pub/<code>` (public room list), `clk` (server clock) and `gk/<code>` (admin gem gifts: only the admin
   account OZN = `nn55g4@spike-oyun.app` and the account `n<code>@spike-oyun.app` may read/write).
 - Admin panel (`src/08b_admin.js`) is visible only when logged in as OZN.
-- Store / cosmetics: catalog (swords, 44 weapon skins, 44 character skins, 14 kill effects, rarities) in
+- Store / cosmetics: catalog (swords, 44 weapon skins, 65 character skins, 14 kill effects, rarities) in
   `src/02h_shop.js`; CS-style cases (bought with gems in the store, opened at once, odds shown, duplicates refund 35%)
-  in `src/02j_cases.js`; kill effects (Arsenal-style, drawn where the victim died, everyone sees them) in
+  in `src/02j_cases.js`; the "Yeniden Başlıyoruz" case (`cs4`) holds character skins c45–c65 named after the owner's
+  friend group chat (rarity by how often the name came up); `ultra: 1` = top rarity ★★ Efsanevi (only Dederam, exactly 1% there); kill effects (Arsenal-style, drawn where the victim died, everyone sees them) in
   `src/07i_killfx.js`. Items with `ex: 1` drop only from cases. Profile fields: `ws/cs/kf` owned, `wsk/csk/kfx` equipped.
   Weapon skin patterns (camo, carbon, scales, flames, circuits…; seeded 128 px tiles, `pat/pc/pk/pg/flow` in `WPAT`)
   are generated in `src/02k_patterns.js`; gun models get box-projected UVs (`src/07g_models.js`), the shader has
