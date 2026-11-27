@@ -20,7 +20,7 @@ function pakValid(o) {
   const hp = +o.hp || 0;
   return { n, img, snd: snd || undefined, spd: clamp(+o.spd || 320, 60, 900), hp: hp > 0 ? clamp(hp, 1, 100000) : 0, dmg: clamp(+o.dmg || 999, 0, 9999), sz: clamp(+o.sz || 1.1, 0.3, 4), mod: o.mod ? 1 : undefined };
 }
-/* bir içeriği bağlantıya parça parça gönder (kanal dolmasın diye yavaşça) */
+/* bir içeriği bağlantıya parça parça gönder (oyun verisini bekletmeden, kanal boşaldıkça) */
 function pakSend(conn, id) {
   const o = PAK.k[id]; if (!conn || !o) return;
   conn._pk = conn._pk || {}; if (conn._pk[id]) return; conn._pk[id] = 1;
@@ -29,13 +29,18 @@ function pakSend(conn, id) {
   for (let i = 0; i < N; i++) q.push({ t: 'pk1', id, i, d: s.slice(i * PAK.CH, (i + 1) * PAK.CH) });
   pakPump(conn);
 }
+/* Parça yalnızca kanal neredeyse boşken gider: oyun verisi hep önde kalır. (Eskiden kanal 192 KB'a kadar
+   doldurulurdu; anlık görüntü 96 KB'ın üstünde atlandığından yavaş bağlantıda içerik inerken istemciye hiç
+   görüntü gitmez, maç başında "Host ile bağlantı koptu" diye düşerdi — özellikle 3+ kişide, çünkü bir
+   oyuncunun içeriği host üzerinden diğerlerine de aktarılır.) */
+const PAK_LOW = 8 * 1024;
 function pakPump(conn) {
   if (conn._pumpT) return;
   const step = () => {
     conn._pumpT = 0;
     const dc = conn.dataChannel;
-    while (conn._pq && conn._pq.length && conn.open && (!dc || dc.bufferedAmount < 192 * 1024)) netSend(conn, conn._pq.shift());
-    if (conn._pq && conn._pq.length && conn.open) conn._pumpT = setTimeout(step, 50);
+    while (conn._pq && conn._pq.length && conn.open && (!dc || dc.bufferedAmount < PAK_LOW)) netSend(conn, conn._pq.shift());
+    if (conn._pq && conn._pq.length && conn.open) conn._pumpT = setTimeout(step, 30);
   };
   step();
 }

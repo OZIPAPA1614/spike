@@ -486,6 +486,10 @@ try:
         if not until(C, "() => UI.screen==='scr-lobby'", 80): fail('İÇERİK: istemci odaya katılamadı')
         ok1 = until(H, f"() => !!(PAK.k['{ka}'] && PAK.k['{kb}'] && PAK.k['{kb}'].snd)", 40) and until(C, f"() => !!(PAK.k['{ka}'] && PAK.k['{kb}']) && !Object.keys(PAK.inb).length", 40)
         lb = C.inner_text('#lbPak')
+        # yavaş bağlantı: içerik parçaları kanalı doldurup anlık görüntüyü (96 KB'da atlanır) / sesi (48 KB) bekletmemeli
+        fill = H.evaluate(f"""() => {{ const dc = {{ bufferedAmount: 0 }}, c = {{ open: true, dataChannel: dc, send(m) {{ dc.bufferedAmount += JSON.stringify(m).length; }} }};
+            pakSend(c, '{kb}'); const n = dc.bufferedAmount; c.open = false; clearTimeout(c._pumpT); return n; }}""")
+        if fill >= 48 * 1024: fail(f'İÇERİK: yavaş bağlantıda içerik kanalı {fill // 1024} KB dolduruyor (oyun verisi bekler, istemci maç başında düşer)')
         H.select_option('#lbMode', 'fr'); H.select_option('#lbSize', '1'); H.wait_for_timeout(500); H.click('#btnLobbyStart')
         until(C, "() => UI.screen==='scr-select'", 60)
         C.click('.agent[data-id="vex"]'); C.wait_for_timeout(200); C.click('#btnLock')
