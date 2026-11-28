@@ -246,6 +246,7 @@ function uiInit() {
   $('sensR').oninput = () => { SETTINGS.sens = +$('sensR').value; $('sensV').textContent = SETTINGS.sens.toFixed(2); try { localStorage.setItem('spk_sens', SETTINGS.sens); } catch (e) { } };
   admInit(); // admin paneli (08b)
   frMenuInit(); // serbest mod spawn menüsü (08c)
+  ctlInit(); // tuş atama + dokunmatik düzen (08e)
   if (!glok) setTimeout(() => uiToast('WebGL başlatılamadı — tarayıcın 3D grafiği desteklemiyor olabilir.', true), 300);
   try { const n = localStorage.getItem('spk_name'); if (n) $('inName').value = n; } catch (e) { }
   $('btnSP').onclick = () => { AU.init(); AU.resume(); uiShow('scr-sp'); };
@@ -366,7 +367,7 @@ function uiInit() {
   $('buyClose').onclick = () => closeBuy();
   // girdi
   window.addEventListener('keydown', onKeyDown);
-  window.addEventListener('keyup', e => { KEYS[e.code] = false; if (e.code === 'Tab') UI.board = false; if (e.code === 'Digit0' || e.code === 'Numpad0') VC.keyUp(); });
+  window.addEventListener('keyup', e => { KEYS[e.code] = false; if (kbIs(e, 'board')) UI.board = false; if (kbIs(e, 'voice')) VC.keyUp(); });
   $('chatIn').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); chatClose(true); } else if (e.key === 'Escape') { e.preventDefault(); chatClose(false); } });
   window.addEventListener('blur', () => { if (!VC.open) VC.setTalk(false); for (const k in KEYS) KEYS[k] = false; MOUSE.down = false; MOUSE.right = false; UI.board = false; });
   document.addEventListener('mousemove', e => {
@@ -586,7 +587,7 @@ function uiRenderSelect(sel) {
     ['q', 'e', 'x'].map(k => {
       const ab = a[k];
       const meta = k === 'x' ? ab.pts + ' ulti puanı' : (ab.cost ? '¤' + ab.cost : 'Ücretsiz') + ' · en fazla ' + ab.max + (ab.free ? ' · her raunt 1 bedava' : '');
-      return '<div class="ab"><span class="k">' + k.toUpperCase() + '</span><div><b>' + ab.name + '</b> <i>' + meta + '</i><p>' + ab.desc + '</p></div></div>';
+      return '<div class="ab"><span class="k">' + esc(IS_TOUCH ? k.toUpperCase() : kbLabel(k)) + '</span><div><b>' + ab.name + '</b> <i>' + meta + '</i><p>' + ab.desc + '</p></div></div>';
     }).join('');
   $('btnLock').disabled = !myPick || locked;
   $('btnLock').textContent = locked ? 'KİLİTLENDİ' : 'KİLİTLE';
@@ -613,6 +614,7 @@ function uiStartGame() {
   for (const k in TOUCH.ptr) delete TOUCH.ptr[k];
   TOUCH.jx = TOUCH.jy = 0; TOUCH.fire = TOUCH.use = TOUCH.alt = TOUCH.crouch = false;
   for (const id of ['tbCrouch', 'tbScope']) { const el = $(id); if (el) el.classList.remove('lit'); }
+  tbApplyMode(); // yalnızca bu modda işe yarayan dokunmatik butonlar (08e)
   syncCursor();
   if (IS_TOUCH) { enterFullscreen(); try { screen.orientation.lock('landscape').catch(() => { }); } catch (e) { } }
   else { G.freeMouse = false; G._needLock = undefined; lockPointer(false); }
@@ -642,6 +644,7 @@ function uiFFBtn() {
 function toggleEmote(force) {
   const open = force === undefined ? !UI.emoteOpen : !!force;
   UI.emoteOpen = open && !!(G.running && S); $('emoteBox').classList.toggle('hidden', !UI.emoteOpen);
+  const eh = $('emoteBox').querySelector('.eh'); if (eh && UI.emoteOpen) eh.textContent = IS_TOUCH ? 'EMOTE · dokunarak seç' : 'EMOTE · 1–6 seç · kapat: ' + kbLabel('emote'); // atanan tuşla
 }
 function doEmote(i) {
   toggleEmote(false);
@@ -711,7 +714,7 @@ function uiRenderBuy() {
   html += '</div></div><div class="cat"><h4>YETENEKLER — ' + ag.name + '</h4><div class="row">';
   for (const k of ['q', 'e']) {
     const ab = ag[k];
-    html += item(k, '[' + k.toUpperCase() + '] ' + ab.name, me.ch[k] + ' / ' + ab.max + ' şarj', ab.cost, me.ch[k] >= ab.max);
+    html += item(k, '[' + esc(IS_TOUCH ? k.toUpperCase() : kbLabel(k)) + '] ' + ab.name, me.ch[k] + ' / ' + ab.max + ' şarj', ab.cost, me.ch[k] >= ab.max);
   }
   html += '</div></div>';
   html += '<div class="cat"><h4>TAKIM EKONOMİSİ</h4><div class="eco">' + S.players.filter(p => p.team === me.team).map(p => '<span>' + esc(p.name) + ' <b>¤' + p.credits + '</b>' + (p.primary ? ' · ' + WEAPONS[p.primary].name : '') + '</span>').join('') + '</div></div>';
@@ -751,50 +754,55 @@ function onKeyDown(e) {
   if (e.code === 'Escape' && UI.frOpen) { frMenuToggle(false); return; }
   if (e.code === 'Escape' && UI.setOpen) { closeSettings(); return; }
   KEYS[e.code] = true;
-  if (e.code === 'Tab') { e.preventDefault(); UI.board = true; }
-  // 0: sesli sohbet (lobide de çalışır)
-  if (e.code === 'Digit0' || e.code === 'Numpad0') { if (!e.repeat) VC.keyDown(); return; }
+  // tuşlar AYARLAR → TUŞ ATAMALARI'ndan değiştirilebilir (08e); ESC (menü) ve fare sabittir
+  const K = a => kbIs(e, a);
+  if (K('board')) { e.preventDefault(); UI.board = true; }
+  // bas-konuş (lobide de çalışır)
+  if (K('voice')) { if (!e.repeat) VC.keyDown(); return; }
   if (!G.running || !S) return;
-  // F3 (Mac'te fn+F3): kamera — birinci şahıs → arkadan → önden
-  if (e.code === 'F3' || e.key === 'F3') { e.preventDefault(); if (!e.repeat) camCycle(); return; }
-  // Z: emote menüsü · menü açıkken 1–6 emote seçer
-  if (e.code === 'KeyZ' && !UI.overlay && !e.repeat) { e.preventDefault(); toggleEmote(); return; }
+  // kamera — birinci şahıs → arkadan → önden
+  if (K('cam')) { e.preventDefault(); if (!e.repeat) camCycle(); return; }
+  // emote menüsü · menü açıkken 1–6 emote seçer
+  if (K('emote') && !UI.overlay && !e.repeat) { e.preventDefault(); toggleEmote(); return; }
   if (UI.emoteOpen && /^(Digit|Numpad)[1-6]$/.test(e.code)) { e.preventDefault(); doEmote(+e.code.slice(-1) - 1); return; }
   if (UI.emoteOpen && e.code === 'Escape') { toggleEmote(false); return; }
-  // nokta: yazılı sohbet (Türkçe klavyede '.' tuşu)
-  if ((e.key === '.' || e.code === 'NumpadDecimal') && !UI.overlay) { e.preventDefault(); KEYS[e.code] = false; chatOpen(); return; }
-  if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
-  if (CINE.on && !e.repeat && (e.code === 'Space' || e.code === 'Escape' || e.code === 'Enter')) { cineStop(true); return; }
-  if (!isLocked() && !UI.overlay && !G.freeMouse && !IS_TOUCH && /^(Key[WASDQEXRCFGV]|Space|Digit\d|Shift(Left|Right))$/.test(e.code)) lockPointer(true);
+  // yazılı sohbet (varsayılan: nokta — Türkçe klavyede '.' tuşu)
+  if (K('chat') && !UI.overlay) { e.preventDefault(); KEYS[e.code] = false; chatOpen(); return; }
+  const act = kbAct(e);
+  if (act || ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
+  if (CINE.on && !e.repeat && (K('jump') || e.code === 'Space' || e.code === 'Escape' || e.code === 'Enter')) { cineStop(true); return; }
+  if (!isLocked() && !UI.overlay && !G.freeMouse && !IS_TOUCH && kbLocks(e)) lockPointer(true);
   if (e.repeat) return;
-  switch (e.code) {
-    case 'Escape':
-      if (UI.buyOpen) closeBuy();
-      else if (UI.pauseOpen) { if (performance.now() - (G._escMenuT || 0) > 400) togglePause(false); }
-      else { G._escMenuT = performance.now(); togglePause(true); }
-      break;
-    case 'Enter': case 'NumpadEnter': if (UI.pauseOpen) quitToMenu(); break;
-    case 'KeyP': if (UI.buyOpen) closeBuy(); togglePause(); break;
-    case 'KeyB': if (!UI.pauseOpen) toggleBuy(); break;
-    case 'KeyQ': if (frOn() && !UI.pauseOpen) { frMenuToggle(); break; } // serbest mod: Q = spawn menüsü (GMod gibi)
-    // falls through
-    case 'KeyE': case 'KeyX': if (!UI.overlay) castAbility(e.code.slice(3).toLowerCase()); break;
-    case 'KeyR': if (!UI.overlay) doReload(); break;
-    case 'Digit1': doSlot(1); break;
-    case 'Digit2': doSlot(2); break;
-    case 'Digit3': doSlot(3); break;
-    case 'Space': { const me = S.pmap[G.myId]; if (me && me.alive) { if (!UI.overlay) doJump(); } else cycleSpec(); break; }
-    case 'KeyT': if (!UI.overlay) doRequest(); break;
-    case 'KeyG': if (!UI.overlay) { const me = S.pmap[G.myId]; if (me && me.hasBomb) { if (G.mode === 'client') netSend(NET.conn, { t: 'act', a: 'drop' }); else dropBomb(me); } } break;
-    case 'KeyM': AU.setEnabled(!AU.enabled); showMsg(null, AU.enabled ? 'SES AÇIK' : 'SES KAPALI'); break;
+  if (e.code === 'Escape') {
+    if (UI.buyOpen) closeBuy();
+    else if (UI.pauseOpen) { if (performance.now() - (G._escMenuT || 0) > 400) togglePause(false); }
+    else { G._escMenuT = performance.now(); togglePause(true); }
+    return;
+  }
+  if ((e.code === 'Enter' || e.code === 'NumpadEnter') && UI.pauseOpen) { quitToMenu(); return; }
+  if (!act) return;
+  const me = S.pmap[G.myId];
+  if (frOn() && K('spawn')) { if (!UI.pauseOpen) frMenuToggle(); return; } // serbest mod: spawn menüsü (GMod gibi)
+  switch (act) {
+    case 'pause': if (UI.buyOpen) closeBuy(); togglePause(); break;
+    case 'buy': if (!UI.pauseOpen) toggleBuy(); break;
+    case 'q': case 'e': case 'x': if (!UI.overlay) castAbility(act); break;
+    case 'reload': if (!UI.overlay) doReload(); break;
+    case 'slot1': doSlot(1); break;
+    case 'slot2': doSlot(2); break;
+    case 'slot3': doSlot(3); break;
+    case 'jump': if (me && me.alive) { if (!UI.overlay) doJump(); } else cycleSpec(); break;
+    case 'req': if (!UI.overlay) doRequest(); break;
+    case 'drop': if (!UI.overlay && me && me.hasBomb) { if (G.mode === 'client') netSend(NET.conn, { t: 'act', a: 'drop' }); else dropBomb(me); } break;
+    case 'mute': AU.setEnabled(!AU.enabled); showMsg(null, AU.enabled ? 'SES AÇIK' : 'SES KAPALI'); break;
   }
 }
 function buildLocalInput(me) {
   const blocked = UI.overlay || CINE.on;
   let f = 0, r = 0;
   if (!blocked) {
-    if (KEYS.KeyW || KEYS.ArrowUp) f += 1; if (KEYS.KeyS || KEYS.ArrowDown) f -= 1;
-    if (KEYS.KeyD || KEYS.ArrowRight) r += 1; if (KEYS.KeyA || KEYS.ArrowLeft) r -= 1;
+    if (kbHeld('fwd') || kbArrow('ArrowUp')) f += 1; if (kbHeld('back') || kbArrow('ArrowDown')) f -= 1;
+    if (kbHeld('right') || kbArrow('ArrowRight')) r += 1; if (kbHeld('left') || kbArrow('ArrowLeft')) r -= 1;
     f += -TOUCH.jy; r += TOUCH.jx;
   }
   const jm = Math.hypot(TOUCH.jx, TOUCH.jy);
@@ -804,9 +812,9 @@ function buildLocalInput(me) {
   const ap = aimPoint(me);
   return {
     mvx: mx, mvy: my, ang: a, pitch: LOOK.pitch, fire: (MOUSE.down || TOUCH.fire) && !blocked, fp: MOUSE.fp,
-    alt: (MOUSE.right || TOUCH.alt) && !blocked, walk: !!(KEYS.KeyC || TOUCH.walk || (jm > 0.05 && jm < 0.5)),
-    crouch: !!(KEYS.ShiftLeft || KEYS.ShiftRight || TOUCH.crouch),
-    use: (!!KEYS.KeyF || TOUCH.use) && !blocked, mx: ap.x, my: ap.y, jc: G.jc | 0
+    alt: (MOUSE.right || TOUCH.alt) && !blocked, walk: !!(kbHeld('walk') || TOUCH.walk || (jm > 0.05 && jm < 0.5)),
+    crouch: !!(kbHeld('crouch') || TOUCH.crouch),
+    use: (kbHeld('use') || TOUCH.use) && !blocked, mx: ap.x, my: ap.y, jc: G.jc | 0
   };
 }
 /* ---------------- DOKUNMATİK KONTROLLER ---------------- */
@@ -844,26 +852,29 @@ function setupTouch() {
   };
   layer.addEventListener('pointerdown', e => {
     e.preventDefault(); AU.resume();
+    if (UI.tedit) { tlDown(e); try { layer.setPointerCapture(e.pointerId); } catch (x) { } return; } // dokunmatik düzen düzenleyicisi (08e)
     if (CINE.on) { cineStop(true); return; } // dokunma sinematiği atlar
     const el = e.target.closest('[data-act]');
     const P = { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now() };
     if (el) { P.role = 'btn'; P.act = el.dataset.act; P.el = el; el.classList.add('on'); btnDown(P.act, el); }
-    else if (e.clientX < W * 0.42) {
+    else if (tlJoyZone(e.clientX)) { // joystick parmağın altında açılır (taraf ve boyut düzenden)
       P.role = 'joy';
-      joy.style.left = (e.clientX - 60) + 'px'; joy.style.top = (e.clientY - 60) + 'px'; joy.classList.add('act');
+      joy.classList.add('act'); joy.style.left = e.clientX + 'px'; joy.style.top = e.clientY + 'px';
       knob.style.transform = 'translate(0px,0px)';
     } else P.role = 'look';
     TOUCH.ptr[e.pointerId] = P;
     try { layer.setPointerCapture(e.pointerId); } catch (x) { }
   }, { passive: false });
   layer.addEventListener('pointermove', e => {
+    if (UI.tedit) { e.preventDefault(); tlMove(e); return; }
     const P = TOUCH.ptr[e.pointerId]; if (!P) return;
     e.preventDefault();
     if (P.role === 'joy') {
-      let dx = e.clientX - P.sx, dy = e.clientY - P.sy; const l = Math.hypot(dx, dy), m = 55;
+      const js = tlJoyScale(), m = 55 * js;
+      let dx = e.clientX - P.sx, dy = e.clientY - P.sy; const l = Math.hypot(dx, dy);
       if (l > m) { dx = dx / l * m; dy = dy / l * m; }
       TOUCH.jx = dx / m; TOUCH.jy = dy / m;
-      knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+      knob.style.transform = 'translate(' + (dx / js) + 'px,' + (dy / js) + 'px)';
     } else if (P.role === 'look' || (P.role === 'btn' && P.act === 'fire')) {
       const me = S && S.pmap[G.myId], k = 0.0055 * SETTINGS.sens * (me && me.scoped ? 0.35 : 1);
       LOOK.yaw += (e.clientX - P.x) * k; LOOK.pitch = clamp(LOOK.pitch - (e.clientY - P.y) * k, -1.4, 1.4);
@@ -871,9 +882,10 @@ function setupTouch() {
     P.x = e.clientX; P.y = e.clientY;
   }, { passive: false });
   const end = e => {
+    if (UI.tedit) { tlUp(e); return; }
     const P = TOUCH.ptr[e.pointerId]; if (!P) return;
     delete TOUCH.ptr[e.pointerId];
-    if (P.role === 'joy') { TOUCH.jx = 0; TOUCH.jy = 0; joy.classList.remove('act'); knob.style.transform = 'translate(0px,0px)'; }
+    if (P.role === 'joy') { TOUCH.jx = 0; TOUCH.jy = 0; joy.classList.remove('act'); tlJoyIdle(); knob.style.transform = 'translate(0px,0px)'; }
     else if (P.role === 'btn') { P.el.classList.remove('on'); btnUp(P.act); }
     else if (P.role === 'look' && Math.hypot(e.clientX - P.sx, e.clientY - P.sy) < 8 && performance.now() - P.t < 250) {
       const me = S && S.pmap[G.myId]; if (me && !me.alive) cycleSpec();
@@ -883,6 +895,7 @@ function setupTouch() {
 }
 function updateTouchButtons() {
   if (!IS_TOUCH || !S) return;
+  tbApplyMode(); // yalnızca bu modda işe yarayan butonlar (08e)
   const me = S.pmap[G.myId]; if (!me) return;
   const ag = AGENTS[me.agent];
   for (const k of ['q', 'e', 'x']) {

@@ -63,11 +63,36 @@ body.ingame.needlock,body.ingame.needlock *{cursor:default!important}
 button.exit{border-color:rgba(255,70,85,.45);color:#ff8a94}
 button.exit:hover{background:rgba(255,70,85,.15)}
 #touch{position:fixed;inset:0;z-index:5;touch-action:none;-webkit-touch-callout:none}
-#tjoy{position:absolute;left:30px;bottom:20px;top:auto;width:120px;height:120px;border-radius:50%;border:2px solid rgba(236,232,225,.25);background:rgba(15,25,35,.25);pointer-events:none;opacity:.45}
-#tjoy.act{opacity:1;bottom:auto}
+#tjoy{position:absolute;left:90px;top:calc(100% - 80px);width:120px;height:120px;border-radius:50%;border:2px solid rgba(236,232,225,.25);background:rgba(15,25,35,.25);pointer-events:none;opacity:.45;transform:translate(-50%,-50%) scale(var(--ts,1))}
+#tjoy.act{opacity:1}
 #tknob{position:absolute;left:35px;top:35px;width:50px;height:50px;border-radius:50%;background:rgba(30,227,207,.45);border:2px solid #1ee3cf;box-shadow:0 0 12px rgba(30,227,207,.5)}
-.tb{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;background:rgba(15,25,35,.62);border:2px solid rgba(236,232,225,.35);color:var(--white);font-weight:800;font-size:14px;letter-spacing:.05em;user-select:none;-webkit-user-select:none;line-height:1.05;text-align:center}
-.tb.on{background:rgba(255,70,85,.55);transform:scale(.94)}
+.tb{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;background:rgba(15,25,35,.62);border:2px solid rgba(236,232,225,.35);color:var(--white);font-weight:800;font-size:14px;letter-spacing:.05em;user-select:none;-webkit-user-select:none;line-height:1.05;text-align:center;transform:scale(var(--ts,1))}
+.tb.on{background:rgba(255,70,85,.55);transform:scale(calc(var(--ts,1)*.94))}
+/* kullanıcı düzeni (08e): konum ekran oranı, merkezden; boyut --ts */
+.tb.lay{right:auto!important;bottom:auto!important;transform:translate(-50%,-50%) scale(var(--ts,1))}
+.tb.lay.on{transform:translate(-50%,-50%) scale(calc(var(--ts,1)*.94))}
+.tb.mh{display:none!important}
+body.tedit #touch{z-index:58;background:rgba(5,10,15,.6)}
+body.tedit #touch .tb{display:flex!important;outline:1px dashed rgba(245,196,81,.55);outline-offset:2px}
+body.tedit #touch .tb.on{background:rgba(15,25,35,.62)}
+body.tedit #tjoy{opacity:1;pointer-events:auto;outline:1px dashed rgba(245,196,81,.55);outline-offset:2px}
+body.tedit #touch .tsel{outline:2px solid var(--gold);box-shadow:0 0 18px rgba(245,196,81,.65)}
+#tedBar{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:59;background:rgba(15,25,35,.95);border:1px solid rgba(245,196,81,.45);padding:10px 12px;width:min(330px,70vw);display:flex;flex-direction:column;gap:6px;transition:opacity .15s}
+body.tdrag #tedBar{opacity:.2;pointer-events:none}
+#tedBar .tedh{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;letter-spacing:.12em}
+#tedBar .tedh b{color:var(--gold)} #tedBar .tedh span{font-size:10px;color:var(--dim);letter-spacing:.06em}
+#tedBar .tedrow{display:flex;gap:6px;align-items:center}
+#tedBar .tedrow button{flex:1;margin:0;padding:7px 4px;font-size:11px}
+#tedBar #tedMinus,#tedBar #tedPlus{flex:0 0 34px;font-size:16px;padding:4px 0}
+#tedBar input[type=range]{flex:1;margin:0;padding:0}
+#tedBar #tedPct{width:42px;text-align:right;color:var(--gold);font-size:12px}
+.keylist{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin:6px 0 8px}
+.keylist .kr{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.06em}
+.keylist .kr span{flex:1;color:var(--white)}
+.keylist .kr button{flex:0 0 96px;margin:0;padding:6px 4px;font-size:12px;letter-spacing:.04em}
+.keylist .kr button.wait{border-color:var(--gold);color:var(--gold);background:rgba(245,196,81,.1)}
+.setpanel button.wide{width:100%;margin:6px 0 2px}
+@media (max-width:560px){.keylist{grid-template-columns:1fr}}
 .tb.lit{border-color:var(--gold);color:var(--gold)}
 .tb small{font-size:10px;color:var(--gold);font-weight:700}
 .tb i{font-style:normal;font-size:8px;color:var(--dim);max-width:52px;overflow:hidden;white-space:nowrap}
@@ -432,6 +457,12 @@ button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
   <div class="tb xs ic" id="tbCam" data-act="cam" title="Kamera">📷</div>
   <div class="tb xs ic" id="tbFull" data-act="full" title="Tam ekran">⛶</div>
 </div>
+<div id="tedBar" class="hidden">
+  <div class="tedh"><b id="tedSel">BİR BUTONA DOKUN</b><span>Sürükle: taşı · Kaydırıcı: boyut</span></div>
+  <div class="tedrow"><button id="tedMinus" class="ghost">−</button><input type="range" id="tedSize" min="0.6" max="1.8" step="0.05" value="1"><button id="tedPlus" class="ghost">+</button><b id="tedPct">100%</b></div>
+  <div class="tedrow"><button id="tedReset1" class="ghost">BUNU SIFIRLA</button><button id="tedResetAll" class="ghost">HEPSİNİ SIFIRLA</button></div>
+  <div class="tedrow"><button id="tedCancel" class="ghost">İPTAL</button><button id="tedSave" class="primary">KAYDET</button></div>
+</div>
 <div id="rotate"><b>⟳</b>Telefonunu yatay çevir<small style="color:var(--dim);font-size:13px">NOVA yatay ekranda oynanır</small></div>
 
 <div id="scr-menu" class="screen">
@@ -788,6 +819,16 @@ button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
     <div class="setrow"><span>DİL / LANGUAGE</span><div class="seg" id="stLang" data-noi18n><button data-v="tr">TÜRKÇE</button><button data-v="en">ENGLISH</button></div></div>
     <h4>KONTROLLER</h4>
     <div class="setrow"><span>FARE HASSASİYETİ</span><input type="range" id="sensR2" min="0.2" max="3" step="0.05" value="1"><b id="sensV2">1.00</b></div>
+    <div id="setTouch" class="hidden">
+      <button id="btnTouchEdit" class="wide">✥ DOKUNMATİK DÜZENİ DÜZENLE</button>
+      <div class="note">Butonları sürükleyerek istediğin yere taşı, seçtiğin butonu büyüt ya da küçült. Joystick de taşınır.</div>
+    </div>
+    <div id="setKeys">
+      <h4>TUŞ ATAMALARI</h4>
+      <div class="note">Değiştirmek istediğin eyleme tıkla, sonra yeni tuşa bas (ESC: vazgeç). Tuş başka bir eylemdeyse ikisi yer değiştirir. Ateş: sol tık · Nişan: sağ tık · Menü: ESC.</div>
+      <div id="keyList" class="keylist"></div>
+      <button id="btnKeyReset" class="ghost wide">TUŞLARI VARSAYILANA DÖNDÜR</button>
+    </div>
     <div class="row-btn"><button id="btnSetBack" class="primary">GERİ</button></div>
   </div>
 </div>

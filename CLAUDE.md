@@ -41,6 +41,10 @@ The owner writes in Turkish: reply to them in Turkish and write commit messages 
   the host inside a Web Worker; they may act only through the checked `nova` API), `src/06b_pak.js`
   (content sharing: custom NPC images + 15 s sounds are sent in 16 KB chunks when joining a room).
 - Multiplayer signalling: public PeerJS server 0.peerjs.com via the embedded MiniPeer (`src/00_peer.js`).
+- Controls (`src/08e_controls.js`): Minecraft-style key rebinding in Settings (`KB`, saved as `spk_keys`; code reads keys
+  through `kbIs` / `kbHeld` / `kbLabel`, never hard-coded codes), Brawl Stars-style touch layout editor (drag + resize
+  buttons and joystick, saved as `spk_tlay` in screen fractions) and `tbModeHidden` (touch buttons shown only in modes
+  where they work).
 
 ## Daily health check (scheduled task, 12:00 Europe/Istanbul)
 1. Run `python3 tests/check.py`.

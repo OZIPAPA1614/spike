@@ -298,7 +298,7 @@ function fmtTime(s) { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) +
 function panel(x, y, w, h, a) { ctx.fillStyle = 'rgba(15,25,35,' + (a || 0.82) + ')'; ctx.fillRect(x, y, w, h); }
 function txt(s, x, y, size, col, align, weight) {
   ctx.font = (weight || 'bold') + ' ' + size + 'px ' + FONT; ctx.textAlign = align || 'left'; ctx.textBaseline = 'middle';
-  ctx.fillStyle = col; ctx.fillText(tl(s), x, y);
+  ctx.fillStyle = col; ctx.fillText(kbHintFix(tl(s)), x, y); // ipuçlarında atanan tuşlar (08e)
 }
 function drawTopBar(me) {
   if (arOn() && S.arena) { arTopBar(me); return; }
@@ -466,11 +466,12 @@ function drawBottom(me) {
   txt(ag.name, 214, by + 48, 12, ag.color, 'right');
   // yetenekler
   const bw = 78, bh = 56, gap = 8, x0 = W / 2 - (bw * 3 + gap * 2) / 2;
-  if (frOn()) abilityBox(W / 2 - bw / 2, by + 4, bw, bh, 'Q', 'SPAWN MENÜSÜ', 0, 0, true, false, 0, PAL.gold); // serbest: Q = spawn menüsü
-  else {
-    abilityBox(x0, by + 4, bw, bh, 'Q', ag.q.name, me.ch.q, ag.q.max, me.ch.q > 0, false, 0, ag.color);
-    abilityBox(x0 + bw + gap, by + 4, bw, bh, 'E', ag.e.name, me.ch.e, ag.e.max, me.ch.e > 0, false, 0, ag.color);
-    abilityBox(x0 + (bw + gap) * 2, by + 4, bw, bh, 'X', ag.x.name, me.ult, 0, me.ult >= ag.x.pts, true, ag.x.pts, PAL.gold);
+  const kl = k => IS_TOUCH ? k.toUpperCase() : kbLabel(k); // klavyede atanan tuş (08e)
+  if (frOn()) abilityBox(W / 2 - bw / 2, by + 4, bw, bh, IS_TOUCH ? 'Q' : kbLabel('spawn'), 'SPAWN MENÜSÜ', 0, 0, true, false, 0, PAL.gold); // serbest: spawn menüsü
+  else if (!arOn()) { // silah yarışı / süpernova'da yetenek yok: kutular da çizilmez
+    abilityBox(x0, by + 4, bw, bh, kl('q'), ag.q.name, me.ch.q, ag.q.max, me.ch.q > 0, false, 0, ag.color);
+    abilityBox(x0 + bw + gap, by + 4, bw, bh, kl('e'), ag.e.name, me.ch.e, ag.e.max, me.ch.e > 0, false, 0, ag.color);
+    abilityBox(x0 + (bw + gap) * 2, by + 4, bw, bh, kl('x'), ag.x.name, me.ult, 0, me.ult >= ag.x.pts, true, ag.x.pts, PAL.gold);
   }
   // durum çipleri
   const chips = [];
@@ -623,7 +624,7 @@ function drawHints(me) {
   if (!h && me.alive && sideOf(me.team) === 'atk' && !me.hasBomb && sp.state === 'carried' && (S.phase === 'live' || S.phase === 'buy')) {
     const c = S.pmap[sp.carrier]; if (c && c.team === me.team && !IS_TOUCH && S.phase !== 'buy') h = 'BOMBA: ' + c.name + ' · [T] İSTE';
   }
-  if (h) { ctx.font = 'bold 14px ' + FONT; const tw = ctx.measureText(tl(h)).width + 30; panel(W / 2 - tw / 2, H - 140, tw, 26, 0.8); txt(h, W / 2, H - 127, 14, PAL.gold, 'center'); }
+  if (h) { ctx.font = 'bold 14px ' + FONT; const tw = ctx.measureText(kbHintFix(tl(h))).width + 30; panel(W / 2 - tw / 2, H - 140, tw, 26, 0.8); txt(h, W / 2, H - 127, 14, PAL.gold, 'center'); }
   const prog = me.plantT > 0 ? [me.plantT / PLANT_TIME, 'BOMBA KURULUYOR'] : me.defT > 0 ? [me.defT / DEFUSE_TIME, 'BOMBA İMHA EDİLİYOR'] : me.rbT > 0 ? [me.rbT / REBOOT_TIME, 'REBOOT EDİLİYOR'] : null;
   if (prog) {
     const w = 320, x = W / 2 - w / 2, y = H / 2 + 70;

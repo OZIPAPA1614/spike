@@ -279,6 +279,68 @@ try:
     report_errs(errs, 'parkur')
     ctx.close()
 
+    # ---------- 4c) kontrol ayarları: tuş atama, dokunmatik düzen, moda göre butonlar ----------
+    errs = []
+    ctx = b.new_context(viewport={'width': 1100, 'height': 700})
+    K1 = page(ctx, 'TUŞ', errs, 'Tuscu')
+    def sp_go(pg, mode):
+        pg.click('#btnPlay'); pg.click('#btnSP'); pg.select_option('#spMode', mode); pg.click('#btnSpGo'); pg.wait_for_timeout(300)
+        if mode != 'pk': pg.click('#selGrid .agent >> nth=0'); pg.click('#btnLock')
+        if not until(pg, "() => !!(G.running && S)", 40): raise Exception(mode + ' maçı başlamadı')
+        pg.evaluate("() => { cineStop(false); S.phase = 'live'; S.phaseT = 200; if (UI.pauseOpen) togglePause(false); updateTouchButtons(); }"); pg.wait_for_timeout(200)
+    try:
+        K1.click('#btnSettings'); K1.wait_for_timeout(200)
+        K1.click('#keyList button[data-k=fwd]'); K1.keyboard.press('KeyI')
+        K1.click('#keyList button[data-k=jump]'); K1.keyboard.press('KeyR')
+        K1.click('#keyList button[data-k=chat]'); K1.keyboard.press('Escape'); K1.wait_for_timeout(100)
+        kb = K1.evaluate("() => [KB.b.fwd.c, KB.b.jump.c, KB.b.reload.c, KB.b.chat.c, UI.setOpen, !!localStorage.getItem('spk_keys')]")
+        if kb != ['KeyI', 'KeyR', 'Space', 'key:.', True, True]: fail(f'tuş atama: atama / yer değiştirme / ESC iptal bozuk {kb}')
+        K1.click('#btnSetBack'); K1.wait_for_timeout(200)
+        sp_go(K1, 'bomb')
+        p0 = K1.evaluate("() => [S.pmap.h.x, S.pmap.h.y]")
+        K1.keyboard.down('KeyW'); K1.wait_for_timeout(500); K1.keyboard.up('KeyW'); K1.wait_for_timeout(150)
+        p1 = K1.evaluate("() => [S.pmap.h.x, S.pmap.h.y]")
+        K1.keyboard.down('KeyI'); K1.wait_for_timeout(600); K1.keyboard.up('KeyI'); K1.wait_for_timeout(150)
+        p2 = K1.evaluate("() => [S.pmap.h.x, S.pmap.h.y]")
+        K1.evaluate("() => { const me = S.pmap.h; me.ammo[curW(me)].mag = 1; }"); K1.keyboard.press('Space'); K1.wait_for_timeout(150)
+        rl = K1.evaluate("() => S.pmap.h.reloadT > 0")
+        dd = lambda a, c: abs(a[0] - c[0]) + abs(a[1] - c[1])
+        if dd(p0, p1) > 5 or dd(p1, p2) < 40 or not rl: fail(f'tuş atama oyunda çalışmıyor: eski W {dd(p0, p1):.0f}, yeni İLERİ {dd(p1, p2):.0f}, BOŞLUK=şarjör {rl}')
+        K1.evaluate("() => { uiBackToMenu(); kbReset(); }")
+        if K1.evaluate("() => KB.b.fwd.c") != 'KeyW': fail('tuş atama: varsayılana dönmedi')
+        else: ok('tuş atama: atandı, çakışan tuşla yer değişti, ESC iptal, oyunda yeni tuşlar çalışıyor, varsayılana döndü')
+    except Exception as e: fail('tuş atama: ' + str(e)[:300])
+    ctx.close()
+    ctx = b.new_context(viewport={'width': 844, 'height': 390}, has_touch=True, is_mobile=True)
+    T1 = page(ctx, 'DOKUNMATİK', errs, 'Dokuncu'); T1.goto(URL + '?touch=1'); T1.wait_for_timeout(700)
+    try:
+        if T1.is_visible('#accOv'): T1.click('#accGuest'); T1.wait_for_timeout(200)
+        T1.click('#btnSettings'); T1.wait_for_timeout(200); T1.click('#btnTouchEdit'); T1.wait_for_timeout(300)
+        FR_ = "() => { const r = $('tbFire').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2, r.width]; }"
+        r0 = T1.evaluate(FR_)
+        T1.mouse.move(r0[0], r0[1]); T1.mouse.down(); T1.mouse.move(r0[0] - 150, r0[1] - 110, steps=8); T1.mouse.up()
+        T1.evaluate("() => { $('tedSize').value = 1.4; $('tedSize').oninput(); }"); T1.click('#tedSave'); T1.wait_for_timeout(200)
+        sv = T1.evaluate("() => JSON.parse(localStorage.getItem('spk_tlay') || '{}').tbFire || null")
+        if not sv or abs(sv['s'] - 1.4) > 0.01: fail(f'dokunmatik düzen kaydedilmedi {sv}')
+        T1.reload(); T1.wait_for_timeout(800)
+        sp_go(T1, 'bomb')
+        r1 = T1.evaluate(FR_)
+        if abs(r1[0] - (r0[0] - 150)) > 6 or abs(r1[1] - (r0[1] - 110)) > 6 or r1[2] < r0[2] * 1.3: fail(f'dokunmatik düzen oyunda uygulanmadı: önce {r0}, sonra {r1}')
+        VIS = "() => [...document.querySelectorAll('#touch .tb')].filter(e => getComputedStyle(e).display !== 'none').map(e => e.id)"
+        seen = {'bomb': T1.evaluate(VIS)}
+        for m in ('gg', 'pk', 'fr'):
+            T1.evaluate("() => uiBackToMenu()"); T1.wait_for_timeout(200); sp_go(T1, m); seen[m] = T1.evaluate(VIS)
+        bad = []
+        if not {'tbQ', 'tbE', 'tbX', 'tbUse'} <= set(seen['bomb']) or 'tbMic' in seen['bomb']: bad.append('klasik')
+        if set(seen['gg']) & {'tbQ', 'tbE', 'tbX', 'tbUse', 'tbBuy', 'tbDrop'} or 'tbSwap' not in seen['gg']: bad.append('silah yarışı')
+        if set(seen['pk']) & {'tbQ', 'tbReload', 'tbSwap', 'tbWalk', 'tbBuy', 'tbUse'} or 'tbJump' not in seen['pk']: bad.append('parkur')
+        if set(seen['fr']) & {'tbQ', 'tbUse', 'tbDrop'} or not {'tbBuy', 'tbChat'} <= set(seen['fr']): bad.append('serbest')
+        if bad: fail(f'moda göre butonlar yanlış: {bad} {seen}')
+        else: ok('dokunmatik düzen: buton taşındı ve büyütüldü, kaydedildi, oyunda uygulandı · her modda yalnızca gerekli butonlar')
+    except Exception as e: fail('dokunmatik düzen: ' + str(e)[:300])
+    report_errs(errs, 'kontrol ayarları')
+    ctx.close()
+
     # ---------- 5) çok oyunculu ----------
     errs = []
     ctx = b.new_context(viewport={'width': 560, 'height': 340}, permissions=['microphone'])
