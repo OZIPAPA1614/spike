@@ -35,7 +35,8 @@ const PAD_HINT = { B: 'buy', F: 'use', G: 'drop', T: 'req', Q: 'spawn', 'BOŞLUK
 const PAD_SEL = 'button, a[href], input:not([type=hidden]):not([type=file]), select, textarea, .agent, .frrow, .item, .sc, .slot .sw, .slot .kick, .slot .fadd, label.filebtn';
 const PAD_FIRST = { pause: ['#btnResume'], 'scr-menu': ['#btnPlay'], 'scr-play': ['#btnSP'], 'scr-sp': ['#btnSpGo'], 'scr-store': ['#stTabs button.on'], end: ['#btnEndMenu'],
   'scr-select': ['#selGrid .agent.sel', '#selGrid .agent:not(.taken)'], 'scr-lobby': ['#btnLobbyStart'], frPop: ['#frPopYes'], frOv: ['#frTabs button.on'],
-  buy: ['#buyBody .item:not(.no):not(.owned)', '#buyBody .item'], 'scr-help': ['[data-back]'], bye: ['#btnBye'] };
+  buy: ['#buyBody .item:not(.no):not(.owned)', '#buyBody .item'], 'scr-help': ['[data-back]'], bye: ['#btnBye'], caseOv: ['#caseSkip', '#caseClose'] };
+const PAD_NEW = { pause: 1, caseOv: 1, end: 1, frPop: 1, bye: 1 }; // her açılışta ilk odaktan başlar (son odak hatırlanmaz)
 /* üstten alta: açık pencereler (ilk görünen menüyü kol yönetir) */
 const PAD_OV = ['bye', 'frPop', 'accOv', 'tedBar', 'settings', 'caseOv', 'admOv', 'frOv', 'end', 'pause', 'buy', 'emoteBox'];
 const PAD_CHAT = { id: 'chat' };
@@ -73,7 +74,12 @@ function padGet() {
   if (gp && gp.connected === false) gp = null;
   if (!gp) { // standart düzenli kol öncelikli
     let alt = null;
-    for (let i = 0; i < L.length; i++) { const g = L[i]; if (!g || g.connected === false) continue; if (g.mapping === 'standard') { gp = g; break; } if (!alt) alt = g; }
+    for (let i = 0; i < L.length; i++) {
+      const g = L[i]; if (!g || g.connected === false) continue;
+      if (g.mapping === 'standard') { gp = g; break; }
+      // bazı Android telefonlar parmak izi okuyucusunu "kol" gibi gösterir: tuşsuz / uinput aygıtları sayılmaz
+      if (!alt && g.buttons && g.buttons.length >= 4 && !/uinput|fpc|goodix|fingerprint/i.test(g.id || '')) alt = g;
+    }
     gp = gp || alt;
   }
   return gp;
@@ -127,8 +133,15 @@ function padHold(v) { if (!v) { PAD.mx = PAD.my = 0; PAD.fire = PAD.alt = PAD.cr
 function padSetOn(v) {
   v = !!v; if (PAD.on === v) return;
   PAD.on = v; document.body.classList.toggle('padon', v);
-  if (!v) { padHL(null); padHold(false); }
+  if (!v) { padHL(null); padHold(false); } else if (IS_TOUCH) padTouchReset();
   G._buySig = null; // mağazadaki tuş yazıları yenilensin
+}
+/* kol devreye girince dokunmatik katman gizlenir ve parmak kalkışını alamaz: ekranda basılı kalan dokunuşlar bırakılmış sayılır
+   (yoksa joystick / ATEŞ basılı kalır, oyuncu kendi kendine yürür) */
+function padTouchReset() {
+  for (const k in TOUCH.ptr) { const P = TOUCH.ptr[k]; if (P.el) P.el.classList.remove('on'); if (P.act === 'mic') VC.keyUp(); if (P.act === 'board') UI.board = false; delete TOUCH.ptr[k]; }
+  TOUCH.jx = TOUCH.jy = 0; TOUCH.fire = TOUCH.use = false;
+  const j = $('tjoy'); if (j && j.classList.contains('act')) { j.classList.remove('act'); tlJoyIdle(); const kn = $('tknob'); if (kn) kn.style.transform = 'translate(0px,0px)'; }
 }
 
 /* ---------------- HER KARE ---------------- */
@@ -146,7 +159,7 @@ function padTick(dt) {
   const root = padLayer();
   if (root) padMenu(root, dt, wake);
   else {
-    if (PAD.root) { if (PAD.foc) PAD.mem.set(PAD.root, PAD.foc); PAD.root = null; }
+    if (PAD.root) { padMemo(); PAD.root = null; }
     padHL(null);
     if (G.running && S) padGame(dt); else padHold(false);
   }
@@ -205,7 +218,7 @@ function padAssist(me) {
     const dx = p.x - me.x, dy = p.y - me.y, d = Math.hypot(dx, dy);
     if (d < 30 || d > 2600 || dx * ux + dy * uy <= 0) continue;
     if (Math.abs(dx * uy - dy * ux) > 38 + d * 0.03) continue; // nişan çizgisine uzaklık
-    if (losClear(me.x, me.y, p.x, p.y)) return 0.62;
+    if (losClear(me.x, me.y, p.x, p.y)) return 0.7; // hafif: bakış %30 yavaşlar
   }
   return 1;
 }
@@ -238,14 +251,16 @@ function padRumbleTick(me) {
 function padMenu(root, dt, wake) {
   padHold(false);
   if (root === PAD_CHAT) { padHL(null); if (padDn(1) || padDn(9)) chatClose(false); return; }
-  if (root !== PAD.root) { // pencere değişti: oradaki son odağa dön
-    if (PAD.root && PAD.foc) PAD.mem.set(PAD.root, PAD.foc);
-    PAD.root = root; const m = PAD.mem.get(root);
-    PAD.foc = m && padOk(m, root) ? m : null;
+  if (root !== PAD.root) { // pencere değişti: oradaki son odağa dön (öğe yeniden çizildiyse aynı yerdekine)
+    if (PAD.root) padMemo();
+    PAD.root = root; const m = PAD_NEW[root.id] ? null : PAD.mem.get(root);
+    PAD.foc = m && padOk(m.el, root) ? m.el : null; PAD.focR = PAD.foc ? null : m ? m.r : null;
     PAD.dir = padDirNow(); PAD.repT = 1e9; // menüyü açan yön tuşu (← mağaza) hâlâ basılıysa gezinme sayılmaz: bırakılınca başlar
   }
   if (!PAD.on) { padHL(null); return; }
-  if (PAD.foc && !padOk(PAD.foc, root)) padSetFoc(padNear(root, PAD.focR)); // yeniden çizilen menüde aynı yere en yakın
+  if (!PAD.foc && PAD.focR) padSetFoc(padNear(root, PAD.focR));
+  // odaklı öğe kayboldu: yeniden çizilen menüde aynı yere en yakın · kasa ekranında ATLA'dan sonra KAPAT (✕'e basmaya devam eden yanlışlıkla yeni kasa almasın)
+  if (PAD.foc && !padOk(PAD.foc, root)) padSetFoc(root.id === 'caseOv' ? padFirst(root) : padNear(root, PAD.focR));
   if (!PAD.foc) padSetFoc(padFirst(root));
   if (PAD.foc) PAD.focR = PAD.foc.getBoundingClientRect();
   padHL(PAD.foc);
@@ -298,6 +313,7 @@ function padHL(el) {
   if (PAD.hl) PAD.hl.classList.remove('padfoc');
   PAD.hl = el || null; if (el) el.classList.add('padfoc');
 }
+function padMemo() { if (PAD.root && PAD.foc) PAD.mem.set(PAD.root, { el: PAD.foc, r: PAD.focR || PAD.foc.getBoundingClientRect() }); }
 function padSetFoc(el) {
   PAD.foc = el || null; if (!el) return;
   const ae = document.activeElement;
@@ -392,6 +408,7 @@ function padBack(root) {
     case 'frPop': uiFriendPopAnswer(null); return; // şimdilik kapat (istek reddedilmez)
     case 'scr-net': $('btnNetBack').click(); return;
     case 'scr-pub': $('btnPubCancel').click(); return;
+    case 'scr-lobby': return; // lobide ○ odadan çıkarmaz (yanlışlıkla basınca oda kapanmasın): AYRIL / ODAYI KAPAT seçilerek çıkılır
   }
   for (const b of root.querySelectorAll('[data-back]')) if (padVis(b)) { b.click(); return; } // ekranın GERİ düğmesi
 }

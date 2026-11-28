@@ -367,18 +367,26 @@ try:
         G1.evaluate("() => padSetFoc($('padSens'))"); ptap(G1, 15)
         sens = G1.evaluate("() => [PAD.cfg.sens, JSON.parse(localStorage.getItem('spk_pad') || '{}').s]")
         ptap(G1, 1); f2 = pfoc(G1); so = G1.evaluate("() => UI.setOpen")
-        ptap(G1, 12); ptap(G1, 0); ptap(G1, 5)
+        en = G1.evaluate("() => { setLang('en'); const t = [$('setPad').querySelector('h4').textContent, $('padStat').textContent, $('padMap').textContent.includes('Switch weapon')]; setLang('tr'); return t; }")
+        ptap(G1, 12); G1.evaluate("() => { SHOP.prof.gems = 5000; SHOP.save(); }"); ptap(G1, 0); ptap(G1, 5)
         stv = G1.evaluate("() => [UI.screen, STORE.tab]")
+        # kasa: R1 ×3 → KASALAR · ↓ kasa · ✕ seç · ✕ aç · ✕ atla → odak KAPAT'ta (✕'e basmaya devam eden yanlışlıkla yeni kasa almasın) · ○ kapat → odak kasada
+        for i in (5, 5, 5, 13, 0, 0): ptap(G1, i)
+        until(G1, "() => UI.caseOpen", 12); ptap(G1, 0); G1.wait_for_timeout(250)
+        cz = G1.evaluate("() => [STORE.tab, UI.caseOpen, !!CASEUI.spin, PAD.foc && PAD.foc.id]")
+        ptap(G1, 1); cz.append(G1.evaluate("() => !UI.caseOpen && !!PAD.foc && PAD.foc.classList.contains('case')"))
         ptap(G1, 1); back = G1.evaluate("() => UI.screen")
         bad = []
         if f1 != 'btnSettings': bad.append(f'↓ ile AYARLAR\'a gelinmedi ({f1})')
         if not st[0] or not st[1] or 'bağlı' not in st[2]: bad.append(f'✕ ile ayarlar / odak / kol durumu {st}')
         if sens[0] <= 1.01 or abs((sens[1] or 0) - sens[0]) > 1e-6: bad.append(f'→ ile kaydırıcı değişmedi / kaydedilmedi {sens}')
         if so or f2 != 'btnSettings': bad.append(f'○ ile ayarlar kapanmadı ya da odak dönmedi ({so}, {f2})')
+        if en[0] != 'CONTROLLER' or 'PlayStation controller connected' not in en[1] or not en[2]: bad.append(f'İngilizce çeviri {en}')
         if stv != ['scr-store', 'ws']: bad.append(f'mağaza / R1 sekme {stv}')
+        if cz != ['cr', True, False, 'caseClose', True]: bad.append(f'kasa ekranı (sekme, açık, dönüyor, odak, kapanınca odak kasada) {cz}')
         if back != 'scr-menu': bad.append(f'mağazadan ○ ile dönülmedi ({back})')
         if bad: fail('oyun kolu menü gezinmesi: ' + ' · '.join(bad))
-        else: ok('oyun kolu: bağlandı bildirimi · menüde ↓ ✕ ○ ile ayarlar ve mağaza, → kaydırıcı, R1 sekme')
+        else: ok('oyun kolu: bağlandı bildirimi · menüde ↓ ✕ ○ ile ayarlar ve mağaza, → kaydırıcı, R1 sekme, kasa aç / atla / kapat · İngilizce')
         # tek oyunculu maça yalnızca kolla gir: OYNA → TEK OYUNCULU → AJAN SEÇİMİ → ✕ ajanı seç → ✕ tekrar: KİLİTLE
         ptap(G1, 12); ptap(G1, 0); ptap(G1, 0); ptap(G1, 0)
         until(G1, "() => UI.screen === 'scr-select'", 20); ptap(G1, 15); ptap(G1, 0)
@@ -398,6 +406,11 @@ try:
         ptap(G1, 0); G1.wait_for_timeout(400); r['jump'] = G1.evaluate("() => window.__mz") > 5
         G1.evaluate("() => { const me = S.pmap.h; me.ammo[curW(me)].mag = 1; }"); ptap(G1, 2); r['reload'] = G1.evaluate("() => S.pmap.h.reloadT > 0")
         s0 = G1.evaluate("() => S.pmap.h.slot"); ptap(G1, 3); r['swap'] = G1.evaluate("() => S.pmap.h.slot") != s0
+        # basılı tutulanlar: ○ eğil · L2 nişan · ↓ kullan
+        G1.evaluate("() => { for (const i of [1, 6, 13]) { __pad.buttons[i].pressed = true; __pad.buttons[i].value = 1; } }"); G1.evaluate("() => __frames(3)")
+        r['hold'] = G1.evaluate("() => { const q = buildLocalInput(S.pmap.h); return [q.crouch, q.alt, q.use]; }")
+        G1.evaluate("() => { for (const i of [1, 6, 13]) { __pad.buttons[i].pressed = false; __pad.buttons[i].value = 0; } }"); G1.evaluate("() => __frames(3)")
+        r['hold'] += G1.evaluate("() => { const q = buildLocalInput(S.pmap.h); return [q.crouch, q.alt, q.use]; }")
         r['labels'] = G1.evaluate("() => [ctlKey('q'), ctlKey('x'), kbHintFix('[F] BASILI TUT: BOMBA KUR'), $('lockHint').classList.contains('hidden')]")
         r['assist'] = G1.evaluate("""() => { const me = S.pmap.h, e = S.players.find(p => p.team !== me.team); e.alive = true; e.st = {}; let ok = false;
             for (let k = 0; k < 16 && !ok; k++) { const a = k * Math.PI / 8, x = me.x + Math.cos(a) * 160, y = me.y + Math.sin(a) * 160; if (!rayBlockAt(x, y) && losClear(me.x, me.y, x, y)) { setPos(e, x, y); LOOK.yaw = a; ok = true; } }
@@ -405,10 +418,10 @@ try:
         ptap(G1, 9); r['pause'] = G1.evaluate("() => [UI.pauseOpen, PAD.foc && PAD.foc.id]"); ptap(G1, 1); r['resume'] = not G1.evaluate("() => UI.pauseOpen")
         G1.evaluate("() => { __pad.connected = false; }")
         r['lost'] = until(G1, "() => PAD.idx === -1 && !PAD.on && UI.pauseOpen && [...document.querySelectorAll('#toasts .toast')].some(t => t.textContent.includes('bağlantısı kesildi'))", 20)
-        exp = {'cine': False, 'fire': True, 'rumble': True, 'jump': True, 'reload': True, 'swap': True, 'labels': ['L1', '↑', '[↓] BASILI TUT: BOMBA KUR', True],
-               'assist': [True, 0.62, 1], 'pause': [True, 'btnResume'], 'resume': True, 'lost': True}
+        exp = {'cine': False, 'fire': True, 'rumble': True, 'jump': True, 'reload': True, 'swap': True, 'hold': [True, True, True, False, False, False],
+               'labels': ['L1', '↑', '[↓] BASILI TUT: BOMBA KUR', True], 'assist': [True, 0.7, 1], 'pause': [True, 'btnResume'], 'resume': True, 'lost': True}
         if r['move'] < 40 or r['look'] < 0.2 or any(r[k] != v for k, v in exp.items()): fail(f'oyun kolu oyunda beklenen gibi değil: {r}')
-        else: ok(f"oyun kolu oyunda: maça kolla girildi, ✕ sinematiği atladı, sol çubuk hareket ({r['move']}), sağ çubuk bakış, R2 ateş + titreşim, ✕ zıpla, □ şarjör, △ silah, OPTIONS menü, kol tuşu yazıları, nişan yardımı, kol kopunca menü")
+        else: ok(f"oyun kolu oyunda: maça kolla girildi, ✕ sinematiği atladı, sol çubuk hareket ({r['move']}), sağ çubuk bakış, R2 ateş + titreşim, ✕ zıpla, □ şarjör, △ silah, ○ / L2 / ↓ basılı, OPTIONS menü, kol tuşu yazıları, nişan yardımı, kol kopunca menü")
     except Exception as e: fail('oyun kolu: ' + str(e)[:300])
     ctx.close()
     ctx = b.new_context(viewport={'width': 844, 'height': 390}, has_touch=True, is_mobile=True)
@@ -419,13 +432,14 @@ try:
         sp_go(T2, 'bomb')
         TD = "() => getComputedStyle($('touch')).display"
         d0 = T2.evaluate(TD); q0 = T2.evaluate("() => [S.pmap.h.x, S.pmap.h.y]")
-        T2.evaluate("() => { __pad.axes[1] = -1; }"); T2.wait_for_timeout(500); T2.evaluate("() => { __pad.axes[1] = 0; }"); T2.wait_for_timeout(150)
+        T2.evaluate("() => { TOUCH.jx = 1; TOUCH.ptr[77] = { role: 'joy' }; __pad.axes[1] = -1; }"); T2.wait_for_timeout(500); T2.evaluate("() => { __pad.axes[1] = 0; }"); T2.wait_for_timeout(150)
         d1 = T2.evaluate(TD); q1 = T2.evaluate("() => [S.pmap.h.x, S.pmap.h.y]")
+        stuck = T2.evaluate("() => TOUCH.jx !== 0 || Object.keys(TOUCH.ptr).length > 0") # gizlenen katmanda basılı kalan joystick bırakılmalı
         T2.touchscreen.tap(420, 200); T2.wait_for_timeout(250)
         d2 = T2.evaluate(TD); on2 = T2.evaluate("() => PAD.on")
         mv = abs(q1[0] - q0[0]) + abs(q1[1] - q0[1])
-        if d0 == 'none' or d1 != 'none' or d2 == 'none' or on2 or mv < 40: fail(f'oyun kolu telefonda: dokunmatik butonlar önce {d0}, kolla {d1}, dokununca {d2} (kol etkin {on2}), hareket {mv:.0f}')
-        else: ok('oyun kolu telefonda: kolla oynarken dokunmatik butonlar gizlendi, ekrana dokununca geri geldi')
+        if d0 == 'none' or d1 != 'none' or d2 == 'none' or on2 or mv < 40 or stuck: fail(f'oyun kolu telefonda: dokunmatik butonlar önce {d0}, kolla {d1}, dokununca {d2} (kol etkin {on2}), hareket {mv:.0f}, basılı kalan joystick {stuck}')
+        else: ok('oyun kolu telefonda: kolla oynarken dokunmatik butonlar gizlendi (basılı kalan joystick bırakıldı), ekrana dokununca geri geldi')
     except Exception as e: fail('oyun kolu telefonda: ' + str(e)[:300])
     report_errs(errs, 'oyun kolu')
     ctx.close()
