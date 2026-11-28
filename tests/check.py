@@ -8,6 +8,7 @@ Kullanım (depo kökünden):  python3 tests/check.py [--quick]
   3b) PARKUR modu: botlarla 5 raunt (--quick: 1 raunt)
   3c) SİLAH YARIŞI ve SÜPERNOVA: botlarla maç (--quick: 4 dk)
   4) Tek oyunculu arayüz akışı (ajan seçimi → sinematik giriş → oyun → çizim) + PARKUR arayüz akışı
+  4c) Kontrol ayarları (tuş atama, dokunmatik düzen) · 4d) Oyun kolu (sahte standart kol: menü gezinme, oyunda tuşlar, telefonda dokunmatik gizleme)
   5) Çok oyunculu: yerel eşleştirme sunucusuyla host + istemci (oda, katılma, maç, hareket, sohbet, ses) + PARKUR eşitlemesi
   6) Herkese açık sunucu eşleşmesi (yerel Firebase taklidiyle)
 Çıkış kodu 0 = sorun yok. Her bulgu "FAIL:" ile başlar.
@@ -52,12 +53,12 @@ INIT = ("window.__NOSPLASH=1;window.__PEER_OPTS={host:'127.0.0.1',port:%d,secure
         "window.__FB_OPTS={auth:'http://127.0.0.1:%d/v1/',tok:'http://127.0.0.1:%d/token',db:'http://127.0.0.1:%d/db'};" % (FBP, FBP, FBP) +
         "try{localStorage.setItem('spk_mus','0');localStorage.setItem('spk_gfx','low');localStorage.setItem('spk_guest','1');}catch(e){}")
 
-def page(ctx, tag, errs, nick, vw=None):
+def page(ctx, tag, errs, nick, vw=None, init=''):
     pg = ctx.new_page()
     if vw: pg.set_viewport_size(vw)
     pg.on('pageerror', lambda e: errs.append(f'{tag} sayfa hatası: {e} {str(e.stack)[:400]}'))
     pg.on('console', lambda m: errs.append(f'{tag} konsol hatası: {m.text[:300]}') if m.type == 'error' and 'Failed to load' not in m.text and 'ERR_' not in m.text else None)
-    pg.add_init_script(INIT + ("try{localStorage.setItem('spk_nick',%s);}catch(e){}" % json.dumps(nick)))
+    pg.add_init_script(INIT + init + ("try{localStorage.setItem('spk_nick',%s);}catch(e){}" % json.dumps(nick)))
     pg.goto(URL); pg.wait_for_timeout(700)
     if pg.is_visible('#accOv'):
         try: pg.click('#accGuest'); pg.wait_for_timeout(200)
@@ -339,6 +340,96 @@ try:
         else: ok('dokunmatik düzen: buton taşındı ve büyütüldü, kaydedildi, oyunda uygulandı · her modda yalnızca gerekli butonlar')
     except Exception as e: fail('dokunmatik düzen: ' + str(e)[:300])
     report_errs(errs, 'kontrol ayarları')
+    ctx.close()
+
+    # ---------- 4d) oyun kolu (PlayStation / standart kol): bağlanma, menü gezinme, oyunda tuşlar, telefonda dokunmatik gizleme ----------
+    # Playwright gerçek kol takamaz: navigator.getGamepads sahte bir standart kol döndürür, durumunu test değiştirir
+    PADMOCK = r"""(() => { const btns = []; for (let i = 0; i < 18; i++) btns.push({ pressed: false, touched: false, value: 0 });
+      window.__pad = { id: 'Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 09cc)', index: 0, connected: false, mapping: 'standard', axes: [0, 0, 0, 0], buttons: btns, timestamp: 0,
+        vibrationActuator: { type: 'dual-rumble', n: 0, playEffect() { this.n++; return Promise.resolve('complete'); } } };
+      Object.defineProperty(navigator, 'getGamepads', { configurable: true, value: () => [window.__pad.connected ? window.__pad : null, null, null, null] });
+      window.__frames = n => new Promise(r => { let k = 0; const f = () => (++k >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); });
+      window.__tap = async (i) => { const b = __pad.buttons[i]; b.pressed = true; b.value = 1; await __frames(3); b.pressed = false; b.value = 0; await __frames(3); };
+      window.__stick = async (a, v, n) => { __pad.axes[a] = v; await __frames(n); __pad.axes[a] = 0; await __frames(2); }; })();"""
+    ptap = lambda pg, i: pg.evaluate("(i) => __tap(i)", i)
+    pfoc = lambda pg: pg.evaluate("() => PAD.foc ? (PAD.foc.id || PAD.foc.className) : ''")
+    PCON = "() => { __pad.connected = true; window.dispatchEvent(new Event('gamepadconnected')); }"
+    errs = []
+    ctx = b.new_context(viewport={'width': 1100, 'height': 700})
+    G1 = page(ctx, 'KOL', errs, 'Kolcu', init=PADMOCK)
+    try:
+        G1.evaluate(PCON)
+        if not until(G1, "() => PAD.idx === 0 && PAD.ps && [...document.querySelectorAll('#toasts .toast')].some(t => t.textContent.includes('PlayStation kolu bağlandı'))", 20): fail('oyun kolu: "PlayStation kolu bağlandı" bildirimi / durumu yok')
+        # ana menü: ↓ (ilk basış yalnızca odağı gösterir) ↓ ↓ → AYARLAR · ✕ açar · → kaydırıcı · ○ kapatır · ↑ ✕ → MAĞAZA · R1 sekme · ○ geri
+        for i in (13, 13, 13): ptap(G1, i)
+        f1 = pfoc(G1); ptap(G1, 0)
+        st = G1.evaluate("() => [UI.setOpen, !!document.querySelector('#settings .padfoc'), $('padStat').textContent]")
+        G1.evaluate("() => padSetFoc($('padSens'))"); ptap(G1, 15)
+        sens = G1.evaluate("() => [PAD.cfg.sens, JSON.parse(localStorage.getItem('spk_pad') || '{}').s]")
+        ptap(G1, 1); f2 = pfoc(G1); so = G1.evaluate("() => UI.setOpen")
+        ptap(G1, 12); ptap(G1, 0); ptap(G1, 5)
+        stv = G1.evaluate("() => [UI.screen, STORE.tab]")
+        ptap(G1, 1); back = G1.evaluate("() => UI.screen")
+        bad = []
+        if f1 != 'btnSettings': bad.append(f'↓ ile AYARLAR\'a gelinmedi ({f1})')
+        if not st[0] or not st[1] or 'bağlı' not in st[2]: bad.append(f'✕ ile ayarlar / odak / kol durumu {st}')
+        if sens[0] <= 1.01 or abs((sens[1] or 0) - sens[0]) > 1e-6: bad.append(f'→ ile kaydırıcı değişmedi / kaydedilmedi {sens}')
+        if so or f2 != 'btnSettings': bad.append(f'○ ile ayarlar kapanmadı ya da odak dönmedi ({so}, {f2})')
+        if stv != ['scr-store', 'ws']: bad.append(f'mağaza / R1 sekme {stv}')
+        if back != 'scr-menu': bad.append(f'mağazadan ○ ile dönülmedi ({back})')
+        if bad: fail('oyun kolu menü gezinmesi: ' + ' · '.join(bad))
+        else: ok('oyun kolu: bağlandı bildirimi · menüde ↓ ✕ ○ ile ayarlar ve mağaza, → kaydırıcı, R1 sekme')
+        # tek oyunculu maça yalnızca kolla gir: OYNA → TEK OYUNCULU → AJAN SEÇİMİ → ajan → → … KİLİTLE
+        ptap(G1, 12); ptap(G1, 0); ptap(G1, 0); ptap(G1, 0)
+        until(G1, "() => UI.screen === 'scr-select'", 20); ptap(G1, 0)
+        for _ in range(8):
+            if pfoc(G1) == 'btnLock': break
+            ptap(G1, 15)
+        ptap(G1, 0)
+        if not until(G1, "() => !!(G.running && S)", 40): raise Exception('kolla tek oyunculu maça girilemedi (odak: ' + pfoc(G1) + ')')
+        until(G1, "() => CINE.on", 8); ptap(G1, 0)
+        r = {'cine': G1.evaluate("() => CINE.on")}
+        G1.evaluate("() => { S.phase = 'live'; S.phaseT = 200; window.__mz = 0; setInterval(() => { window.__mz = Math.max(window.__mz, S.pmap.h.jz || 0); }, 16); }")
+        p0 = G1.evaluate("() => [S.pmap.h.x, S.pmap.h.y]")
+        G1.evaluate("() => { __pad.axes[1] = -1; }"); G1.wait_for_timeout(600); G1.evaluate("() => { __pad.axes[1] = 0; }"); G1.wait_for_timeout(150)
+        p1 = G1.evaluate("() => [S.pmap.h.x, S.pmap.h.y]"); r['move'] = round(abs(p1[0] - p0[0]) + abs(p1[1] - p0[1]))
+        y0 = G1.evaluate("() => LOOK.yaw"); G1.evaluate("() => __stick(2, 1, 10)"); r['look'] = round(G1.evaluate("() => LOOK.yaw") - y0, 2)
+        a0 = G1.evaluate("() => { const me = S.pmap.h; return [me.ammo[curW(me)].mag, MOUSE.fp]; }"); ptap(G1, 7); G1.wait_for_timeout(150)
+        a1 = G1.evaluate("() => { const me = S.pmap.h; return [me.ammo[curW(me)].mag, MOUSE.fp, __pad.vibrationActuator.n]; }")
+        r['fire'] = a1[0] < a0[0] and a1[1] == a0[1] + 1; r['rumble'] = a1[2] > 0
+        ptap(G1, 0); G1.wait_for_timeout(400); r['jump'] = G1.evaluate("() => window.__mz") > 5
+        G1.evaluate("() => { const me = S.pmap.h; me.ammo[curW(me)].mag = 1; }"); ptap(G1, 2); r['reload'] = G1.evaluate("() => S.pmap.h.reloadT > 0")
+        s0 = G1.evaluate("() => S.pmap.h.slot"); ptap(G1, 3); r['swap'] = G1.evaluate("() => S.pmap.h.slot") != s0
+        r['labels'] = G1.evaluate("() => [ctlKey('q'), ctlKey('x'), kbHintFix('[F] BASILI TUT: BOMBA KUR'), $('lockHint').classList.contains('hidden')]")
+        r['assist'] = G1.evaluate("""() => { const me = S.pmap.h, e = S.players.find(p => p.team !== me.team); e.alive = true; e.st = {}; let ok = false;
+            for (let k = 0; k < 16 && !ok; k++) { const a = k * Math.PI / 8, x = me.x + Math.cos(a) * 160, y = me.y + Math.sin(a) * 160; if (!rayBlockAt(x, y) && losClear(me.x, me.y, x, y)) { setPos(e, x, y); LOOK.yaw = a; ok = true; } }
+            const a1 = padAssist(me); PAD.cfg.aim = false; const a2 = padAssist(me); PAD.cfg.aim = true; return [ok, a1, a2]; }""")
+        ptap(G1, 9); r['pause'] = G1.evaluate("() => [UI.pauseOpen, PAD.foc && PAD.foc.id]"); ptap(G1, 1); r['resume'] = not G1.evaluate("() => UI.pauseOpen")
+        G1.evaluate("() => { __pad.connected = false; }")
+        r['lost'] = until(G1, "() => PAD.idx === -1 && !PAD.on && UI.pauseOpen && [...document.querySelectorAll('#toasts .toast')].some(t => t.textContent.includes('bağlantısı kesildi'))", 20)
+        exp = {'cine': False, 'fire': True, 'rumble': True, 'jump': True, 'reload': True, 'swap': True, 'labels': ['L1', '↑', '[↓] BASILI TUT: BOMBA KUR', True],
+               'assist': [True, 0.62, 1], 'pause': [True, 'btnResume'], 'resume': True, 'lost': True}
+        if r['move'] < 40 or r['look'] < 0.2 or any(r[k] != v for k, v in exp.items()): fail(f'oyun kolu oyunda beklenen gibi değil: {r}')
+        else: ok(f"oyun kolu oyunda: maça kolla girildi, ✕ sinematiği atladı, sol çubuk hareket ({r['move']}), sağ çubuk bakış, R2 ateş + titreşim, ✕ zıpla, □ şarjör, △ silah, OPTIONS menü, kol tuşu yazıları, nişan yardımı, kol kopunca menü")
+    except Exception as e: fail('oyun kolu: ' + str(e)[:300])
+    ctx.close()
+    ctx = b.new_context(viewport={'width': 844, 'height': 390}, has_touch=True, is_mobile=True)
+    T2 = page(ctx, 'KOL-DOKUNMATİK', errs, 'KolDokun', init=PADMOCK); T2.goto(URL + '?touch=1'); T2.wait_for_timeout(700)
+    try:
+        if T2.is_visible('#accOv'): T2.click('#accGuest'); T2.wait_for_timeout(200)
+        T2.evaluate(PCON)
+        sp_go(T2, 'bomb')
+        TD = "() => getComputedStyle($('touch')).display"
+        d0 = T2.evaluate(TD); q0 = T2.evaluate("() => [S.pmap.h.x, S.pmap.h.y]")
+        T2.evaluate("() => { __pad.axes[1] = -1; }"); T2.wait_for_timeout(500); T2.evaluate("() => { __pad.axes[1] = 0; }"); T2.wait_for_timeout(150)
+        d1 = T2.evaluate(TD); q1 = T2.evaluate("() => [S.pmap.h.x, S.pmap.h.y]")
+        T2.touchscreen.tap(420, 200); T2.wait_for_timeout(250)
+        d2 = T2.evaluate(TD); on2 = T2.evaluate("() => PAD.on")
+        mv = abs(q1[0] - q0[0]) + abs(q1[1] - q0[1])
+        if d0 == 'none' or d1 != 'none' or d2 == 'none' or on2 or mv < 40: fail(f'oyun kolu telefonda: dokunmatik butonlar önce {d0}, kolla {d1}, dokununca {d2} (kol etkin {on2}), hareket {mv:.0f}')
+        else: ok('oyun kolu telefonda: kolla oynarken dokunmatik butonlar gizlendi, ekrana dokununca geri geldi')
+    except Exception as e: fail('oyun kolu telefonda: ' + str(e)[:300])
+    report_errs(errs, 'oyun kolu')
     ctx.close()
 
     # ---------- 5) çok oyunculu ----------

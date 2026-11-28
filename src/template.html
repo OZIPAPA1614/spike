@@ -93,6 +93,16 @@ body.tdrag #tedBar{opacity:.2;pointer-events:none}
 .keylist .kr button.wait{border-color:var(--gold);color:var(--gold);background:rgba(245,196,81,.1)}
 .setpanel button.wide{width:100%;margin:6px 0 2px}
 @media (max-width:560px){.keylist{grid-template-columns:1fr}}
+/* oyun kolu (08f): menüde odak çerçevesi (düğmelerin köşesi kesik olduğundan çerçeve içeride), kolla oynarken dokunmatik butonlar gizli */
+.padfoc{outline:3px solid var(--gold)!important;outline-offset:-3px!important;box-shadow:inset 0 0 18px rgba(245,196,81,.4),0 0 14px rgba(245,196,81,.5)!important}
+input.padfoc,select.padfoc,a.padfoc,.agent.padfoc,.item.padfoc,.frrow.padfoc,.slot .padfoc{outline-offset:2px!important}
+body.padon:not(.tedit) #touch{display:none!important}
+.padmap{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin:6px 0 8px}
+.padmap .pr{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.05em;line-height:1.25}
+.padmap .pr b{flex:0 0 96px;white-space:nowrap;text-align:center;padding:3px 2px;border:1px solid rgba(245,196,81,.45);color:var(--gold);font-size:12px;letter-spacing:.04em}
+.padmap .pr span{flex:1}
+.setpanel .note.padst{color:var(--white);font-size:13px} .setpanel .note.padst.ok{color:#5be3a0}
+@media (max-width:560px){.padmap{grid-template-columns:1fr}}
 .tb.lit{border-color:var(--gold);color:var(--gold)}
 .tb small{font-size:10px;color:var(--gold);font-weight:700}
 .tb i{font-style:normal;font-size:8px;color:var(--dim);max-width:52px;overflow:hidden;white-space:nowrap}
@@ -594,6 +604,7 @@ button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
       <tr><td>. (nokta)</td><td>Yazılı sohbet: yaz, ENTER ile gönder — mesaj herkesin ekranında solda adınla görünür</td></tr>
       <tr><td>ESC</td><td>Menüyü açar: <b>OYUNDAN ÇIK</b> (ya da ENTER) ile ana menüye dönersin, tekrar ESC ile maça dönersin. Mağaza açıksa önce mağazayı kapatır.</td></tr>
       <tr><td>P · TAB · M</td><td>Duraklat / ayarlar · Skor tablosu · Ses aç/kapa</td></tr>
+      <tr><td>OYUN KOLU</td><td>PlayStation kolu (DualShock 4 / DualSense) ya da başka bir kol: telefona veya bilgisayara Bluetooth ile bağla, bir tuşa bas. Sol çubuk hareket · sağ çubuk bakış · R2 ateş · L2 nişan · ✕ zıpla · ○ eğil · □ şarjör · △ silah değiştir · L1 / R1 / ↑ yetenekler ve ulti · ↓ kullan · ← mağaza · → bomba · OPTIONS menü. Menülerde yön tuşları + ✕ seç, ○ geri. Hassasiyet, titreşim ve nişan yardımı: AYARLAR → OYUN KOLU</td></tr>
     </table>
     <h3>MAÇ</h3>
     <p>İki takım: Saldıranlar ve Savunanlar. Maç <b>20 raunt</b> sürer; <b>10. rauntten sonra</b> taraflar değişir ve ekonomi sıfırlanır. 20 raunt sonunda daha çok raunt kazanan takım maçı alır (10–10 berabere). Saldıranlar bombayı A veya B bölgesine kurar; kurulan bomba (C4) haritaya göre 45–50 saniyede patlar; raunt 100 saniyedir. Savunanlar 7 saniyede imha eder (yarıda bırakılırsa 3.5 sn'den devam eder).</p>
@@ -643,6 +654,7 @@ button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
       <tr><td>. (period)</td><td>Text chat: type, press ENTER — the message appears on the left for everyone with your name</td></tr>
       <tr><td>ESC</td><td>Opens the menu: <b>QUIT GAME</b> (or ENTER) returns to the main menu, ESC again resumes.</td></tr>
       <tr><td>P · TAB · M</td><td>Pause · Scoreboard · Sound on/off</td></tr>
+      <tr><td>CONTROLLER</td><td>PlayStation controller (DualShock 4 / DualSense) or any other gamepad: pair it with your phone or computer via Bluetooth and press a button. Left stick move · right stick look · R2 fire · L2 aim · ✕ jump · ○ crouch · □ reload · △ switch weapon · L1 / R1 / ↑ abilities and ultimate · ↓ use · ← shop · → bomb · OPTIONS menu. In menus: D-pad + ✕ select, ○ back. Sensitivity, vibration and aim assist: SETTINGS → CONTROLLER</td></tr>
     </table>
     <h3>MATCH</h3>
     <p>Two teams: Attackers and Defenders. A match lasts <b>20 rounds</b>; sides swap <b>after round 10</b> and the economy resets. After 20 rounds the team with more round wins takes the match (10–10 is a draw). Attackers plant the bomb at site A or B; it detonates after 45–50 s depending on the map; a round lasts about 100 s. Defenders defuse in 7 s (resumes from 3.5 s if interrupted halfway).</p>
@@ -828,6 +840,18 @@ button.adm{border-color:var(--gold)!important;color:var(--gold)!important}
       <div class="note">Değiştirmek istediğin eyleme tıkla, sonra yeni tuşa bas (ESC: vazgeç). Tuş başka bir eylemdeyse ikisi yer değiştirir. Ateş: sol tık · Nişan: sağ tık · Menü: ESC.</div>
       <div id="keyList" class="keylist"></div>
       <button id="btnKeyReset" class="ghost wide">TUŞLARI VARSAYILANA DÖNDÜR</button>
+    </div>
+    <div id="setPad">
+      <h4>OYUN KOLU</h4>
+      <div class="note padst" id="padStat">Kol bağlı değil — kolu Bluetooth ile bağla ve bir tuşa bas</div>
+      <div class="setrow"><span>KOL HASSASİYETİ</span><input type="range" id="padSens" min="0.3" max="3" step="0.05" value="1"><b id="padSensV">1.00</b></div>
+      <div class="setrow"><span>ÖLÜ BÖLGE</span><input type="range" id="padDz" min="0.05" max="0.35" step="0.01" value="0.15"><b id="padDzV">15%</b></div>
+      <div class="setrow"><span>Y EKSENİNİ TERS ÇEVİR</span><button id="padInv" class="tog off">KAPALI</button></div>
+      <div class="setrow"><span>TİTREŞİM</span><button id="padVib" class="tog">AÇIK</button></div>
+      <div class="setrow"><span>NİŞAN YARDIMI</span><button id="padAim" class="tog">AÇIK</button></div>
+      <div id="padMap" class="padmap"></div>
+      <div class="note">Menülerde: yön tuşları ya da sol çubuk ile gez · ✕ seç · ○ geri · L1 / R1 sekme değiştir · sağ çubuk kaydırır</div>
+      <div class="note">Telefonda da çalışır (Android Chrome, iPhone Safari). Kolu kullanınca ekrandaki dokunmatik butonlar gizlenir, ekrana dokununca geri gelir.</div>
     </div>
     <div class="row-btn"><button id="btnSetBack" class="primary">GERİ</button></div>
   </div>

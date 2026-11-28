@@ -204,7 +204,7 @@ function arTopBar(me) {
     panel(cx - 90, y, 180, 44, 0.9);
     txt('SERBEST', cx, y + 17, 20, PAL.gold, 'center');
     txt(S.phase === 'buy' ? 'HAZIRLAN' : (S.npcs ? S.npcs.length : 0) + ' NPC · ' + S.players.filter(p => !p.isBot).length + ' OYUNCU', cx, y + 34, 11, PAL.dim, 'center');
-    const info = (IS_TOUCH ? '[SPAWN] düğmesi' : '[Q] SPAWN MENÜSÜ') + ' · silah · NPC · pill' + (me && me.pill && npcKind(me.pill) ? '  ·  ŞU AN: ' + npcKind(me.pill).n.toLocaleUpperCase('tr-TR') : '');
+    const info = (IS_TOUCH && !padOn() ? '[SPAWN] düğmesi' : '[Q] SPAWN MENÜSÜ') + ' · silah · NPC · pill' + (me && me.pill && npcKind(me.pill) ? '  ·  ŞU AN: ' + npcKind(me.pill).n.toLocaleUpperCase('tr-TR') : '');
     ctx.font = 'bold 12px ' + FONT; const tw = ctx.measureText(tl(info)).width + 24; panel(cx - tw / 2, y + 50, tw, 20, 0.8); txt(info, cx, y + 60, 12, PAL.gold, 'center');
     return;
   }

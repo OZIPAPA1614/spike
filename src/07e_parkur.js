@@ -220,7 +220,7 @@ function drawPkHUD(dt, me, v) {
   if (me && me.alive && S.phase === 'live' && !(S.pk && S.pk.fin[me.id])) {
     let near = false;
     for (let d = 20; d <= 140 && !near; d += 20) { const X2 = Math.floor((me.x + Math.cos(LOOK.yaw) * d) / TILE), Y2 = Math.floor((me.y + Math.sin(LOOK.yaw) * d) / TILE), i = Y2 * MW + X2; if (tileAt(X2, Y2) === T_BREAK && !pkBroken[i]) near = true; }
-    if (near) { const h = IS_TOUCH ? 'BARİKAT — ATEŞ ile kılıçla kır' : 'BARİKAT — sol tık ile kılıçla kır (sağ tık: güçlü darbe)'; ctx.font = 'bold 14px ' + FONT; const tw = ctx.measureText(tl(h)).width + 30; panel(cx - tw / 2, H - 120, tw, 26, 0.8); txt(h, cx, H - 107, 14, PAL.gold, 'center'); }
+    if (near) { const h = padOn() ? 'BARİKAT — ' + padGlyph('fire') + ' ile kılıçla kır (' + padGlyph('alt') + ': güçlü darbe)' : IS_TOUCH ? 'BARİKAT — ATEŞ ile kılıçla kır' : 'BARİKAT — sol tık ile kılıçla kır (sağ tık: güçlü darbe)'; ctx.font = 'bold 14px ' + FONT; const tw = ctx.measureText(tl(h)).width + 30; panel(cx - tw / 2, H - 120, tw, 26, 0.8); txt(h, cx, H - 107, 14, PAL.gold, 'center'); }
   }
   drawCenterMsgs(dt);
   drawVoiceList(me);

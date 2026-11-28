@@ -195,7 +195,7 @@ function handleEvent(ev) {
       const side = me ? sideOf(me.team) : 'atk';
       if (arOn()) { // arena modları: tek uzun raunt
         const m = arMode();
-        showMsg(AR_NAMES[m], m === 'gg' ? 'Her öldürmede sıradaki silah · kılıçla öldüren kazanır' : m === 'fr' ? 'Görev yok · dolaş · ' + (IS_TOUCH ? '[SPAWN]' : '[Q]') + ' spawn menüsü: silah, NPC, pill' : 'Parlayan bölgeyi tut · 100 puana ilk ulaşan kazanır', PAL.gold, 3.5);
+        showMsg(AR_NAMES[m], m === 'gg' ? 'Her öldürmede sıradaki silah · kılıçla öldüren kazanır' : m === 'fr' ? 'Görev yok · dolaş · ' + (IS_TOUCH && !padOn() ? '[SPAWN]' : '[Q]') + ' spawn menüsü: silah, NPC, pill' : 'Parlayan bölgeyi tut · 100 puana ilk ulaşan kazanır', PAL.gold, 3.5);
         AU.play('round'); G.spec = null; UIS.deathBy = undefined; UIS.pings.length = 0; cmbReset();
         LOOK.yaw = side === 'atk' ? -Math.PI / 2 : Math.PI / 2; LOOK.pitch = 0;
         if (ev.n === 1 && G.running) cineStart('match');
@@ -466,8 +466,8 @@ function drawBottom(me) {
   txt(ag.name, 214, by + 48, 12, ag.color, 'right');
   // yetenekler
   const bw = 78, bh = 56, gap = 8, x0 = W / 2 - (bw * 3 + gap * 2) / 2;
-  const kl = k => IS_TOUCH ? k.toUpperCase() : kbLabel(k); // klavyede atanan tuş (08e)
-  if (frOn()) abilityBox(W / 2 - bw / 2, by + 4, bw, bh, IS_TOUCH ? 'Q' : kbLabel('spawn'), 'SPAWN MENÜSÜ', 0, 0, true, false, 0, PAL.gold); // serbest: spawn menüsü
+  const kl = k => ctlKey(k); // klavyede atanan tuş (08e) · oyun kolunda kol tuşu (08f)
+  if (frOn()) abilityBox(W / 2 - bw / 2, by + 4, bw, bh, ctlKey('spawn', 'Q'), 'SPAWN MENÜSÜ', 0, 0, true, false, 0, PAL.gold); // serbest: spawn menüsü
   else if (!arOn()) { // silah yarışı / süpernova'da yetenek yok: kutular da çizilmez
     abilityBox(x0, by + 4, bw, bh, kl('q'), ag.q.name, me.ch.q, ag.q.max, me.ch.q > 0, false, 0, ag.color);
     abilityBox(x0 + bw + gap, by + 4, bw, bh, kl('e'), ag.e.name, me.ch.e, ag.e.max, me.ch.e > 0, false, 0, ag.color);
@@ -622,7 +622,7 @@ function drawHints(me) {
     else if (!h) h = '🂠 KART: ' + names + ' — A veya B\'deki REBOOT istasyonuna götür';
   }
   if (!h && me.alive && sideOf(me.team) === 'atk' && !me.hasBomb && sp.state === 'carried' && (S.phase === 'live' || S.phase === 'buy')) {
-    const c = S.pmap[sp.carrier]; if (c && c.team === me.team && !IS_TOUCH && S.phase !== 'buy') h = 'BOMBA: ' + c.name + ' · [T] İSTE';
+    const c = S.pmap[sp.carrier]; if (c && c.team === me.team && (!IS_TOUCH || padOn()) && S.phase !== 'buy') h = 'BOMBA: ' + c.name + ' · [T] İSTE';
   }
   if (h) { ctx.font = 'bold 14px ' + FONT; const tw = ctx.measureText(kbHintFix(tl(h))).width + 30; panel(W / 2 - tw / 2, H - 140, tw, 26, 0.8); txt(h, W / 2, H - 127, 14, PAL.gold, 'center'); }
   const prog = me.plantT > 0 ? [me.plantT / PLANT_TIME, 'BOMBA KURULUYOR'] : me.defT > 0 ? [me.defT / DEFUSE_TIME, 'BOMBA İMHA EDİLİYOR'] : me.rbT > 0 ? [me.rbT / REBOOT_TIME, 'REBOOT EDİLİYOR'] : null;
@@ -667,7 +667,7 @@ function drawHUD(dt, me, v) {
   drawMinimap(me, v);
   drawFeed(dt);
   if (me) {
-    if (me.alive) { UIS.deathRep = null; if (IS_TOUCH) drawMobileStats(me); else drawBottom(me); }
+    if (me.alive) { UIS.deathRep = null; if (IS_TOUCH && !padOn()) drawMobileStats(me); else drawBottom(me); } // kolla oynarken dokunmatik butonlar gizli: yetenek kutuları altta
     else { drawDeathPanel(me, v); drawDeathRep(me); }
     drawHints(me);
   }

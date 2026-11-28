@@ -30,7 +30,7 @@ const TOUCH = { jx: 0, jy: 0, fire: false, use: false, alt: false, walk: false, 
    böylece imleç ekrandan/başka monitöre kaçsa bile istediğin yöne bakabilirsin. Her tıklamada kilit yeniden denenir. */
 function isLocked() { return !!glcv && document.pointerLockElement === glcv; }
 function lockPointer(gesture) {
-  if (IS_TOUCH || !glcv || isLocked()) return;
+  if (IS_TOUCH || !glcv || isLocked() || padOn()) return; // oyun koluyla oynarken fare kilidi gerekmez (08f)
   if (!glcv.requestPointerLock) { enterFreeMouse('api'); return; }
   G._lockReqT = performance.now(); G._lockGesture = !!gesture;
   try {
@@ -50,7 +50,7 @@ function enterFreeMouse(why) {
 }
 /* Serbest fare modunda ekran kenarı bölgesinde sürekli dönüş */
 function freeLookTick(dt) {
-  if (!G.freeMouse || isLocked() || !G.running || !S || IS_TOUCH || UI.overlay || !MOUSE.inside) return;
+  if (!G.freeMouse || isLocked() || !G.running || !S || IS_TOUCH || UI.overlay || !MOUSE.inside || padOn()) return;
   const W = innerWidth, H = innerHeight, bx = Math.max(40, W * 0.09), by = Math.max(30, H * 0.08);
   const sp = 2.6 * Math.sqrt(SETTINGS.sens), me = S.pmap[G.myId], k = me && me.scoped ? 0.35 : 1;
   let ax = 0, ay = 0;
@@ -61,7 +61,7 @@ function freeLookTick(dt) {
 }
 /* "Tıkla ve kilitle" ipucu + imleç durumu */
 function syncLockHint() {
-  const need = G.running && !!S && !IS_TOUCH && !isLocked() && !G.freeMouse && !UI.overlay && !(S.phase === 'over');
+  const need = G.running && !!S && !IS_TOUCH && !isLocked() && !G.freeMouse && !UI.overlay && !(S.phase === 'over') && !padOn();
   if (need !== G._needLock) { G._needLock = need; $('lockHint').classList.toggle('hidden', !need); document.body.classList.toggle('needlock', need); }
 }
 function unlockPointer() { G._noPauseOnUnlock = true; try { if (document.pointerLockElement) document.exitPointerLock(); } catch (e) { } setTimeout(() => { G._noPauseOnUnlock = false; }, 300); }
@@ -227,6 +227,7 @@ function uiInit() {
     seg('stGfx', SETTINGS.gfx); seg('stLang', LANG);
     $('sensR2').value = SETTINGS.sens; $('sensV2').textContent = SETTINGS.sens.toFixed(2);
     $('btnMute').textContent = AU.enabled ? 'SESİ KAPAT' : 'SESİ AÇ';
+    padUiRefresh(); // oyun kolu (08f)
   };
   $('stSound').onclick = () => { AU.setEnabled(!AU.enabled); LS('spk_snd', AU.enabled ? '1' : '0'); uiSettingsRefresh(); };
   $('stMus').onclick = () => { if (MUS.vol > 0.001) { MUS._last = MUS.vol; MUS.setVol(0); } else MUS.setVol(MUS._last || 0.75); LS('spk_mus', MUS.vol); uiSettingsRefresh(); };
@@ -247,6 +248,7 @@ function uiInit() {
   admInit(); // admin paneli (08b)
   frMenuInit(); // serbest mod spawn menüsü (08c)
   ctlInit(); // tuş atama + dokunmatik düzen (08e)
+  padInit(); // oyun kolu: PlayStation / standart kol (08f)
   if (!glok) setTimeout(() => uiToast('WebGL başlatılamadı — tarayıcın 3D grafiği desteklemiyor olabilir.', true), 300);
   try { const n = localStorage.getItem('spk_name'); if (n) $('inName').value = n; } catch (e) { }
   $('btnSP').onclick = () => { AU.init(); AU.resume(); uiShow('scr-sp'); };
@@ -587,7 +589,7 @@ function uiRenderSelect(sel) {
     ['q', 'e', 'x'].map(k => {
       const ab = a[k];
       const meta = k === 'x' ? ab.pts + ' ulti puanı' : (ab.cost ? '¤' + ab.cost : 'Ücretsiz') + ' · en fazla ' + ab.max + (ab.free ? ' · her raunt 1 bedava' : '');
-      return '<div class="ab"><span class="k">' + esc(IS_TOUCH ? k.toUpperCase() : kbLabel(k)) + '</span><div><b>' + ab.name + '</b> <i>' + meta + '</i><p>' + ab.desc + '</p></div></div>';
+      return '<div class="ab"><span class="k">' + esc(ctlKey(k)) + '</span><div><b>' + ab.name + '</b> <i>' + meta + '</i><p>' + ab.desc + '</p></div></div>';
     }).join('');
   $('btnLock').disabled = !myPick || locked;
   $('btnLock').textContent = locked ? 'KİLİTLENDİ' : 'KİLİTLE';
@@ -644,7 +646,7 @@ function uiFFBtn() {
 function toggleEmote(force) {
   const open = force === undefined ? !UI.emoteOpen : !!force;
   UI.emoteOpen = open && !!(G.running && S); $('emoteBox').classList.toggle('hidden', !UI.emoteOpen);
-  const eh = $('emoteBox').querySelector('.eh'); if (eh && UI.emoteOpen) eh.textContent = IS_TOUCH ? 'EMOTE · dokunarak seç' : 'EMOTE · 1–6 seç · kapat: ' + kbLabel('emote'); // atanan tuşla
+  const eh = $('emoteBox').querySelector('.eh'); if (eh && UI.emoteOpen) eh.textContent = padOn() ? 'EMOTE · ' + padGlyph('jump') + ' ile seç · kapat: ' + padGlyph('crouch') : IS_TOUCH ? 'EMOTE · dokunarak seç' : 'EMOTE · 1–6 seç · kapat: ' + kbLabel('emote'); // atanan tuşla
 }
 function doEmote(i) {
   toggleEmote(false);
@@ -714,7 +716,7 @@ function uiRenderBuy() {
   html += '</div></div><div class="cat"><h4>YETENEKLER — ' + ag.name + '</h4><div class="row">';
   for (const k of ['q', 'e']) {
     const ab = ag[k];
-    html += item(k, '[' + esc(IS_TOUCH ? k.toUpperCase() : kbLabel(k)) + '] ' + ab.name, me.ch[k] + ' / ' + ab.max + ' şarj', ab.cost, me.ch[k] >= ab.max);
+    html += item(k, '[' + esc(ctlKey(k)) + '] ' + ab.name, me.ch[k] + ' / ' + ab.max + ' şarj', ab.cost, me.ch[k] >= ab.max);
   }
   html += '</div></div>';
   html += '<div class="cat"><h4>TAKIM EKONOMİSİ</h4><div class="eco">' + S.players.filter(p => p.team === me.team).map(p => '<span>' + esc(p.name) + ' <b>¤' + p.credits + '</b>' + (p.primary ? ' · ' + WEAPONS[p.primary].name : '') + '</span>').join('') + '</div></div>';
@@ -803,18 +805,18 @@ function buildLocalInput(me) {
   if (!blocked) {
     if (kbHeld('fwd') || kbArrow('ArrowUp')) f += 1; if (kbHeld('back') || kbArrow('ArrowDown')) f -= 1;
     if (kbHeld('right') || kbArrow('ArrowRight')) r += 1; if (kbHeld('left') || kbArrow('ArrowLeft')) r -= 1;
-    f += -TOUCH.jy; r += TOUCH.jx;
+    f += -TOUCH.jy - PAD.my; r += TOUCH.jx + PAD.mx; // dokunmatik joystick + oyun kolu sol çubuğu (08f)
   }
-  const jm = Math.hypot(TOUCH.jx, TOUCH.jy);
+  const jm = Math.hypot(TOUCH.jx, TOUCH.jy), pm = Math.hypot(PAD.mx, PAD.my);
   const a = LOOK.yaw, ca = Math.cos(a), sa = Math.sin(a);
   let mx = ca * f - sa * r, my = sa * f + ca * r;
   const l = Math.hypot(mx, my); if (l > 0.08) { mx /= l; my /= l; } else { mx = 0; my = 0; }
   const ap = aimPoint(me);
   return {
-    mvx: mx, mvy: my, ang: a, pitch: LOOK.pitch, fire: (MOUSE.down || TOUCH.fire) && !blocked, fp: MOUSE.fp,
-    alt: (MOUSE.right || TOUCH.alt) && !blocked, walk: !!(kbHeld('walk') || TOUCH.walk || (jm > 0.05 && jm < 0.5)),
-    crouch: !!(kbHeld('crouch') || TOUCH.crouch),
-    use: (kbHeld('use') || TOUCH.use) && !blocked, mx: ap.x, my: ap.y, jc: G.jc | 0
+    mvx: mx, mvy: my, ang: a, pitch: LOOK.pitch, fire: (MOUSE.down || TOUCH.fire || PAD.fire) && !blocked, fp: MOUSE.fp,
+    alt: (MOUSE.right || TOUCH.alt || PAD.alt) && !blocked, walk: !!(kbHeld('walk') || TOUCH.walk || PAD.walk || (jm > 0.05 && jm < 0.5) || (pm > 0.05 && pm < 0.5)),
+    crouch: !!(kbHeld('crouch') || TOUCH.crouch || PAD.crouch),
+    use: (kbHeld('use') || TOUCH.use || PAD.use) && !blocked, mx: ap.x, my: ap.y, jc: G.jc | 0
   };
 }
 /* ---------------- DOKUNMATİK KONTROLLER ---------------- */
@@ -984,6 +986,7 @@ function frame(now) {
   try { dynRes(dt); } catch (e) { }
   if (dt > 0.1) dt = 0.1;
   if (dt <= 0) return;
+  try { padTick(dt); } catch (e) { console.error(e); } // oyun kolu: girdi + menü gezinme (08f)
   try {
     if (G.running && S) {
       simAdvance();

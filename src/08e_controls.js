@@ -93,7 +93,9 @@ function kbLocks(e) { for (const a in KB_LOCK) if (kbIs(e, a)) return true; retu
 /* HUD ipuçlarındaki varsayılan tuş harflerini atanan tuşla değiştir ([B] mağaza, [F] kullan, [G] bırak, [T] iste) */
 const KB_HINT = { B: 'buy', F: 'use', G: 'drop', T: 'req' };
 function kbHintFix(s) {
-  if (IS_TOUCH || typeof s !== 'string' || s.indexOf('[') < 0) return s;
+  if (typeof s !== 'string' || s.indexOf('[') < 0) return s;
+  if (padOn()) return padHintFix(s); // oyun kolu: [F] → [↓], [B] → [←], [BOŞLUK] → [✕] (08f)
+  if (IS_TOUCH) return s;
   return s.replace(/\[([BFGT])\]/g, (m, k) => '[' + kbLabel(KB_HINT[k]) + ']');
 }
 /* ayarlar: tuş listesi */
