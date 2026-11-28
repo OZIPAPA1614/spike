@@ -14,7 +14,7 @@
    · Ayarlar (spk_pad): kol hassasiyeti, ölü bölge, Y ters, titreşim, nişan yardımı.
    ===================================================================== */
 const PAD = {
-  on: false, idx: -1, id: '', ps: true, n: 0, scanT: 0,
+  on: false, idx: -1, id: '', ps: true, std: true, n: 0, scanT: 0,
   cur: new Array(18).fill(false), prev: new Array(18).fill(false),
   lx: 0, ly: 0, rx: 0, ry: 0,
   mx: 0, my: 0, fire: false, alt: false, crouch: false, use: false, walk: false, edgeT: 0, boardOn: false,
@@ -32,7 +32,7 @@ const PAD_MAP = [['move', 'Hareket (az it: yürü)'], ['look', 'Bakış'], ['fir
   ['board', 'Skor tablosu (basılı tut)'], ['emote', 'Emote menüsü']];
 const PAD_HINT = { B: 'buy', F: 'use', G: 'drop', T: 'req', Q: 'spawn', 'BOŞLUK': 'jump', SPACE: 'jump' };
 /* menüde odaklanabilenler · ilk odak (ekran / pencere başına) */
-const PAD_SEL = 'button, a[href], input:not([type=hidden]):not([type=file]), select, textarea, .agent, .frrow, .item, .slot .sw, .slot .kick, .slot .fadd, label.filebtn';
+const PAD_SEL = 'button, a[href], input:not([type=hidden]):not([type=file]), select, textarea, .agent, .frrow, .item, .sc, .slot .sw, .slot .kick, .slot .fadd, label.filebtn';
 const PAD_FIRST = { pause: ['#btnResume'], 'scr-menu': ['#btnPlay'], 'scr-play': ['#btnSP'], 'scr-sp': ['#btnSpGo'], 'scr-store': ['#stTabs button.on'], end: ['#btnEndMenu'],
   'scr-select': ['#selGrid .agent.sel', '#selGrid .agent:not(.taken)'], 'scr-lobby': ['#btnLobbyStart'], frPop: ['#frPopYes'], frOv: ['#frTabs button.on'],
   buy: ['#buyBody .item:not(.no):not(.owned)', '#buyBody .item'], 'scr-help': ['[data-back]'], bye: ['#btnBye'] };
@@ -86,7 +86,7 @@ function padPoll(dt) {
   return gp;
 }
 function padConnect(gp) {
-  PAD.idx = gp.index; PAD.id = String(gp.id || ''); PAD.ps = padIsPS(PAD.id);
+  PAD.idx = gp.index; PAD.id = String(gp.id || ''); PAD.ps = padIsPS(PAD.id); PAD.std = gp.mapping === 'standard';
   PAD.cur.fill(false); PAD.prev.fill(false);
   uiToast(PAD.ps ? 'PlayStation kolu bağlandı' : 'Oyun kolu bağlandı');
   padUiRefresh(); padMapRender();
@@ -112,6 +112,12 @@ function padRead(gp) {
   const A = gp.axes || [];
   PAD.lx = +A[0] || 0; PAD.ly = +A[1] || 0; PAD.rx = +A[2] || 0; PAD.ry = +A[3] || 0;
 }
+/* kolda şu an basılı tuş ya da itilmiş çubuk var mı (son okunan durum: kare sonunda PAD.prev) */
+function padBusy() {
+  if (PAD.idx < 0) return false;
+  for (let i = 0; i < 18; i++) if (PAD.prev[i]) return true;
+  const dz = PAD.cfg.dz; return Math.hypot(PAD.lx, PAD.ly) > dz || Math.hypot(PAD.rx, PAD.ry) > dz;
+}
 function padDn(i) { return PAD.cur[i] && !PAD.prev[i]; }
 function padUp(i) { return !PAD.cur[i] && PAD.prev[i]; }
 /* ölü bölge (dairesel): çubuk değerini 0..1'e yeniden ölçekleyen çarpan */
@@ -135,7 +141,7 @@ function padTick(dt) {
   for (let i = 0; i < 18; i++) if (PAD.cur[i] && !PAD.prev[i]) { act = true; break; }
   if (!act && (Math.hypot(PAD.lx, PAD.ly) > 0.5 || Math.hypot(PAD.rx, PAD.ry) > 0.5)) act = true; // hafif çubuk kayması kolu "etkin" yapmaz
   const wake = act && !PAD.on;
-  if (act) padSetOn(true);
+  if (act) { padSetOn(true); try { AU.resume(); } catch (e) { } }
   if (padUp(8) && PAD.boardOn) { UI.board = false; PAD.boardOn = false; }
   const root = padLayer();
   if (root) padMenu(root, dt, wake);
@@ -235,7 +241,8 @@ function padMenu(root, dt, wake) {
   if (root !== PAD.root) { // pencere değişti: oradaki son odağa dön
     if (PAD.root && PAD.foc) PAD.mem.set(PAD.root, PAD.foc);
     PAD.root = root; const m = PAD.mem.get(root);
-    PAD.foc = m && padOk(m, root) ? m : null; PAD.dir = '';
+    PAD.foc = m && padOk(m, root) ? m : null;
+    PAD.dir = padDirNow(); PAD.repT = 1e9; // menüyü açan yön tuşu (← mağaza) hâlâ basılıysa gezinme sayılmaz: bırakılınca başlar
   }
   if (!PAD.on) { padHL(null); return; }
   if (PAD.foc && !padOk(PAD.foc, root)) padSetFoc(padNear(root, PAD.focR)); // yeniden çizilen menüde aynı yere en yakın
@@ -268,7 +275,10 @@ function padVis(el) {
 function padOk(el, root) { return el.isConnected && root.contains(el) && padVis(el); }
 function padList(root) {
   const out = [];
-  for (const el of root.querySelectorAll(PAD_SEL)) if (!el.closest('#keyList') && padVis(el)) out.push(el);
+  for (const el of root.querySelectorAll(PAD_SEL)) {
+    if (el.tagName === 'BUTTON' && el.parentElement && el.parentElement.classList.contains('sc')) continue; // mağaza kartı tek parça: düğmesi ayrıca seçilmez
+    if (!el.closest('#keyList') && padVis(el)) out.push(el);
+  }
   return out;
 }
 function padFirst(root) {
@@ -356,6 +366,15 @@ function padActivate(el) {
   if (tg === 'INPUT' && ty === 'range') return; // ← → ile değişir
   if (tg === 'TEXTAREA' || (tg === 'INPUT' && ty !== 'checkbox' && ty !== 'radio' && ty !== 'button' && ty !== 'submit')) { try { el.focus(); } catch (e) { } return; }
   if (el.dataset && el.dataset.e !== undefined && el.closest('#emoteBox')) { doEmote(+el.dataset.e); return; } // emote düğmeleri pointerdown dinler
+  if (el.classList.contains('sc')) { // mağaza kartı: kartın düğmesi · kasa: ilk ✕ seçer (içindekiler görünür), seçiliyken ✕ açar
+    const b = el.querySelector('button');
+    if (el.classList.contains('case') && !el.classList.contains('eq')) el.click();
+    else if (b && !b.disabled) b.click();
+    else { try { AU.play('empty'); } catch (e) { } }
+    return;
+  }
+  // ajan seçimi: seçili ajanda tekrar ✕ = KİLİTLE
+  if (el.classList.contains('agent') && el.classList.contains('sel') && UI.screen === 'scr-select') { const lk = $('btnLock'); if (lk && !lk.disabled) { lk.click(); return; } }
   el.click();
 }
 function padBack(root) {
@@ -370,6 +389,7 @@ function padBack(root) {
     case 'buy': closeBuy(); return;
     case 'emoteBox': toggleEmote(false); return;
     case 'tedBar': tlEditClose(false); return;
+    case 'frPop': uiFriendPopAnswer(null); return; // şimdilik kapat (istek reddedilmez)
     case 'scr-net': $('btnNetBack').click(); return;
     case 'scr-pub': $('btnPubCancel').click(); return;
   }
@@ -389,7 +409,7 @@ function padTog(id, on) { const b = $(id); if (!b) return; b.textContent = on ? 
 function padUiRefresh() {
   const st = $('padStat'); if (!st) return;
   const c = PAD.cfg;
-  if (PAD.idx >= 0) { st.textContent = '✓ ' + (PAD.ps ? 'PlayStation kolu bağlı' : 'Oyun kolu bağlı') + ' · ' + padModel(PAD.id); st.classList.add('ok'); }
+  if (PAD.idx >= 0) { st.textContent = '✓ ' + (PAD.ps ? 'PlayStation kolu bağlı' : 'Oyun kolu bağlı') + ' · ' + padModel(PAD.id) + (PAD.std ? '' : ' · tuşlar farklı olabilir (standart dışı kol)'); st.classList.add('ok'); }
   else { st.textContent = 'Kol bağlı değil — kolu Bluetooth ile bağla ve bir tuşa bas'; st.classList.remove('ok'); }
   $('padSens').value = c.sens; $('padSensV').textContent = c.sens.toFixed(2);
   $('padDz').value = c.dz; $('padDzV').textContent = Math.round(c.dz * 100) + '%';
@@ -407,11 +427,12 @@ function padInit() {
   $('padVib').onclick = () => { PAD.cfg.vib = !PAD.cfg.vib; padSave(); padUiRefresh(); if (PAD.cfg.vib) padRumble(0.6, 0.6, 220); };
   $('padAim').onclick = () => { PAD.cfg.aim = !PAD.cfg.aim; padSave(); padUiRefresh(); };
   // fare / dokunma / klavye kullanılınca kol yazıları ve odak çerçevesi kalkar, dokunmatik butonlar geri gelir
+  // (kol o an kullanılıyorsa gelen tuş / fare olayı koldan taklit olabilir: Steam, bazı Android kolları — yok sayılır)
   const off = () => { if (PAD.on) padSetOn(false); };
   document.addEventListener('pointerdown', off, true);
   document.addEventListener('touchstart', off, { capture: true, passive: true });
-  window.addEventListener('keydown', off, true);
-  document.addEventListener('mousemove', e => { if (PAD.on && Math.abs(e.movementX || 0) + Math.abs(e.movementY || 0) > 6) padSetOn(false); }, true);
+  window.addEventListener('keydown', () => { if (PAD.on && !padBusy()) padSetOn(false); }, true);
+  document.addEventListener('mousemove', e => { if (PAD.on && !padBusy() && Math.abs(e.movementX || 0) + Math.abs(e.movementY || 0) > 6) padSetOn(false); }, true);
   window.addEventListener('gamepadconnected', () => { PAD.scanT = 0; });
   window.addEventListener('gamepaddisconnected', () => { PAD.scanT = 0; });
 }
@@ -431,6 +452,6 @@ Object.assign(EN_EXACT, {
     'Works on phones too (Android Chrome, iPhone Safari). While you use the controller the on-screen touch buttons hide; touch the screen to bring them back.'
 });
 Object.assign(EN_FRAG, {
-  'PlayStation kolu bağlı': 'PlayStation controller connected', 'Oyun kolu bağlı': 'Controller connected', ' ile seç · kapat: ': ' to pick · close: ',
+  'PlayStation kolu bağlı': 'PlayStation controller connected', 'Oyun kolu bağlı': 'Controller connected', ' · tuşlar farklı olabilir (standart dışı kol)': ' · buttons may differ (non-standard controller)', ' ile seç · kapat: ': ' to pick · close: ',
   'BARİKAT — ': 'BARRICADE — ', ' ile kılıçla kır (': ' to break it with your sword (', ': güçlü darbe)': ': heavy hit)'
 });

@@ -379,12 +379,10 @@ try:
         if back != 'scr-menu': bad.append(f'mağazadan ○ ile dönülmedi ({back})')
         if bad: fail('oyun kolu menü gezinmesi: ' + ' · '.join(bad))
         else: ok('oyun kolu: bağlandı bildirimi · menüde ↓ ✕ ○ ile ayarlar ve mağaza, → kaydırıcı, R1 sekme')
-        # tek oyunculu maça yalnızca kolla gir: OYNA → TEK OYUNCULU → AJAN SEÇİMİ → ajan → → … KİLİTLE
+        # tek oyunculu maça yalnızca kolla gir: OYNA → TEK OYUNCULU → AJAN SEÇİMİ → ✕ ajanı seç → ✕ tekrar: KİLİTLE
         ptap(G1, 12); ptap(G1, 0); ptap(G1, 0); ptap(G1, 0)
-        until(G1, "() => UI.screen === 'scr-select'", 20); ptap(G1, 0)
-        for _ in range(8):
-            if pfoc(G1) == 'btnLock': break
-            ptap(G1, 15)
+        until(G1, "() => UI.screen === 'scr-select'", 20); ptap(G1, 15); ptap(G1, 0)
+        if not G1.evaluate("() => !!(NET.sel && NET.sel.picks.h)"): raise Exception('ajan seçimi: ✕ ajanı seçmedi (odak: ' + pfoc(G1) + ')')
         ptap(G1, 0)
         if not until(G1, "() => !!(G.running && S)", 40): raise Exception('kolla tek oyunculu maça girilemedi (odak: ' + pfoc(G1) + ')')
         until(G1, "() => CINE.on", 8); ptap(G1, 0)

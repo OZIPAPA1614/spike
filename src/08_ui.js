@@ -614,7 +614,7 @@ function uiStartGame() {
   $('touch').classList.toggle('hidden', !IS_TOUCH);
   $('tbFull').classList.toggle('hidden', IS_IOS && IS_STANDALONE);
   for (const k in TOUCH.ptr) delete TOUCH.ptr[k];
-  TOUCH.jx = TOUCH.jy = 0; TOUCH.fire = TOUCH.use = TOUCH.alt = TOUCH.crouch = false;
+  TOUCH.jx = TOUCH.jy = 0; TOUCH.fire = TOUCH.use = TOUCH.alt = TOUCH.crouch = false; PAD.walk = false;
   for (const id of ['tbCrouch', 'tbScope']) { const el = $(id); if (el) el.classList.remove('lit'); }
   tbApplyMode(); // yalnızca bu modda işe yarayan dokunmatik butonlar (08e)
   syncCursor();
@@ -814,7 +814,7 @@ function buildLocalInput(me) {
   const ap = aimPoint(me);
   return {
     mvx: mx, mvy: my, ang: a, pitch: LOOK.pitch, fire: (MOUSE.down || TOUCH.fire || PAD.fire) && !blocked, fp: MOUSE.fp,
-    alt: (MOUSE.right || TOUCH.alt || PAD.alt) && !blocked, walk: !!(kbHeld('walk') || TOUCH.walk || PAD.walk || (jm > 0.05 && jm < 0.5) || (pm > 0.05 && pm < 0.5)),
+    alt: (MOUSE.right || TOUCH.alt || PAD.alt) && !blocked, walk: !!(kbHeld('walk') || TOUCH.walk || (PAD.on && PAD.walk) || (jm > 0.05 && jm < 0.5) || (pm > 0.05 && pm < 0.5)),
     crouch: !!(kbHeld('crouch') || TOUCH.crouch || PAD.crouch),
     use: (kbHeld('use') || TOUCH.use || PAD.use) && !blocked, mx: ap.x, my: ap.y, jc: G.jc | 0
   };
